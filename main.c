@@ -1,16 +1,5 @@
-#define GPBCON	0x56000010
-#define GPBDAT	0x56000014
-#define GPBUP	0x56000018
+#include "gpio_def.h"
 
-
-#define writeregw(addr,value) \
-	*((volatile unsigned int *) (addr) ) = (value)
-
-#define writeregh(addr,value) \
-	*((volatile unsigned short *) (addr) ) = (value)
-
-#define writeregb(addr,value) \
-	*((volatile unsigned char *) (addr) ) = (value)
 
 /*
 	nLED_1 -> GPB5
