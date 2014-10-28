@@ -20,17 +20,17 @@ int main(void) {
 
 	while(1) {
 
-		writeregw(GPBDAT,0x1E0);
+		writeregw(GPBDAT,LED1|LED2|LED3|LED4);
 
-		/*for(j = 0; j<3; j++) 
+		for(j = 0; j<3; j++) 
 			for(i = 0; i<100000;i++)
-				;*/
+				;
 
 
 		writeregw(GPBDAT,0x0);
 
-/*		for(j = 0; j<3; j++)
+		for(j = 0; j<3; j++)
 			for(i = 0; i<100000;i++)
-				;*/
+				;
 	}
 }

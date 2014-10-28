@@ -1,0 +1,24 @@
+GPIO TEST
+=========
+
+Brought up GPIO by blinking LED's.
+
+
+Board bringup
+=============
+1) Create the memory map configuration.
+	a) Load the data onto the SRAM.
+	b) DO NOT load data into SDRAM as MEMORY controller is not yet initialized.
+
+
+TESTING PROCEDURE
+=================
+
+From u-boot
+-----------
+1) Put the final binary to the tftp directory.
+2) Tftpboot the file to a memory location and run it from the location.
+
+
+From supervivi
+--------------

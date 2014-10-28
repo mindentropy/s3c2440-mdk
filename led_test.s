@@ -1,3 +1,19 @@
+/*
+ * Problems related to linker script addresses.
+ * --------------------------------------------
+ *
+ * If the address of the code is setup such that the .text
+ * section is put in sdram say 0x32000000. Next if the program
+ * is loaded to the address 0x30000000 then we expect that the
+ * program should not work properly because the address generated
+ * in the code is different. This is not the case as the branch
+ * instruction is pc(program counter) relative. Hence the b reset
+ * would be b <pc+offset>. The branch instructions create position
+ * independent code which makes the above scenario work. Of course
+ * if the code becomes somehow position dependent then the above 
+ * condition would fail.
+ */
+
 .section .text
 .code 32
 .globl vectors
@@ -55,8 +71,10 @@ stack_pointer: .word __stack_top__
 bss_start : .word __bss_start__
 bss_end : .word __bss_end__
 
+/*
 GPBCON:	.word	0x56000010
 GPBDAT:	.word	0x56000014
 GPBUP:	.word	0x56000018
+*/
 
 	.end

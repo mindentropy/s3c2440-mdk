@@ -4,10 +4,8 @@ SEARCH_DIR(.)
 
 MEMORY
 {
-
 	sram : org = 0x00000000 , len = 0x1000
 	sdram : org = 0x30000000 , len = 0x4000000
-
 }
 
 SECTIONS

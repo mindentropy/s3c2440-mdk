@@ -1,0 +1,83 @@
+S3C2440 TODO LIST
+=================
+
+Generic board bring up
+----------------------
+1) Code to bring up to main -> Done
+2) Creation of linker scripts to handle the binary -> Partially done. Optimization -> Pending.
+
+
+GPIO
+----
+
+1) Add GPIO definitions  -> Done
+2) Add GPIO helper macro definitions to manipulate bit fields.
+     a) Read and write registers -> Done
+	 b) Individual modifications to the bit fields -> Pending
+	 c) Test script for testing of the bit pins on a DSO -> Pending
+
+CLOCK & POWER MANAGEMENT
+------------------------
+1) Add clock definitions. -> Done
+2) Add power definitions. -> Done.
+3) Helper macros for setting up clock -> Pending
+4) Test script for modification of clocks and verification on a DSO -> Pending
+
+MEMORY CONTROLLER
+-----------------
+1) Add Memory controller definitions
+2) Add Memory controller helper functions
+3) Initialze the SDRAM with fixed parameters
+4) Test the SDRAM controller.
+
+NAND FLASH CONTROLLER
+---------------------
+
+DMA
+---
+
+PWM TIMER
+---------
+
+UART
+----
+
+USB HOST CONTROLLER
+-------------------
+
+USB DEVICE CONTROLLER
+---------------------
+
+INTERRUPT CONTROLLER
+--------------------
+
+LCD CONTROLLER
+--------------
+
+ADC AND TOUCH SCREEN INTERFACE
+------------------------------
+
+REAL TIME CLOCK
+---------------
+
+WATCH DOG TIMER
+---------------
+
+MMC/SD/SDIO CONTROLLER
+----------------------
+
+IIC-BUS INTERFACE
+-----------------
+
+IIS-BUS INTERFACE
+-----------------
+
+SPI
+---
+
+CAMERA INTERFACE
+----------------
+
+AC97 CONTROLLER
+---------------
+

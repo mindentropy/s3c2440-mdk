@@ -61,6 +61,4 @@
 #define CAMCLK_DIV	(BIT3|BIT2|BIT1|BIT0)
 
 
-
-
 #endif

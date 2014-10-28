@@ -40,6 +40,15 @@
 #define GPJUP	0x560000d8
 
 
+#define BIT(n)  (1<<(n))
+
+
+#define LED1 	BIT(5)
+#define LED2    BIT(6)
+#define LED3    BIT(7)
+#define LED4    BIT(8)
+
+
 #define writeregw(addr,value) \
 	*((volatile unsigned int *) (addr) ) = (value)
 
