@@ -1,12 +1,19 @@
 #include "gpio_def.h"
+#include "led.h"
 
 
 /*
-	nLED_1 -> GPB5
-	nLED_2 -> GPB6
-	nLED_3 -> GPB7
-	nLED_4 -> GPB8
-*/
+ *  LED Orientation
+ *   _   _   _   _
+ *  |_| |_| |_| |_|
+ *   1   2   3   4
+ *
+ *  nLED_1 -> GPB5
+ *	nLED_2 -> GPB6
+ *	nLED_3 -> GPB7
+ *  nLED_4 -> GPB8
+ *
+ */
 
 
 int main(void) {
@@ -20,7 +27,7 @@ int main(void) {
 
 	while(1) {
 
-		writeregw(GPBDAT,LED1|LED2|LED3|LED4);
+		writeregw(GPBDAT,LED2|LED3);
 
 		for(j = 0; j<3; j++) 
 			for(i = 0; i<100000;i++)

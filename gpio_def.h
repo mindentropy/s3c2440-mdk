@@ -2,6 +2,8 @@
 
 #define GPIO_DEF_H_
 
+#include "common.h"
+
 #define GPACON	0x56000000
 #define GPADAT	0x56000004
 
@@ -38,15 +40,6 @@
 #define GPJCON	0x560000d0
 #define GPJDAT	0x560000d4
 #define GPJUP	0x560000d8
-
-
-#define BIT(n)  (1<<(n))
-
-
-#define LED1 	BIT(5)
-#define LED2    BIT(6)
-#define LED3    BIT(7)
-#define LED4    BIT(8)
 
 
 #define writeregw(addr,value) \

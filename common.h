@@ -6,6 +6,8 @@
 #define RESET 0
 
 
+#define BIT(n)  (SET<<(n))
+
 #define BIT0 	(SET << 0)
 #define BIT1 	(SET << 1)
 #define BIT2 	(SET << 2)
@@ -28,16 +30,16 @@
 #define BIT19	(SET << 19)
 #define BIT20	(SET << 20)
 #define BIT21	(SET << 21)
-#define BIT22	(SET << 20)
-#define BIT23	(SET << 20)
-#define BIT24	(SET << 20)
-#define BIT25	(SET << 20)
-#define BIT26	(SET << 20)
-#define BIT27	(SET << 20)
-#define BIT28	(SET << 20)
-#define BIT29	(SET << 20)
-#define BIT30	(SET << 20)
-#define BIT31	(SET << 20)
+#define BIT22	(SET << 22)
+#define BIT23	(SET << 23)
+#define BIT24	(SET << 24)
+#define BIT25	(SET << 25)
+#define BIT26	(SET << 26)
+#define BIT27	(SET << 27)
+#define BIT28	(SET << 28)
+#define BIT29	(SET << 29)
+#define BIT30	(SET << 30)
+#define BIT31	(SET << 31)
 
 #define SET_BITS(val,bitmask) {	\
 		((val) = ((val) & ~(bitmask)) | (bitmask)); \

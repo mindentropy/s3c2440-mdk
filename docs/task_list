@@ -39,8 +39,12 @@ DMA
 PWM TIMER
 ---------
 
-UART
+UART 
 ----
+*Priority* 1) Bring up basic UART either with or without interrupt with basic i/o
+for verification of registers. This can be run only in memory(RAM) without all the 
+constraints present. RAM will be initialized by supervivi. With this we can
+build different components.
 
 USB HOST CONTROLLER
 -------------------
