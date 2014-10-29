@@ -2,6 +2,8 @@
 
 #define CLOCK_PM_H_
 
+#include "common.h"
+
 #define REG_LOCKTIME	0x4C000000
 
 #define U_LTIME_MASK	(0xFFFF << 16)
@@ -16,7 +18,6 @@
 #define SDIV_MASK	0x1
 
 #define CLKCON	0x4C00000C
-
 
 #define CLK_AC97				BIT20
 #define CLK_CAMERA				BIT19

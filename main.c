@@ -16,6 +16,13 @@
  */
 
 
+void init_uart0()
+{
+	//Enable the UART0 in CLKCON register.
+	
+
+}
+
 int main(void) {
 
 	writeregw(GPBCON,0x15400);
