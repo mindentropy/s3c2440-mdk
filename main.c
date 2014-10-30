@@ -1,9 +1,12 @@
 #include "gpio_def.h"
 #include "led.h"
-
+#include "clock_pm.h"
+#include "uart.h"
 
 /*
  *  LED Orientation
+ *
+ *  <- Interfaces side -- GPIO Headers side  ->
  *   _   _   _   _
  *  |_| |_| |_| |_|
  *   1   2   3   4
@@ -16,32 +19,29 @@
  */
 
 
-void init_uart0()
-{
-	//Enable the UART0 in CLKCON register.
-	
-
-}
 
 int main(void) {
 
-	writeregw(GPBCON,0x15400);
-	writeregw(GPBUP,0x1E0);
+	writereg32(GPBCON,0x15400);
+	writereg32(GPBUP,0x1E0);
 
 	register unsigned int i = 0, j = 0;
+	
 
+	init_uart0();
+
+	
 /* Without delay the led blink rate is 2MHz. */
-
 	while(1) {
 
-		writeregw(GPBDAT,LED2|LED3);
+		writereg32(GPBDAT,LED2|LED3);
 
 		for(j = 0; j<3; j++) 
 			for(i = 0; i<100000;i++)
 				;
 
 
-		writeregw(GPBDAT,0x0);
+		writereg32(GPBDAT,0x0);
 
 		for(j = 0; j<3; j++)
 			for(i = 0; i<100000;i++)

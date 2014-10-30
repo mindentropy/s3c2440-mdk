@@ -5,6 +5,7 @@
 #define SET 1
 #define RESET 0
 
+/* Set the exact bit positions rather than shifting */
 
 #define BIT(n)  (SET<<(n))
 
@@ -41,13 +42,44 @@
 #define BIT30	BIT(30)
 #define BIT31	BIT(31)
 
+#define WORD_MASK  (0xFFFFFFFF)
+#define SHORT_MASK (0xFFFF)
+#define BYTE_MASK (0xFF)
+
+
 #define set_bits(val,bitmask) {	\
 		((val) = ((val) & ~(bitmask)) | (bitmask)); \
 	}
 
-#define reset_bits(val,bitmask) {	\
+#define clear_bits(val,bitmask) {	\
 		((val) = ((val) & ~(bitmask)));	\
 	}
+
+/*
+ * For more info on problems associated with volatile casting see.
+ * http://infocenter.arm.com/help/topic/com.arm.doc.faqs/ka3750.html
+ */
+#define writereg32(addr,value) \
+	*((volatile unsigned int *) (addr) ) = ((value) & (0xFFFFFFFF))
+
+#define writereg16(addr,value) \
+	*((volatile unsigned short *) (addr) ) = ((value) & (0xFFFF))
+
+#define writereg8(addr,value) \
+	*((volatile unsigned char *) (addr) ) = ((value) & (0xFF))
+
+#define readreg32(addr,value) \
+	value = ((*((volatile unsigned int *)(addr))) & (0xFFFFFFFF))
+
+#define readreg16(addr,value) \
+	value = ((*((volatile unsigned int *)(addr))) & (0xFFFF))
+
+#define readreg8(addr,value) \
+	value = ((*((volatile unsigned int *)(addr))) & (0xFF))
+
+
+#define set_bitval_pos(value,shift) \
+	((value)<<(shift))
 
 
 #endif

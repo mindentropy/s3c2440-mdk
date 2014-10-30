@@ -41,26 +41,4 @@
 #define GPJDAT	0x560000d4
 #define GPJUP	0x560000d8
 
-/*
- * For more info on problems associated with volatile casting see.
- * http://infocenter.arm.com/help/topic/com.arm.doc.faqs/ka3750.html
- */
-#define writereg32(addr,value) \
-	*((volatile unsigned int *) (addr) ) = ((value) & (0xFFFFFFFF))
-
-#define writereg16(addr,value) \
-	*((volatile unsigned short *) (addr) ) = ((value) & (0xFFFF))
-
-#define writereg8(addr,value) \
-	*((volatile unsigned char *) (addr) ) = ((value) & (0xFF))
-
-#define readreg32(addr,value) \
-	value = ((*((volatile unsigned int *)(addr))) & (0xFFFFFFFF))
-
-#define readreg16(addr,value) \
-	value = ((*((volatile unsigned int *)(addr))) & (0xFFFF))
-
-#define readreg8(addr,value) \
-	value = ((*((volatile unsigned int *)(addr))) & (0xFF))
-
 #endif

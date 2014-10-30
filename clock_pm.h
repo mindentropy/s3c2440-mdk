@@ -4,6 +4,7 @@
 
 #include "common.h"
 
+
 #define REG_LOCKTIME	0x4C000000
 
 #define U_LTIME_MASK	(0xFFFF << 16)
@@ -39,6 +40,18 @@
 #define CLK_SLEEP				BIT3
 #define CLK_IDLE				BIT2
 
+
+extern void enable_apb_clk(unsigned int peripheral_clk);
+
+#define enable_uart0_clk() \
+	enable_apb_clk(CLK_UART0)
+
+#define enable_uart1_clk() \
+	enable_apb_clk(CLK_UART1)
+
+#define enable_uart2_clk() \
+	enable_apb_clk(CLK_UART2)
+	
 
 #define CLKSLOW	0x4C000010
 
