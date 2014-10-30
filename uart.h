@@ -2,6 +2,8 @@
 
 #define UART_H_
 
+#include "common.h"
+
 /* UART Line Control Register Base Address*/
 #define ULCON0 	0x50000000
 #define ULCON1 	0x50004000
@@ -33,8 +35,14 @@
 #define UEXTCLK_SELECT   (BIT10)
 #define FCLK_BY_N_SELECT (BIT11|BIT10)
 
-#define Tx_INTR_TYPE 				(BIT9)
+#define Tx_INTR_TYPE 			(BIT9)
+#define Tx_INTR_TYPE_LVL 		(BIT9)
+#define Tx_INTR_TYPE_PULSE 		(0)
+
 #define Rx_INTR_TYPE 				(BIT8)
+#define Rx_INTR_TYPE_LVL			(BIT8)
+#define Rx_INTR_TYPE_PULSE			(0)
+
 #define Rx_TIMEOUT_ENABLE 			(BIT7)
 #define Rx_ERROR_STATUS_INTR_ENABLE (BIT6)
 #define LOOPBACK_MODE 				(BIT5)
@@ -172,5 +180,11 @@
 
 
 void init_uart0();
+
+
+#define uart_writel_ch0(ch) \
+		writereg32(UTXH0_L,ch)
+
+
 
 #endif
