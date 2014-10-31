@@ -2,6 +2,7 @@
 #include "led.h"
 #include "clock_pm.h"
 #include "uart.h"
+#include "wdt.h"
 
 /*
  *  LED Orientation
@@ -19,36 +20,43 @@
  */
 
 
+void test_delay() {
+
+	register unsigned int i = 0, j = 0;
+
+	for(j = 0; j<3; j++)
+		for(i = 0; i<100000;i++)
+			;
+}
 
 int main(void) {
+
+	disable_watchdog();
 
 	writereg32(GPBCON,0x15400);
 	writereg32(GPBUP,0x1E0);
 
-	register unsigned int i = 0, j = 0;
+	writereg32(GPBDAT,0x00);
 	
-
-	init_uart0();
+	init_clock();
+/*	init_uart0();*/
 
 	
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 
-		writereg32(GPBDAT,LED2|LED3);
+//		uart_writel_ch0('a'); //Write to uart ch0
 
-		uart_writel_ch0('a'); //Write to uart ch0
+		writereg32(GPBDAT,LED1);
+		test_delay();
 
-		for(j = 0; j<3; j++) 
-			for(i = 0; i<100000;i++)
-				;
+		writereg32(GPBDAT,LED2);
+		test_delay();
 
+		writereg32(GPBDAT,LED3);
+		test_delay();
 
-		writereg32(GPBDAT,0x0);
-
-		for(j = 0; j<3; j++)
-			for(i = 0; i<100000;i++)
-				;
-
-
+		writereg32(GPBDAT,LED4);
+		test_delay();
 	}
 }

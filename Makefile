@@ -1,7 +1,7 @@
 ASFLAGS = -mcpu=arm9tdmi  -gstabs
 CFLAGS = -mcpu=arm9tdmi -Wall -g -I.
 LDFLAGS = -Tled_test.lds -Wl,--build-id=none -nostartfiles -Lgcc -L.
-OBJS = led_test.o clock_pm.o uart.o main.o common.o
+OBJS = led_test.o clock_pm.o uart.o main.o common.o wdt.o
 EXE = led_test.elf
 
 $(EXE): $(OBJS)

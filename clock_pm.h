@@ -11,6 +11,9 @@
 #define M_LTIME_MASK	(SHORT_MASK_LSB)
 
 
+#define U_LTIME_SHIFT   (16)
+#define M_LTIME_SHIFT   (0)
+
 #define MPLLCON		0x4C000004
 #define UPLLCON		0x4C000008
 
@@ -66,9 +69,23 @@ extern void enable_apb_clk(unsigned int peripheral_clk);
 
 #define CLKDIVN	0x4C000014
 
-#define DIVN_UPLL	BIT3
-#define HDIVN		(BIT2|BIT1)
-#define PDIVN		BIT0
+#define DIVN_UPLL		BIT3
+
+#define DIVN_UPLL_BY_1	0
+#define DIVN_UPLL_BY_2  BIT3
+
+#define HDIVN			(BIT2|BIT1)
+
+#define HDIVN_FCLK_BY_1 0
+#define HDIVN_FCLK_BY_2 (BIT1)
+#define HDIVN_FCLK_BY_4 (BIT2)
+#define HDIVN_FCLK_BY_3 (BIT2|BIT1)
+
+
+#define PDIVN				BIT0
+#define PDIVN_HCLK_BY_1		0
+#define PDIVN_HCLK_BY_2		BIT0
+
 
 #define CAMDIVN	0x4C000018
 
@@ -78,5 +95,7 @@ extern void enable_apb_clk(unsigned int peripheral_clk);
 #define CAMCLK_SEL	BIT4
 #define CAMCLK_DIV	(BIT3|BIT2|BIT1|BIT0)
 
+
+void init_clock();
 
 #endif

@@ -90,4 +90,9 @@ void set_reg_params(
 					unsigned int reg,
 					unsigned int regmask
 					);
+
+void clear_reg_params(
+					unsigned int reg,
+					unsigned int regmask
+					);
 #endif
