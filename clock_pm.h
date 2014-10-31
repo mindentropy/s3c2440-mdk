@@ -7,16 +7,20 @@
 
 #define REG_LOCKTIME	0x4C000000
 
-#define U_LTIME_MASK	(0xFFFF << 16)
-#define M_LTIME_MASK	(0xFFFF)
+#define U_LTIME_MASK	(SHORT_MASK_MSB)
+#define M_LTIME_MASK	(SHORT_MASK_LSB)
 
 
 #define MPLLCON		0x4C000004
 #define UPLLCON		0x4C000008
 
-#define MDIV_MASK	0xFF000
-#define PDIV_MASK	0x3F0
-#define SDIV_MASK	0x1
+#define MDIV_MASK	(BIT19|BIT18|BIT17|BIT16|BIT15|BIT14|BIT13|BIT12)
+#define PDIV_MASK	(BIT9|BIT8|BIT7|BIT6|BIT4)
+#define SDIV_MASK	(BIT1|BIT0)
+
+#define MDIV_SHIFT  (12)
+#define PDIV_SHIFT 	(4)
+#define SDIV_SHIFT 	(0)
 
 #define CLKCON	0x4C00000C
 
@@ -43,13 +47,13 @@
 
 extern void enable_apb_clk(unsigned int peripheral_clk);
 
-#define enable_uart0_clk() \
+#define apb_clk_enable_uart0() \
 	enable_apb_clk(CLK_UART0)
 
-#define enable_uart1_clk() \
+#define apb_clk_enable_uart1() \
 	enable_apb_clk(CLK_UART1)
 
-#define enable_uart2_clk() \
+#define apb_clk_enable_uart2() \
 	enable_apb_clk(CLK_UART2)
 	
 

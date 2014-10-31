@@ -43,7 +43,11 @@
 #define BIT31	BIT(31)
 
 #define WORD_MASK  (0xFFFFFFFF)
-#define SHORT_MASK (0xFFFF)
+
+#define SHORT_MASK_MSB ((0xFFFF) << 16)
+#define SHORT_MASK_LSB ((0xFFFF))
+
+
 #define BYTE_MASK (0xFF)
 
 
@@ -82,4 +86,8 @@
 	((value)<<(shift))
 
 
+void set_reg_params(
+					unsigned int reg,
+					unsigned int regmask
+					);
 #endif

@@ -36,7 +36,7 @@ int main(void) {
 
 		writereg32(GPBDAT,LED2|LED3);
 
-		uart_writel_ch0('a');
+		uart_writel_ch0('a'); //Write to uart ch0
 
 		for(j = 0; j<3; j++) 
 			for(i = 0; i<100000;i++)

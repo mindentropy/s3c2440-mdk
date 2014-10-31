@@ -1,36 +1,24 @@
+#include "common.h"
 #include "uart.h"
 #include "clock_pm.h"
 
 
 static void set_uart_line_control()
 {
-	unsigned int val = 0;
-
-	readreg32(ULCON0,val);
-
-	writereg32(ULCON0,0);
-
-	set_bits(val,WORD_LENGTH);
-	writereg32(ULCON0,val);
+	set_reg_params(ULCON0,WORD_LENGTH);
 }
 
 
 static void set_uclk_select()
 {
-	unsigned int val = 0;
-
-	readreg32(UCON0,val);
-
-	writereg32(UCON0,0);
-
-	set_bits(val,
-				PCLK_SELECT|Tx_INTR_TYPE_LVL|Rx_INTR_TYPE_LVL|
-				TRANSMIT_MODE_INTR_REQ|RECEIVE_MODE_INTR_REQ);
-	writereg32(UCON0,val);
+	set_reg_params(UCON0,
+					PCLK_SELECT|Tx_INTR_TYPE_LVL|Rx_INTR_TYPE_LVL|
+					TRANSMIT_MODE_INTR_REQ|RECEIVE_MODE_INTR_REQ
+					);
 }
 
 
-static void set_uart0_baud_gen ()
+static void set_uart0_baud_gen()
 {
 	writereg32(UBRDIV0,26);
 }
@@ -49,7 +37,7 @@ void init_uart0()
 
 	init_uart0_registers();
 	//Enable the UART0 in CLKCON register.
-	enable_uart0_clk();
+	apb_clk_enable_uart0();
 
 	//Set UART Line register to 8N1. 8 bits, No parity and 1 stop bit.
 	set_uart_line_control();

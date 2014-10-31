@@ -28,16 +28,16 @@
 #define UCON1 	0x50004004
 #define UCON2  	0x50008004
 
-#define FCLK_DIVIDER 	(BIT15|BIT14|BIT13|BIT12)
-#define CLOCK_SELECTION (BIT11|BIT10)
+#define FCLK_DIVIDER 				(BIT15|BIT14|BIT13|BIT12)
+#define CLOCK_SELECTION 			(BIT11|BIT10)
 
-#define PCLK_SELECT      (BIT11)
-#define UEXTCLK_SELECT   (BIT10)
-#define FCLK_BY_N_SELECT (BIT11|BIT10)
+#define PCLK_SELECT      			(BIT11)
+#define UEXTCLK_SELECT   			(BIT10)
+#define FCLK_BY_N_SELECT 			(BIT11|BIT10)
 
-#define Tx_INTR_TYPE 			(BIT9)
-#define Tx_INTR_TYPE_LVL 		(BIT9)
-#define Tx_INTR_TYPE_PULSE 		(0)
+#define Tx_INTR_TYPE 				(BIT9)
+#define Tx_INTR_TYPE_LVL 			(BIT9)
+#define Tx_INTR_TYPE_PULSE 			(0)
 
 #define Rx_INTR_TYPE 				(BIT8)
 #define Rx_INTR_TYPE_LVL			(BIT8)
@@ -185,6 +185,19 @@ void init_uart0();
 #define uart_writel_ch0(ch) \
 		writereg32(UTXH0_L,ch)
 
+#define uart_writel_ch1(ch) \
+		writereg32(UTXH1_L,ch)
 
+#define uart_writel_ch2(ch) \
+		writereg32(UTXH2_L,ch)
+
+#define uart_writeb_ch0(ch) \
+		writereg32(UTXH0_B,ch)
+
+#define uart_writeb_ch1(ch) \
+		writereg32(UTXH0_B,ch)
+
+#define uart_writeb_ch2(ch) \
+		writereg32(UTXH0_B,ch)
 
 #endif

@@ -44,7 +44,9 @@ UART
 *Priority* 1) Bring up basic UART either with or without interrupt with basic i/o
 for verification of registers. This can be run only in memory(RAM) without all the 
 constraints present. RAM will be initialized by supervivi. With this we can
-build different components.
+build different components. -->Done.
+
+2) Design a polling driver.
 
 USB HOST CONTROLLER
 -------------------
@@ -54,6 +56,7 @@ USB DEVICE CONTROLLER
 
 INTERRUPT CONTROLLER
 --------------------
+1) Disable all interrupt for testing.
 
 LCD CONTROLLER
 --------------
@@ -85,3 +88,6 @@ CAMERA INTERFACE
 AC97 CONTROLLER
 ---------------
 
+Standard Library for printing
+-----------------------------
+1) Create a standard library for string handling, debug printing etc.
