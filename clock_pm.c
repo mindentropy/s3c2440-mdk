@@ -1,23 +1,27 @@
 #include "common.h"
 #include "clock_pm.h"
-
+#include "gpio_def.h"
 
 void enable_apb_clk(unsigned int peripheral_clk)
 {
-	set_reg_params(CLKCON,CLK_UART0);
+	set_reg_params(CLKCON,peripheral_clk);
 }
 
+void enable_gpio_clk()
+{
+	set_reg_params(CLKCON,CLK_GPIO);
+}
 
 void set_mpll(unsigned int mdiv,
 				unsigned int pdiv,
 				unsigned int sdiv) 
 {
 
-
-	writereg32(MPLLCON,
+	writereg32(MPLLCON,0x0007f021);
+	/*writereg32(MPLLCON,
 				(mdiv<<MDIV_SHIFT) | 
 				(pdiv<<PDIV_SHIFT) | 
-				(sdiv<<SDIV_SHIFT));
+				(sdiv<<SDIV_SHIFT));*/
 
 }
 
@@ -38,7 +42,9 @@ void set_clk_divn(unsigned int divn_upll,
 							unsigned int hdivn,
 							unsigned int pdivn)
 {
-	writereg32(CLKDIVN,divn_upll|hdivn|pdivn);
+	
+	writereg32(CLKDIVN,0x00000005);
+	//writereg32(CLKDIVN,divn_upll|hdivn|pdivn);
 }
 
 
@@ -49,6 +55,10 @@ void set_clock_lock_time(unsigned short upll_lock_time,
 		((upll_lock_time << U_LTIME_SHIFT)|(mpll_lock_time)));
 }
 							
+void set_clk_dbg_port()
+{
+	set_reg_params(MISCCR,(CLK_SEL1_PCLK));
+}
 
 void init_clock()
 {
@@ -56,7 +66,7 @@ void init_clock()
 
 //	set_clock_lock_time(1000,1000);
 
-
+	disable_pull_up(GPHUP,BIT10|BIT9);
 
 	/* Set upll first, use 7 "nops" delay and then set mpll */
 	set_upll(56,2,2); //48 Mhz.
@@ -65,7 +75,7 @@ void init_clock()
 		for(i = 0; i<10;i++)
 			;
 
-	__asm__(
+	/*__asm__(
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
@@ -73,10 +83,10 @@ void init_clock()
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
-			);
+			);*/
 
 	
-	set_mpll(127,2,1); //405 Mhz
+	//set_mpll(127,2,1); //405 Mhz
 
 	set_clk_divn(DIVN_UPLL_BY_1,
 				HDIVN_FCLK_BY_4,

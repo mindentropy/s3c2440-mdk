@@ -31,32 +31,49 @@ void test_delay() {
 
 int main(void) {
 
-	disable_watchdog();
-
-	writereg32(GPBCON,0x15400);
-	writereg32(GPBUP,0x1E0);
-
-	writereg32(GPBDAT,0x00);
 	
-	init_clock();
-/*	init_uart0();*/
+//	disable_watchdog();
 
+	init_clock();
+	init_uart0();
+
+	apb_clk_enable_gpio();
+	set_clk_dbg_port();
+
+
+	init_led();
+//	writereg32(GPBCON,0x15400);
+//	writereg32(GPBUP,0x1E0);
+
+//	writereg32(GPBDAT,0x00);
+	
+	
+	led_off(LED3);
 	
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 
-//		uart_writel_ch0('a'); //Write to uart ch0
+		uart_writel_ch0('a'); //Write to uart ch0
 
-		writereg32(GPBDAT,LED1);
 		test_delay();
 
-		writereg32(GPBDAT,LED2);
+
+		led_on(LED4);
+		test_delay();
+		led_off(LED4);
 		test_delay();
 
-		writereg32(GPBDAT,LED3);
+/*		writereg32(GPBDAT,LED1);
+		test_delay();*/
+
+/*		writereg32(GPBDAT,LED2);
+		test_delay();*/
+
+
+/*		writereg32(GPBDAT,LED3);
 		test_delay();
 
 		writereg32(GPBDAT,LED4);
-		test_delay();
+		test_delay();*/
 	}
 }

@@ -10,4 +10,8 @@
 #define LED3    BIT(7)
 #define LED4    BIT(8)
 
+void init_led();
+void led_on(unsigned led);
+void led_off(unsigned led);
+
 #endif

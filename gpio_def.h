@@ -41,4 +41,42 @@
 #define GPJDAT	0x560000d4
 #define GPJUP	0x560000d8
 
+
+#define MISCCR  0x56000080
+
+#define CLK_SEL1 		(BIT10|BIT9|BIT8)
+#define CLK_SEL1_MPLL  	(0)
+#define CLK_SEL1_UPLL  	(BIT8)
+#define CLK_SEL1_RTC 	(BIT9)
+#define CLK_SEL1_HCLK 	(BIT9|BIT8)
+#define CLK_SEL1_PCLK 	(BIT10)
+#define CLK_SEL1_DCLK1 	(BIT10|BIT8)
+
+#define CLK_SEL0_MPLL_INPUT_XTAL  	(0)
+#define CLK_SEL0_UPLL_OUTPUT  		(BIT4)
+#define CLK_SEL0_FCLK 				(BIT5)
+#define CLK_SEL0_HCLK 				(BIT5|BIT4)
+#define CLK_SEL0_PCLK 				(BIT6)
+#define CLK_SEL0_DCLK0 				(BIT6|BIT4)
+
+#define nCTS0 	((BIT1) & (~BIT0))
+#define nRTS0 	((BIT3) & (~BIT2))
+#define TXD0	((BIT5) & (~BIT4))
+#define RXD0	((BIT7) & (~BIT6))
+
+#define CLKOUT0 ((BIT19) & (~BIT18))
+#define CLKOUT1 ((BIT21) & (~BIT20))
+
+
+#define LED1_GPIO_OUT ((~BIT11) & (BIT10)) //GPB5
+#define LED2_GPIO_OUT ((~BIT13) & (BIT12)) //GPB6
+#define LED3_GPIO_OUT ((~BIT15) & (BIT14)) //GPB7
+#define LED4_GPIO_OUT ((~BIT17) & (BIT16)) //GPB8
+
+#define disable_pull_up(port_reg,linemask) \
+	set_reg_params(port_reg,linemask)
+
+void set_gpio_clk_dbg();
+void set_gpio_uart_ch0();
+
 #endif

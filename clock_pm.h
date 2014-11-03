@@ -48,8 +48,6 @@
 #define CLK_IDLE				BIT2
 
 
-extern void enable_apb_clk(unsigned int peripheral_clk);
-
 #define apb_clk_enable_uart0() \
 	enable_apb_clk(CLK_UART0)
 
@@ -59,6 +57,8 @@ extern void enable_apb_clk(unsigned int peripheral_clk);
 #define apb_clk_enable_uart2() \
 	enable_apb_clk(CLK_UART2)
 	
+#define apb_clk_enable_gpio() \
+    enable_gpio_clk()
 
 #define CLKSLOW	0x4C000010
 
@@ -97,5 +97,8 @@ extern void enable_apb_clk(unsigned int peripheral_clk);
 
 
 void init_clock();
+void set_clk_dbg_port();
+void enable_gpio_clk();
+void enable_apb_clk(unsigned int peripheral_clk);
 
 #endif

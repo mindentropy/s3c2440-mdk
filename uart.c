@@ -1,5 +1,6 @@
 #include "common.h"
 #include "uart.h"
+#include "gpio_def.h"
 #include "clock_pm.h"
 
 
@@ -31,13 +32,14 @@ static void init_uart0_registers()
 	writereg32(UMCON0,0);
 }
 
-
 void init_uart0()
 {
 
 	init_uart0_registers();
 	//Enable the UART0 in CLKCON register.
 	apb_clk_enable_uart0();
+
+	set_gpio_uart_ch0();
 
 	//Set UART Line register to 8N1. 8 bits, No parity and 1 stop bit.
 	set_uart_line_control();
