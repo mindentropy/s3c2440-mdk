@@ -3,6 +3,7 @@
 #include "clock_pm.h"
 #include "uart.h"
 #include "wdt.h"
+#include "spkr.h"
 
 /*
  *  LED Orientation
@@ -24,9 +25,11 @@ void test_delay() {
 
 	register unsigned int i = 0, j = 0;
 
-	for(j = 0; j<3; j++)
-		for(i = 0; i<100000;i++)
+	for(j = 0; j<3; j++) {
+		for(i = 0; i<100000;i++) {
 			;
+		}
+	}
 }
 
 int main(void) {
@@ -36,6 +39,7 @@ int main(void) {
 
 	init_clock();
 	init_uart0();
+	init_spkr();
 
 	apb_clk_enable_gpio();
 	set_clk_dbg_port();
@@ -54,15 +58,15 @@ int main(void) {
 	while(1) {
 
 		uart_writel_ch0('a'); //Write to uart ch0
-
+		set_spkr_lo();
 		test_delay();
-
-
 		led_on(LED4);
+		set_spkr_hi();
 		test_delay();
 		led_off(LED4);
+		set_spkr_lo();
 		test_delay();
-
+		set_spkr_hi();
 /*		writereg32(GPBDAT,LED1);
 		test_delay();*/
 

@@ -31,7 +31,7 @@ SECTIONS
 		__bss_end__ = .;
 
 		__stack_bottom__ = .;
-		. += 0x800;
+		. += 0x400;
 		__stack_top__ = .;
 
 	} > sdram
