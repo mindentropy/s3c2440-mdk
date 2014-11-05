@@ -4,6 +4,7 @@
 #include "uart.h"
 #include "wdt.h"
 #include "spkr.h"
+#include "interrupt.h"
 
 /*
  *  LED Orientation
@@ -33,30 +34,36 @@ void test_delay() {
 }
 
 int main(void) {
+	disable_watchdog();
 
-	
-//	disable_watchdog();
+	disable_all_interrupts();
+	disable_all_interrupt_subservice();
 
 	init_clock();
+	test_delay();
 	//init_uart0();
-	init_spkr();
+	//init_spkr();
 
 	apb_clk_enable_gpio();
-	set_clk_dbg_port();
+	//set_clk_dbg_port();
 
 	init_led();
-	
-	led_off(LED3);
-	
+	led_on(LED4|LED3|LED2|LED1);
+
+	set_spkr_hi();
+	test_delay();
+	set_spkr_lo();
+
+	led_off(LED4|LED3|LED2|LED1);
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
-
+		
 	//	uart_writel_ch0('a'); //Write to uart ch0
-	//	test_delay();
+		
+		test_delay();
 		led_on(LED4);
 		test_delay();
 		led_off(LED4);
-		test_delay();
 
 	}
 }

@@ -14,7 +14,7 @@ SECTIONS
 	{
 		*(.text);
 		. = ALIGN(4);
-	} > sdram
+	} > sram
 
 	.data :
 	{
@@ -22,7 +22,7 @@ SECTIONS
 		*(.data)
 		. = ALIGN(4);
 		__data_end__ = .;
-	} > sdram
+	} > sram
 
 	.bss  :
 	{
@@ -34,7 +34,7 @@ SECTIONS
 		. += 0x400;
 		__stack_top__ = .;
 
-	} > sdram
+	} > sram
 
 
 /*

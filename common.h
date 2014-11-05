@@ -52,11 +52,11 @@
 
 
 #define set_bits(val,bitmask) {	\
-		((val) = ((val) & ~(bitmask)) | (bitmask)); \
+		((val) = ((val) & (~(bitmask))) | (bitmask)); \
 	}
 
 #define clear_bits(val,bitmask) {	\
-		((val) = ((val) & ~(bitmask)));	\
+		((val) = ((val) & (~(bitmask))));	\
 	}
 
 /*

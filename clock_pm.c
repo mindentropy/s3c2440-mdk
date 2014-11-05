@@ -7,17 +7,13 @@ void enable_apb_clk(unsigned int peripheral_clk)
 	set_reg_params(CLKCON,peripheral_clk);
 }
 
-void enable_gpio_clk()
-{
-	set_reg_params(CLKCON,CLK_GPIO);
-}
-
 void set_mpll(unsigned int mdiv,
 				unsigned int pdiv,
 				unsigned int sdiv) 
 {
-
-	writereg32(MPLLCON,0x0007f021);
+	
+	writereg32(MPLLCON,0x00096030);
+	//writereg32(MPLLCON,0x0007f021);
 	/*writereg32(MPLLCON,
 				(mdiv<<MDIV_SHIFT) | 
 				(pdiv<<PDIV_SHIFT) | 
@@ -39,8 +35,8 @@ void set_upll(unsigned int mdiv,
 
 
 void set_clk_divn(unsigned int divn_upll,
-							unsigned int hdivn,
-							unsigned int pdivn)
+				unsigned int hdivn,
+				unsigned int pdivn)
 {
 	
 	writereg32(CLKDIVN,0x00000005);
@@ -78,11 +74,7 @@ void init_clock()
 	/* Set upll first, use 7 "nops" delay and then set mpll */
 	set_upll(56,2,2); //48 Mhz.
 
-	for(j = 0; j<10; j++) 
-		for(i = 0; i<10;i++)
-			;
-
-	/*__asm__(
+	__asm__(
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
@@ -90,10 +82,10 @@ void init_clock()
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
-			);*/
+			);
 
 	
-	//set_mpll(127,2,1); //405 Mhz
+	set_mpll(127,2,1); //405 Mhz
 
 	set_clk_divn(DIVN_UPLL_BY_1,
 				HDIVN_FCLK_BY_4,

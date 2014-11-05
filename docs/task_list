@@ -56,7 +56,9 @@ USB DEVICE CONTROLLER
 
 INTERRUPT CONTROLLER
 --------------------
-1) Disable all interrupt for testing.
+1) Update interrupt definitions.
+2) Helper functions for interrupts.
+3) Disable all interrupt for testing.
 
 LCD CONTROLLER
 --------------
@@ -91,3 +93,8 @@ AC97 CONTROLLER
 Standard Library for printing
 -----------------------------
 1) Create a standard library for string handling, debug printing etc.
+
+Speaker
+-------
+1) Create helper functions and test beeps -> Done.
+2) Connect pwm timer to it to generate patterns.

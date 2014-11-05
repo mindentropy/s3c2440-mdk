@@ -58,7 +58,7 @@
 	enable_apb_clk(CLK_UART2)
 	
 #define apb_clk_enable_gpio() \
-    enable_gpio_clk()
+	enable_apb_clk(CLK_GPIO)
 
 #define CLKSLOW	0x4C000010
 
