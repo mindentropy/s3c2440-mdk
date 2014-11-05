@@ -57,7 +57,14 @@ void set_clock_lock_time(unsigned short upll_lock_time,
 							
 void set_clk_dbg_port()
 {
-	set_reg_params(MISCCR,(CLK_SEL1_PCLK));
+	set_gpio_clk_dbg();
+	//set_reg_params(MISCCR,(CLK_SEL1_HCLK|CLK_SEL0_MPLL_INPUT_XTAL));
+	
+	set_reg_params(MISCCR,BIT9);
+	clear_reg_params(MISCCR,BIT10|BIT8);
+	//set_reg_params(MISCCR,BIT5|BIT4);
+/*	set_reg_params(MISCCR,(BIT5));
+	clear_reg_params(MISCCR,(BIT6|BIT4));*/
 }
 
 void init_clock()
@@ -66,7 +73,7 @@ void init_clock()
 
 //	set_clock_lock_time(1000,1000);
 
-	disable_pull_up(GPHUP,BIT10|BIT9);
+	disable_pull_up(GPHUP,CLKOUT0_PIN|CLKOUT1_PIN);
 
 	/* Set upll first, use 7 "nops" delay and then set mpll */
 	set_upll(56,2,2); //48 Mhz.

@@ -95,6 +95,8 @@
 #define CAMCLK_SEL	BIT4
 #define CAMCLK_DIV	(BIT3|BIT2|BIT1|BIT0)
 
+#define CLKOUT0_PIN BIT9
+#define CLKOUT1_PIN BIT10
 
 void init_clock();
 void set_clk_dbg_port();
