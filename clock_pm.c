@@ -11,19 +11,19 @@ void set_mpll(unsigned int mdiv,
 				unsigned int pdiv,
 				unsigned int sdiv) 
 {
-	unsigned val = 0;
+	//unsigned val = 0;
 	//readreg32(MPLLCON,val);
 	//writereg32(MPLLCON,val);
 	
 	
 	//writereg32(MPLLCON,0x00096030);
-	writereg32(MPLLCON,0x0007f021);
+	//writereg32(MPLLCON,0x0007f021);
 	
 
-	/*writereg32(MPLLCON,
+	writereg32(MPLLCON,
 				(mdiv<<MDIV_SHIFT) | 
 				(pdiv<<PDIV_SHIFT) | 
-				(sdiv<<SDIV_SHIFT));*/
+				(sdiv<<SDIV_SHIFT));
 
 }
 
@@ -45,8 +45,8 @@ void set_clk_divn(unsigned int divn_upll,
 				unsigned int pdivn)
 {
 	
-	writereg32(CLKDIVN,0x00000005);
-	//writereg32(CLKDIVN,divn_upll|hdivn|pdivn);
+	//writereg32(CLKDIVN,0x00000005);
+	writereg32(CLKDIVN,divn_upll|hdivn|pdivn);
 }
 
 
@@ -60,7 +60,9 @@ void set_clock_lock_time(unsigned short upll_lock_time,
 
 void clear_slow_clk()
 {
-	clear_reg_params(CLKSLOW,BIT4);
+	clear_reg_params(CLKSLOW,SLOW_BIT);
+	clear_reg_params(CLKSLOW,UCLK_ON);
+	clear_reg_params(CLKSLOW,MPLL_OFF);
 }
 							
 void set_clk_dbg_port()
@@ -77,7 +79,7 @@ void set_clk_dbg_port()
 
 void init_clock()
 {
-	unsigned int i = 0, j = 0;
+	//unsigned int i = 0, j = 0;
 
 
 	disable_pull_up(GPHUP,CLKOUT0_PIN|CLKOUT1_PIN);
@@ -86,6 +88,10 @@ void init_clock()
 
 
 	/* 
+	 *------
+	 * NOTE
+	 *------
+	 *
 	 * Set the divider register first. Example code from
 	 * myled 2440init.s
 	 */
@@ -96,22 +102,19 @@ void init_clock()
 
 	/* Set upll first, use 7 "nops" delay and then set mpll */
 	set_upll(56,2,2); //48 Mhz.
-
     
-	//for(i = 0;i<50;i++) {
-		__asm__(
-				"mov r0,r0\n\t"
-				"mov r0,r0\n\t"
-				"mov r0,r0\n\t"
-				"mov r0,r0\n\t"
-				"mov r0,r0\n\t"
-				"mov r0,r0\n\t"
-				"mov r0,r0\n\t"
-				"mov r0,r0\n\t"
-				"mov r0,r0\n\t"
-				"mov r0,r0\n\t"
-				);
-	//}
+	__asm__(
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+		);
 
 	
 	set_mpll(127,2,1); //405 Mhz

@@ -114,6 +114,29 @@
 #define Tx_BUFF_EMPTY   	(BIT1)
 #define Rx_BUFF_DATA_RDY    (BIT0)
 
+//Bit will be set if buffer is empty.
+unsigned int isTxBuffEmpty(unsigned int channel);
+
+//Bit will be set if buffer is full.
+unsigned int isRxBuffFull(unsigned int channel);
+
+/*#define is_tx_buff_empty_uart0() \
+	isTxBuffEmpty(UTRSTAT0)
+
+#define is_tx_buff_empty_uart1() \
+	isTxBuffEmpty(UTRSTAT1)
+
+#define is_tx_buff_empty_uart2() \
+	isTxBuffEmpty(UTRSTAT2)
+
+#define is_rx_buff_full_uart0() \
+	isRxBuffFull(UTRSTAT0)
+
+#define is_rx_buff_full_uart1() \
+	isRxBuffFull(UTRSTAT1)
+
+#define is_rx_buff_full_uart2() \
+	isRxBuffFull(UTRSTAT2)*/
 
 /* UART Error Status Register Base Address */
 #define UERSTAT0  0x50000014
@@ -199,5 +222,36 @@ void init_uart0();
 
 #define uart_writeb_ch2(ch) \
 		writereg32(UTXH0_B,ch)
+
+#define uart_readl_ch0(ch) \
+		readreg32(URXH0_L,ch)
+
+#define uart_readl_ch1(ch) \
+		readreg32(URXH1_L,ch)
+
+#define uart_readl_ch2(ch) \
+		readreg32(URXH2_L,ch)
+
+#define uart_readb_ch0(ch) \
+		readreg32(URXH0_B,ch)
+
+#define uart_readb_ch1(ch) \
+		readreg32(URXH1_B,ch)
+
+#define uart_readb_ch2(ch) \
+		readreg32(URXH2_B,ch)
+
+
+void putc_ch0(char ch);
+//void putc_ch1(char ch)
+//void putc_ch2(char ch)
+
+char getc_ch0();
+//char getc_ch1();
+//char getc_ch2();
+
+
+void puts(const char *str);
+void print_hex(unsigned int num);
 
 #endif

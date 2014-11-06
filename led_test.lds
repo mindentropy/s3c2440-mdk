@@ -31,7 +31,7 @@ SECTIONS
 		__bss_end__ = .;
 
 		__stack_bottom__ = .;
-		. += 0x400;
+		. += 0x300;
 		__stack_top__ = .;
 
 	} > sram

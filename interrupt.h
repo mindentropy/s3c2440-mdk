@@ -106,16 +106,25 @@ void set_interrupt_mode(unsigned int_line);
 void set_fiq_mode(unsigned int_line);
 void enable_interrupt_service(unsigned int_mask);
 void disable_interrupt_service(unsigned int_mask);
-void disable_all_interrupts();
-void enable_all_interrupts();
+
+#define  disable_all_interrupts() \
+	writereg32(INTMSK,0xFFFFFFFF)
+	
+#define enable_all_interrupts() \
+	writereg32(INTMSK,0x0)
+	
+
 unsigned get_interrupt_pending_status(unsigned interrupt_line);
 unsigned get_interrupt_subservice_pending_status(unsigned interrupt_line);
 void enable_interrupt_sub_service(unsigned int_mask);
 void disable_interrupt_sub_service(unsigned int_mask);
-void disable_all_interrupt_subservice();
-void enable_all_interrupt_subservice();
 
 
-
+#define disable_all_interrupt_subservice() \
+	writereg32(INTSUBMSK,0xFFFF)
+	
+#define enable_all_interrupt_subservice() \
+	writereg32(INTSUBMSK,0)
+	
 
 #endif
