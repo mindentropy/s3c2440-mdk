@@ -59,19 +59,22 @@ int main(void) {
 	//set_spkr_lo();
 	led_off(LED4|LED3|LED2|LED1);
 
-	readreg32(CLKSLOW,test_val);
-	print_hex(test_val);
+	/*readreg32(CLKSLOW,test_val);
+	print_hex(test_val);*/
 	
+	puts("\r\nEnter your choice:\r\n");
+	puts("1 - Jump to RAM\r\n");
+	puts("2 - Load from flash to RAM\r\n");
+
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 	//	uart_writel_ch0('a'); //Write to uart ch0
 	//	set_spkr_hi();
-		test_delay();
 		led_on(LED4);
 		test_delay();
 	//	set_spkr_lo();
 		led_off(LED4);
+		putc_ch0(getc_ch0());
 		//putc_ch0('a');
-
 	}
 }
