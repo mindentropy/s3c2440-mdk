@@ -119,6 +119,19 @@ void init_clock()
 	
 	set_mpll(127,2,1); //405 Mhz
 
+	__asm__(
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+			"mov r0,r0\n\t"
+		);
+
 	clear_slow_clk();
 
 }
