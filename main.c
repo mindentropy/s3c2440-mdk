@@ -5,6 +5,7 @@
 #include "wdt.h"
 #include "spkr.h"
 #include "interrupt.h"
+#include "sdram.h"
 
 /*
  *  LED Orientation
@@ -62,9 +63,9 @@ int main(void) {
 	/*readreg32(CLKSLOW,test_val);
 	print_hex(test_val);*/
 	
-	puts("\r\nEnter your choice:\r\n");
+	/*puts("\r\nEnter your choice:\r\n");
 	puts("1 - Jump to RAM\r\n");
-	puts("2 - Load from flash to RAM\r\n");
+	puts("2 - Load from flash to RAM\r\n");*/
 
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {

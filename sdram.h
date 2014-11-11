@@ -2,6 +2,78 @@
 
 #define SDRAM_H_
 
+#include "common.h"
+
+#define BWSCON 		0x48000000
+
+#define ST7 			(BIT31)
+#define WS7     		(BIT30)
+#define DW7        		(BIT29|BIT28)
+
+#define DW7_8b     		(0)
+#define DW7_16b    		(BIT28)
+#define DW7_32b    		(BIT29)
+#define DW7_RESERVED   	(BIT29|BIT28)
+
+#define ST6 			(BIT27)
+#define WS6         	(BIT26)
+#define DW6         	(BIT25|BIT24)
+
+#define DW6_8b     		(0)
+#define DW6_16b    		(BIT24)
+#define DW6_32b    		(BIT25)
+#define DW6_RESERVED   	(BIT25|BIT24)
+
+
+#define ST5 			(BIT23)
+#define WS5         	(BIT22)
+#define DW5         	(BIT21|BIT20)
+
+#define DW5_8b     		(0)
+#define DW5_16b    		(BIT20)
+#define DW5_32b    		(BIT21)
+#define DW5_RESERVED   	(BIT21|BIT20)
+
+#define ST4 			(BIT19)
+#define WS4         	(BIT18)
+#define DW4         	(BIT17|BIT16)
+
+#define DW4_8b     		(0)
+#define DW4_16b    		(BIT16)
+#define DW4_32b    		(BIT17)
+#define DW4_RESERVED   	(BIT17|BIT16)
+
+#define ST3 			(BIT15)
+#define WS3        	 	(BIT14)
+#define DW3         	(BIT13|BIT12)
+
+#define DW3_8b     		(0)
+#define DW3_16b    		(BIT12)
+#define DW3_32b    		(BIT13)
+#define DW3_RESERVED   	(BIT13|BIT12)
+
+#define ST2 			(BIT11)
+#define WS2         	(BIT10)
+#define DW2         	(BIT9|BIT8)
+
+#define DW2_8b     		(0)
+#define DW2_16b    		(BIT8)
+#define DW2_32b    		(BIT9)
+#define DW2_RESERVED   	(BIT9|BIT8)
+
+#define ST1 			(BIT7)
+#define WS1         	(BIT6)
+#define DW1 			(BIT5|BIT4)
+
+#define DW1_8b     		(0)
+#define DW1_16b    		(BIT4)
+#define DW1_32b    		(BIT5)
+#define DW1_RESERVED   	(BIT5|BIT4)
+
+#define DW0 			(BIT2|BIT1)
+#define DW0_16b 		(BIT1)
+#define DW0_32b 		(BIT2)
+
 
 #define BANKCON0	0x48000004
 #define BANKCON1	0x48000008
