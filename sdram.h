@@ -108,7 +108,7 @@
 #define Tcah_CLK_2	0x2
 #define Tcah_CLK_4	0x3
 
-#define Tacp_CLK_2	0x0
+#define Tacp_CLK_2	((0x0)<<2)
 #define Tacp_CLK_3	0x1
 #define Tacp_CLK_4	0x2
 #define Tacp_CLK_6	0x3
@@ -136,7 +136,7 @@
 #define MT_RESERVED_02		0x2
 #define MT_SYNC_DRAM		0x3
 
-#define Trcd_CLK_2	0x0
+#define Trcd_CLK_2	((0x0)<<2)
 #define Trcd_CLK_3	0x1
 #define Trcd_CLK_4	0x2
 
@@ -144,35 +144,38 @@
 #define SCAN_9BIT		0x1
 #define SCAN_10BIT		0x2
 
-#define REFRESHCON		0x48000024
+#define REFRESHCTL		0x48000024
 
-#define REFEN				0x01
-#define TREFMD_SELF_REFRESH	0x01
+#define REFEN				BIT23
+#define TREFMD_SELF_REFRESH	BIT22
 
-#define Trp_2	0x00
-#define Trp_3	0x01
-#define Trp_4	0x02
-#define Trp_NS	0x03
+#define Trp     (BIT21|BIT20)
+#define Trp_2	0
+#define Trp_3	(BIT20)
+#define Trp_4	(BIT21)
+#define Trp_NS	(BIT21|BIT20)
+
+#define Tsrc    (BIT19|BIT18)
 
 #define Tsrc_4	0x00
-#define Tsrc_5	0x01
-#define Tsrc_6	0x02
-#define Tsrc_7	0x03
+#define Tsrc_5	(BIT18)
+#define Tsrc_6	(BIT19)
+#define Tsrc_7	(BIT19|BIT18)
 
 
 #define BANKSIZE	0x48000028
 
-#define BURST_EN	0x01
-#define SCKE_EN		0x01
-#define SCLK_EN		0x01
+#define BURST_EN	BIT7
+#define SCKE_EN		BIT5
+#define SCLK_EN		BIT4
 
-#define BK76MAP_128MB	0x02
-#define BK76MAP_64MB	0x01
-#define BK76MAP_32MB	0x00
-#define BK76MAP_16MB	0x07
-#define BK76MAP_8MB		0x06
-#define BK76MAP_4MB		0x05
-#define BK76MAP_2MB		0x04
+#define BK76MAP_128MB	(BIT1)
+#define BK76MAP_64MB	(BIT0)
+#define BK76MAP_32MB	(0)
+#define BK76MAP_16MB	(BIT2|BIT1|BIT0)
+#define BK76MAP_8MB		(BIT2|BIT1)
+#define BK76MAP_4MB		(BIT2|BIT0)
+#define BK76MAP_2MB		(BIT2)
 
 #define MRSRB6		0x4800002C
 #define MRSRB7		0x48000030
