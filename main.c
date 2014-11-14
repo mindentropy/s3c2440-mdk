@@ -7,6 +7,8 @@
 #include "interrupt.h"
 #include "sdram.h"
 
+#define PHYS_START   0x30000000U
+#define MAX_RAM_SIZE 67108864U
 /*
  *  LED Orientation
  *
@@ -37,8 +39,13 @@ void test_delay() {
 
 unsigned int test_val = 0;
 
+//RAM addr space 0x30000000 - 0x34000000
+unsigned char *ram_ptr = (unsigned int)PHYS_START;
+
 int main(void) {
-	disable_watchdog();
+	/* Note : Do not put any operations above this */
+	/* Disable watchdog.*/
+	disable_watchdog(); 
 
 	disable_all_interrupts();
 	disable_all_interrupt_subservice();
@@ -67,15 +74,30 @@ int main(void) {
 	puts("1 - Jump to RAM\r\n");
 	puts("2 - Load from flash to RAM\r\n");*/
 
+	sdram_init();
+
 /* Without delay the led blink rate is 2MHz. */
+
+	
+	/*for(;ram_ptr < ((unsigned)(PHYS_START+0x100));ram_ptr++)
+		*ram_ptr = test_val++;*/
+
+
 	while(1) {
-	//	uart_writel_ch0('a'); //Write to uart ch0
 	//	set_spkr_hi();
 		led_on(LED4);
 		test_delay();
 	//	set_spkr_lo();
 		led_off(LED4);
-		putc_ch0(getc_ch0());
-		//putc_ch0('a');
+	//	putc_ch0(getc_ch0());
+		*ram_ptr = test_val++;
+		print_hex(*ram_ptr);
+		ram_ptr++;
+
+		/*if(ram_ptr == 0x3000FFFFU)
+			set_spkr_hi();*/
+
+		if(ram_ptr >= (PHYS_START +  MAX_RAM_SIZE))
+			ram_ptr = PHYS_START;
 	}
 }

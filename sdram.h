@@ -180,6 +180,20 @@
 #define MRSRB6		0x4800002C
 #define MRSRB7		0x48000030
 
+#define WBL 				BIT9
+#define TM 					(BIT8|BIT7)
+#define TM_MODE_REG_SET 	(0)
+#define CAS_LATENCY         (BIT6|BIT5|BIT4)
+#define CAS_LATENCY_1CLK    (0)
+#define CAS_LATENCY_2CLK    (BIT5)
+#define CAS_LATENCY_3CLK    (BIT5|BIT4)
+
+#define BT 				(BIT3)
+#define BT_SEQUENTIAL 	(0)
+
+#define BL 				(BIT2|BIT1|BIT0)
+#define BL_FIXED 		(0)
+
+void sdram_init();
 
 #endif
-
