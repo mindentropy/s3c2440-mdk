@@ -7,8 +7,8 @@
 #include "interrupt.h"
 #include "sdram.h"
 
-#define PHYS_START   0x30000000U
-#define MAX_RAM_SIZE 67108864U
+#define PHYS_START   0x30000000
+#define MAX_RAM_SIZE 67108864
 /*
  *  LED Orientation
  *
@@ -40,7 +40,7 @@ void test_delay() {
 unsigned int test_val = 0;
 
 //RAM addr space 0x30000000 - 0x34000000
-unsigned char *ram_ptr = (unsigned int)PHYS_START;
+unsigned char *ram_ptr = 0x30000000;
 
 int main(void) {
 	/* Note : Do not put any operations above this */
@@ -57,7 +57,7 @@ int main(void) {
 
 	apb_clk_enable_gpio();
 
-	//init_spkr();
+	init_spkr();
 
 	init_led();
 	//led_on(LED4|LED3|LED2|LED1);
@@ -67,8 +67,6 @@ int main(void) {
 	//set_spkr_lo();
 	led_off(LED4|LED3|LED2|LED1);
 
-	/*readreg32(CLKSLOW,test_val);
-	print_hex(test_val);*/
 	
 	/*puts("\r\nEnter your choice:\r\n");
 	puts("1 - Jump to RAM\r\n");
@@ -76,6 +74,8 @@ int main(void) {
 
 	sdram_init();
 
+	readreg32(BANKCON6,test_val);
+	print_hex(test_val);
 /* Without delay the led blink rate is 2MHz. */
 
 	
@@ -86,18 +86,17 @@ int main(void) {
 	while(1) {
 	//	set_spkr_hi();
 		led_on(LED4);
-		test_delay();
+		//test_delay();
 	//	set_spkr_lo();
-		led_off(LED4);
 	//	putc_ch0(getc_ch0());
 		*ram_ptr = test_val++;
 		print_hex(*ram_ptr);
 		ram_ptr++;
+		led_off(LED4);
 
-		/*if(ram_ptr == 0x3000FFFFU)
-			set_spkr_hi();*/
-
-		if(ram_ptr >= (PHYS_START +  MAX_RAM_SIZE))
-			ram_ptr = PHYS_START;
+		if(ram_ptr >= (PHYS_START+MAX_RAM_SIZE-1)) {
+			ram_ptr = 0x30000000;
+			set_spkr_hi();
+		}
 	}
 }

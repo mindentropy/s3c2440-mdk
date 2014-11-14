@@ -3,6 +3,8 @@
 #define SDRAM_H_
 
 #include "common.h"
+#include "gpio_def.h"
+#include "clock_pm.h"
 
 #define BWSCON 		0x48000000
 
@@ -83,66 +85,69 @@
 #define BANKCON5	0x48000018
 
 
+#define Tacs        (BIT14|BIT13)
 #define Tacs_CLK_0	0x0
-#define Tacs_CLK_1	0x1
-#define Tacs_CLK_2	0x2
-#define Tacs_CLK_4	0x3
+#define Tacs_CLK_1	(BIT13)
+#define Tacs_CLK_2	(BIT14)
+#define Tacs_CLK_4	(BIT14|BIT13)
 
+#define Tcos        (BIT12|BIT11)
 #define Tcos_CLK_0	0x0
-#define Tcos_CLK_1	0x1
-#define Tcos_CLK_2	0x2
-#define Tcos_CLK_4	0x3
+#define Tcos_CLK_1	(BIT11)
+#define Tcos_CLK_2	(BIT12)
+#define Tcos_CLK_4	(BIT12|BIT11)
 
+#define Tcoh        (BIT7|BIT6)
 #define Tcoh_CLK_0	0x0
-#define Tcoh_CLK_1	0x1
-#define Tcoh_CLK_2	0x2
-#define Tcoh_CLK_4	0x3
+#define Tcoh_CLK_1	(BIT6)
+#define Tcoh_CLK_2	(BIT7)
+#define Tcoh_CLK_4	(BIT7|BIT6)
 
-#define Tcoh_CLK_0	0x0
-#define Tcoh_CLK_1	0x1
-#define Tcoh_CLK_2	0x2
-#define Tcoh_CLK_4	0x3
-
+#define Tcah     	(BIT5|BIT4)
 #define Tcah_CLK_0	0x0
-#define Tcah_CLK_1	0x1
-#define Tcah_CLK_2	0x2
-#define Tcah_CLK_4	0x3
+#define Tcah_CLK_1	(BIT4)
+#define Tcah_CLK_2	(BIT5)
+#define Tcah_CLK_4	(BIT5|BIT4)
 
+#define Tacp        (BIT3|BIT2)
 #define Tacp_CLK_2	((0x0)<<2)
-#define Tacp_CLK_3	0x1
-#define Tacp_CLK_4	0x2
-#define Tacp_CLK_6	0x3
+#define Tacp_CLK_3	(BIT2)
+#define Tacp_CLK_4	(BIT3)
+#define Tacp_CLK_6	(BIT3|BIT2)
 
+#define PMC 		(BIT1|BIT0)
 #define PMC_0		0x00
-#define PMC_4		0x01
-#define PMC_8		0x02
-#define PMC_16		0x03
+#define PMC_4		(BIT0)
+#define PMC_8		(BIT1)
+#define PMC_16		(BIT1|BIT0)
+
+#define Tacc        (BIT10|BIT9|BIT8)
 
 #define Tacc_CLK_1	0x00
-#define Tacc_CLK_2	0x01
-#define Tacc_CLK_3	0x02
-#define Tacc_CLK_4	0x03
-#define Tacc_CLK_6	0x04
-#define Tacc_CLK_8	0x05
-#define Tacc_CLK_10	0x06
-#define Tacc_CLK_14	0x07
+#define Tacc_CLK_2	(BIT8)
+#define Tacc_CLK_3	(BIT9)
+#define Tacc_CLK_4	(BIT9|BIT8)
+#define Tacc_CLK_6	(BIT10)
+#define Tacc_CLK_8	(BIT10|BIT8)
+#define Tacc_CLK_10	(BIT10|BIT9)
+#define Tacc_CLK_14	(BIT10|BIT9|BIT8)
 
 
 #define BANKCON6	0x4800001C
 #define BANKCON7	0x48000020
 
-#define MT_ROM_SRAM			0x0
-#define MT_RESERVED_01		0x1
-#define MT_RESERVED_02		0x2
-#define MT_SYNC_DRAM		0x3
+#define MT_ROM_SRAM			0
+#define MT_RESERVED_01		(BIT15)
+#define MT_RESERVED_02		(BIT16)
+#define MT_SYNC_DRAM		(BIT16|BIT15)
 
 #define Trcd_CLK_2	((0x0)<<2)
-#define Trcd_CLK_3	0x1
-#define Trcd_CLK_4	0x2
+#define Trcd_CLK_3	(BIT2)
+#define Trcd_CLK_4	(BIT3)
 
 #define SCAN_8BIT		0x0
-#define SCAN_9BIT		0x1
-#define SCAN_10BIT		0x2
+#define SCAN_9BIT		BIT0
+#define SCAN_10BIT		BIT1
 
 #define REFRESHCTL		0x48000024
 

@@ -10,11 +10,11 @@ void sdram_init()
 			DW3_RESERVED|DW2_RESERVED|DW1_RESERVED);
 
 	/* Configure BANKCON6/BANKCON7 */
-	writereg32(BANKCON6,
-				MT_SYNC_DRAM|SCAN_9BIT);
+	writereg32(BANKCON6,MT_SYNC_DRAM|SCAN_9BIT);
 
-/*	writereg32(BANKCON7,
-				MT_SYNC_DRAM|Trcd_CLK_3|SCAN_9BIT);*/
+
+	/* Set BANKCON7 to ROM/SRAM */
+	writereg32(BANKCON7,MT_ROM_SRAM);
 
 	/* Configure SDRAM Refresh settings */
 	writereg32(REFRESHCTL,REFEN|Tsrc_5|1269);
@@ -22,9 +22,8 @@ void sdram_init()
 	/* Configure Banksize setting */
 	writereg32(BANKSIZE,BURST_EN|SCKE_EN|SCLK_EN|BK76MAP_32MB);
 
-
-	/* Configure mode set register */
-	writereg32(MRSRB6,CAS_LATENCY_3CLK);
+	/* Configure mode set register for BANK6 */
+	writereg32(MRSRB6,CAS_LATENCY_2CLK);
 
 	return;
 }
