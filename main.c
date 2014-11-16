@@ -8,7 +8,7 @@
 #include "sdram.h"
 
 #define PHYS_START   0x30000000
-#define MAX_RAM_SIZE 67108864
+#define MAX_RAM_SIZE 0x4000000
 /*
  *  LED Orientation
  *
@@ -40,7 +40,7 @@ void test_delay() {
 unsigned int test_val = 0;
 
 //RAM addr space 0x30000000 - 0x34000000
-unsigned char *ram_ptr = 0x30000000;
+unsigned char *ram_ptr = 0x33000000;
 
 int main(void) {
 	/* Note : Do not put any operations above this */
@@ -84,19 +84,28 @@ int main(void) {
 
 
 	while(1) {
-	//	set_spkr_hi();
 		led_on(LED4);
-		//test_delay();
-	//	set_spkr_lo();
-	//	putc_ch0(getc_ch0());
-		*ram_ptr = test_val++;
-		print_hex(*ram_ptr);
+
+		*ram_ptr = test_val;
+		//print_hex(*ram_ptr);
+
+		if((test_val & 0xFF) != *ram_ptr) {
+			set_spkr_hi();
+
+			while(1)
+				;
+		}
+
+		test_val++;
 		ram_ptr++;
 		led_off(LED4);
 
-		if(ram_ptr >= (PHYS_START+MAX_RAM_SIZE-1)) {
-			ram_ptr = 0x30000000;
+		if(ram_ptr >= (PHYS_START + MAX_RAM_SIZE -1)) {
 			set_spkr_hi();
+			ram_ptr = 0x30000000;
+			test_delay();
+			set_spkr_lo();
 		}
+		//test_delay();
 	}
 }

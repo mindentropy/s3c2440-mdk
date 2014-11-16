@@ -9,7 +9,6 @@ Generic board bring up
 
 GPIO
 ----
-
 1) Add GPIO definitions  -> Done
 2) Add GPIO helper macro definitions to manipulate bit fields.
      a) Read and write registers -> Done
@@ -25,10 +24,10 @@ CLOCK & POWER MANAGEMENT
 
 MEMORY CONTROLLER
 -----------------
-1) Add Memory controller definitions
-2) Add Memory controller helper functions
-3) Initialze the SDRAM with fixed parameters
-4) Test the SDRAM controller.
+1) Add Memory controller definitions --> Done.
+2) Add Memory controller helper functions --> Done.
+3) Initialze the SDRAM with fixed parameters --> Done.
+4) Test the SDRAM controller. --> Done.
 5) Jump to code loaded in the memory controller.
 
 NAND FLASH CONTROLLER
@@ -50,7 +49,7 @@ for verification of registers. This can be run only in memory(RAM) without all t
 constraints present. RAM will be initialized by supervivi. With this we can
 build different components. -->Done.
 
-2) Design a polling driver.
+2) Design a polling driver. --> Done
 
 USB HOST CONTROLLER
 -------------------
@@ -62,7 +61,7 @@ INTERRUPT CONTROLLER
 --------------------
 1) Update interrupt definitions.
 2) Helper functions for interrupts.
-3) Disable all interrupt for testing.
+3) Disable all interrupt for testing. --> Done.
 
 LCD CONTROLLER
 --------------
@@ -75,6 +74,7 @@ REAL TIME CLOCK
 
 WATCH DOG TIMER
 ---------------
+1) Disable watchdog to prevent reset during board bringup. --> Done.
 
 MMC/SD/SDIO CONTROLLER
 ----------------------
@@ -96,7 +96,7 @@ AC97 CONTROLLER
 
 Standard Library for printing
 -----------------------------
-1) Create a standard library for string handling, debug printing etc.
+1) Create a standard library for string handling, debug printing etc. --> Done.
 
 Speaker
 -------

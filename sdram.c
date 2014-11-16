@@ -20,7 +20,7 @@ void sdram_init()
 	writereg32(REFRESHCTL,REFEN|Tsrc_5|1269);
 
 	/* Configure Banksize setting */
-	writereg32(BANKSIZE,BURST_EN|SCKE_EN|SCLK_EN|BK76MAP_32MB);
+	writereg32(BANKSIZE,BURST_EN|SCKE_EN|SCLK_EN|BK76MAP_64MB);
 
 	/* Configure mode set register for BANK6 */
 	writereg32(MRSRB6,CAS_LATENCY_2CLK);
