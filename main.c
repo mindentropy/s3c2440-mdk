@@ -42,6 +42,18 @@ unsigned int test_val = 0;
 //RAM addr space 0x30000000 - 0x34000000
 unsigned char *ram_ptr = 0x33000000;
 
+static int read_size()
+{
+	unsigned int size = 0;
+
+	size = getc_ch0();
+	size |= getc_ch0()<<8;
+	size |= getc_ch0()<<16;
+	size |= getc_ch0()<<24;
+
+	return size;
+}
+
 int main(void) {
 	/* Note : Do not put any operations above this */
 	/* Disable watchdog.*/
@@ -74,19 +86,25 @@ int main(void) {
 
 	sdram_init();
 
-	readreg32(BANKCON6,test_val);
-	print_hex(test_val);
+	puts("Load data to RAM\r\n");
+	/*readreg32(BANKCON6,test_val);
+	print_hex(test_val);*/
 /* Without delay the led blink rate is 2MHz. */
 
 	
 	/*for(;ram_ptr < ((unsigned)(PHYS_START+0x100));ram_ptr++)
 		*ram_ptr = test_val++;*/
 
+	//print_hex(read_size());
 
 	while(1) {
 		led_on(LED4);
+	
+		print_hex(getc_ch0());
+	
+		led_off(LED4);
 
-		*ram_ptr = test_val;
+/*		*ram_ptr = test_val;
 		//print_hex(*ram_ptr);
 
 		if((test_val & 0xFF) != *ram_ptr) {
@@ -106,6 +124,6 @@ int main(void) {
 			test_delay();
 			set_spkr_lo();
 		}
-		//test_delay();
+		//test_delay();*/
 	}
 }
