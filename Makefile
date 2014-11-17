@@ -1,7 +1,7 @@
 ASFLAGS = -mcpu=arm9tdmi  -gstabs
 CFLAGS = -mcpu=arm9tdmi -Wall -g -nostdlib -nodefaultlibs -O0 -ffreestanding -I.
-LDFLAGS = -Tled_test.lds -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
-OBJS = led_test.o clock_pm.o uart.o main.o common.o wdt.o gpio_def.o led.o spkr.o interrupt.o sdram.o nand.o
+LDFLAGS = -Tloader.lds -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
+OBJS = glue.o clock_pm.o uart.o main.o common.o wdt.o gpio_def.o led.o spkr.o interrupt.o sdram.o nand.o
 EXELOADER = mdk_loader.elf
 
 $(EXELOADER): $(OBJS)
