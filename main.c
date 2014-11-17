@@ -37,10 +37,10 @@ void test_delay() {
 }
 
 
-unsigned int test_val = 0;
+//unsigned int test_val = 0;
 
 //RAM addr space 0x30000000 - 0x34000000
-unsigned char *ram_ptr = 0x33000000;
+//unsigned char *ram_ptr = 0x33000000;
 
 static int read_size()
 {
@@ -53,6 +53,9 @@ static int read_size()
 
 	return size;
 }
+
+char load_ch = 0;
+unsigned int i = 0,load_size = 0;
 
 int main(void) {
 	/* Note : Do not put any operations above this */
@@ -69,7 +72,7 @@ int main(void) {
 
 	apb_clk_enable_gpio();
 
-	init_spkr();
+	//init_spkr();
 
 	init_led();
 	//led_on(LED4|LED3|LED2|LED1);
@@ -86,7 +89,7 @@ int main(void) {
 
 	sdram_init();
 
-	puts("Load data to RAM\r\n");
+	//puts("Load data to RAM\r\n");
 	/*readreg32(BANKCON6,test_val);
 	print_hex(test_val);*/
 /* Without delay the led blink rate is 2MHz. */
@@ -97,12 +100,18 @@ int main(void) {
 
 	//print_hex(read_size());
 
-	while(1) {
-		led_on(LED4);
-	
-		print_hex(getc_ch0());
-	
+	print_hex(load_size = read_size());
+
+
+	for(i = 0; i<load_size; i++)
+	{
+		load_ch = getc_ch0();
 		led_off(LED4);
+		putc_ch0(load_ch);
+		led_on(LED4);
+	}
+
+	while(1) {
 
 /*		*ram_ptr = test_val;
 		//print_hex(*ram_ptr);
