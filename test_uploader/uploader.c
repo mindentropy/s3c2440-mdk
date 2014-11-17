@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 			break;
 		} else {
 
-			if(serial_index & 0x1F) 
+			if((serial_index & 0x1F) == 0) 
 				printf("\n");
 
 			printf("%02x ",(unsigned char)ch);

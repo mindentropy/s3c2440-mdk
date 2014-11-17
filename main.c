@@ -10,14 +10,13 @@
 #define PHYS_START   0x30000000U
 #define MAX_RAM_SIZE 0x4000000U
 
-/*
 #undef 	TEST_BINARY
 #define LOADER
-*/
 
+/*
 #define TEST_BINARY
 #undef LOADER
-
+*/
 
 /*
  *  LED Orientation
