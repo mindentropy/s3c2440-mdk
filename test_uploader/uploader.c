@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 	struct termios attrib;
 	char ch,val_ch;
 	int serial_fd = 0,binary_fd,retval;
-	unsigned int size = 0;
+	unsigned int size = 0,serial_index = 0;
 
 	struct stat stat_buff;
 
@@ -101,11 +101,27 @@ int main(int argc, char **argv)
 			printf("Match failed\n");
 			break;
 		} else {
+
+			if(serial_index & 0x1F) 
+				printf("\n");
+
 			printf("%02x ",(unsigned char)ch);
+			serial_index++;
 		}
 	}
 	
 	printf("\n");
+
+	while(ch != '\n') {
+		if(read(serial_fd,&ch,1) < 0) {
+			perror("read");
+			return -1;
+		}
+		printf("%c",ch);
+	}
+	
 	close(binary_fd);
 	close(serial_fd);
+
+	return 0;
 }
