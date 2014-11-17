@@ -41,6 +41,16 @@ unsigned int isTxBuffEmpty(unsigned int channel)
 	return ((val & Tx_BUFF_EMPTY) == (Tx_BUFF_EMPTY));
 }
 
+
+unsigned int isTxEmpty(unsigned int channel)
+{
+	unsigned int val = 0;
+
+	readreg32(channel,val);
+	return ((val & Tx_EMPTY) == (Tx_EMPTY));
+}
+
+
 unsigned int isRxBuffFull(unsigned int channel)
 {
 	unsigned int val = 0;
@@ -53,7 +63,7 @@ void putc_ch0(char ch)
 {
 	uart_writel_ch0(ch);
 
-	while(!isTxBuffEmpty(UTRSTAT0))
+	while(!isTxEmpty(UTRSTAT0))
 		;
 }
 

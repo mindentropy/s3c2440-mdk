@@ -7,8 +7,18 @@
 #include "interrupt.h"
 #include "sdram.h"
 
-#define PHYS_START   0x30000000
-#define MAX_RAM_SIZE 0x4000000
+#define PHYS_START   0x30000000U
+#define MAX_RAM_SIZE 0x4000000U
+
+/*
+#undef 	TEST_BINARY
+#define LOADER
+*/
+
+#define TEST_BINARY
+#undef LOADER
+
+
 /*
  *  LED Orientation
  *
@@ -40,8 +50,9 @@ void test_delay() {
 //unsigned int test_val = 0;
 
 //RAM addr space 0x30000000 - 0x34000000
-//unsigned char *ram_ptr = 0x33000000;
+volatile unsigned char *ram_ptr = PHYS_START;
 
+#ifdef LOADER
 static int read_size()
 {
 	unsigned int size = 0;
@@ -53,13 +64,16 @@ static int read_size()
 
 	return size;
 }
+#endif
 
 char load_ch = 0;
 unsigned int i = 0,load_size = 0;
 
+
 int main(void) {
 	/* Note : Do not put any operations above this */
 	/* Disable watchdog.*/
+
 	disable_watchdog(); 
 
 	disable_all_interrupts();
@@ -67,72 +81,64 @@ int main(void) {
 
 	set_clk_dbg_port();
 	init_clock();
-
 	init_uart0();
 
+#ifdef LOADER
+	puts("Loader\r\n");
+#endif
+
+#ifdef TEST_BINARY
+	puts("TB\r\n");
+#endif
+
 	apb_clk_enable_gpio();
-
 	//init_spkr();
-
 	init_led();
 	//led_on(LED4|LED3|LED2|LED1);
-
-	//set_spkr_hi();
-	//test_delay();
-	//set_spkr_lo();
 	led_off(LED4|LED3|LED2|LED1);
 
-	
-	/*puts("\r\nEnter your choice:\r\n");
-	puts("1 - Jump to RAM\r\n");
-	puts("2 - Load from flash to RAM\r\n");*/
-
+#ifdef LOADER
 	sdram_init();
+#endif
 
-	//puts("Load data to RAM\r\n");
 	/*readreg32(BANKCON6,test_val);
 	print_hex(test_val);*/
 /* Without delay the led blink rate is 2MHz. */
 
-	
-	/*for(;ram_ptr < ((unsigned)(PHYS_START+0x100));ram_ptr++)
-		*ram_ptr = test_val++;*/
-
 	//print_hex(read_size());
 
+
+#ifdef LOADER
 	print_hex(load_size = read_size());
 
 
 	for(i = 0; i<load_size; i++)
 	{
 		load_ch = getc_ch0();
-		led_off(LED4);
-		putc_ch0(load_ch);
+		ram_ptr[i] = load_ch;
 		led_on(LED4);
-	}
-
-	while(1) {
-
-/*		*ram_ptr = test_val;
-		//print_hex(*ram_ptr);
-
-		if((test_val & 0xFF) != *ram_ptr) {
-			set_spkr_hi();
-
-			while(1)
-				;
-		}
-
-		test_val++;
-		ram_ptr++;
+		putc_ch0(ram_ptr[i]);
 		led_off(LED4);
-
-		if(ram_ptr >= (PHYS_START + MAX_RAM_SIZE -1)) {
-			set_spkr_hi();
-			ram_ptr = 0x30000000;
-			test_delay();
-			set_spkr_lo();
-		}
-		//test_delay();*/
 	}
+
+
+	__asm__(
+		"mov pc,#0x30000000\n\t"
+	);
+
+	__asm__(
+		"b .\n\t"
+	);
+
+#endif
+
+#ifdef TEST_BINARY
+	while(1) {
+		led_on(LED4);
+		test_delay();
+		led_off(LED4);
+		test_delay();
+		puts("TB\r\n");
+	}
+#endif
 }

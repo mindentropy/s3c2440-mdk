@@ -120,6 +120,7 @@ unsigned int isTxBuffEmpty(unsigned int channel);
 //Bit will be set if buffer is full.
 unsigned int isRxBuffFull(unsigned int channel);
 
+unsigned int isTxEmpty(unsigned int channel);
 /*#define is_tx_buff_empty_uart0() \
 	isTxBuffEmpty(UTRSTAT0)
 
