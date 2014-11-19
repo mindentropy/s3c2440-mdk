@@ -10,14 +10,6 @@
 #define PHYS_START   0x30000000U
 #define MAX_RAM_SIZE 0x4000000U
 
-#undef 	TEST_BINARY
-#define LOADER
-
-/*
-#define TEST_BINARY
-#undef LOADER
-*/
-
 /*
  *  LED Orientation
  *
@@ -51,7 +43,6 @@ void test_delay() {
 //RAM addr space 0x30000000 - 0x34000000
 volatile unsigned char *ram_ptr = PHYS_START;
 
-#ifdef LOADER
 static int read_size()
 {
 	unsigned int size = 0;
@@ -63,7 +54,6 @@ static int read_size()
 
 	return size;
 }
-#endif
 
 char load_ch = 0;
 unsigned int i = 0,load_size = 0;
@@ -82,13 +72,8 @@ int main(void) {
 	init_clock();
 	init_uart0();
 
-#ifdef LOADER
 	puts("Loader\r\n");
-#endif
 
-#ifdef TEST_BINARY
-	puts("TB\r\n");
-#endif
 
 	apb_clk_enable_gpio();
 	//init_spkr();
@@ -96,9 +81,7 @@ int main(void) {
 	//led_on(LED4|LED3|LED2|LED1);
 	led_off(LED4|LED3|LED2|LED1);
 
-#ifdef LOADER
 	sdram_init();
-#endif
 
 	/*readreg32(BANKCON6,test_val);
 	print_hex(test_val);*/
@@ -107,7 +90,6 @@ int main(void) {
 	//print_hex(read_size());
 
 
-#ifdef LOADER
 	print_hex(load_size = read_size());
 
 
@@ -129,15 +111,4 @@ int main(void) {
 		"b .\n\t"
 	);
 
-#endif
-
-#ifdef TEST_BINARY
-	while(1) {
-		led_on(LED4);
-		test_delay();
-		led_off(LED4);
-		test_delay();
-		puts("TB\r\n");
-	}
-#endif
 }

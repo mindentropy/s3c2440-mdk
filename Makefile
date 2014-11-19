@@ -1,23 +1,46 @@
 ASFLAGS = -mcpu=arm9tdmi  -gstabs
 CFLAGS = -mcpu=arm9tdmi -Wall -g -nostdlib -nodefaultlibs -O0 -ffreestanding -I.
-LDFLAGS = -Tloader.lds -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
-OBJS = glue.o clock_pm.o uart.o main.o common.o wdt.o gpio_def.o led.o spkr.o interrupt.o sdram.o nand.o
+LDFLAGS =  -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
+OS_OBJS = os_glue.o os_main.o
+LOADER_OBJS = loader_glue.o loader_main.o
+COMMON_OBJS = clock_pm.o sdram.o common.o interrupt.o uart.o wdt.o gpio_def.o led.o spkr.o nand.o
 EXELOADER = mdk_loader.elf
+EXEOS = mdk_os.elf
+LOADER_LDSCRIPT = -Tloader.lds
+OS_LDSCRIPT = -Tmdkos.lds
+TOOLCHAIN_PREFIX=arm-linux-gnueabi-
+CC = $(TOOLCHAIN_PREFIX)gcc
+AS = $(TOOLCHAIN_PREFIX)as
+LD = $(TOOLCHAIN_PREFIX)ld
+OBJCOPY = $(TOOLCHAIN_PREFIX)objcopy
 
-$(EXELOADER): $(OBJS)
-	arm-linux-gnueabi-gcc -Wall -o $(EXELOADER) $(OBJS) $(LDFLAGS)
-	arm-linux-gnueabi-objcopy -O binary $(EXELOADER) mdk_loader.bin
+mdkloader: $(EXELOADER)
+
+mdkos: $(EXEOS)
+
+
+$(EXELOADER):  $(LOADER_OBJS) $(COMMON_OBJS)
+	$(CC) -Wall -o $(EXELOADER) $(LOADER_OBJS) $(COMMON_OBJS) $(LOADER_LDSCRIPT) $(LDFLAGS) 
+	$(OBJCOPY) -O binary $(EXELOADER) mdk_loader.bin
 	ls -al mdk_loader.bin
 
+$(EXEOS):  $(OS_OBJS) $(COMMON_OBJS)
+	$(CC) -Wall -o $(EXEOS) $(OS_OBJS) $(COMMON_OBJS) $(OS_LDSCRIPT) $(LDFLAGS)
+	$(OBJCOPY) -O binary $(EXEOS) mdk_os.bin
+	ls -al mdk_os.bin
+
 %.o:%.s
-	arm-linux-gnueabi-as $(ASFLAGS) $< -o $@
+	$(AS) $(ASFLAGS) $< -o $@
 
 %.o:%.c
-	arm-linux-gnueabi-gcc -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
-	rm -f $(OBJS)
-	rm -f $(EXE)
+	rm -f $(COMMON_OBJS)
+	rm -f $(EXEOS)
+	rm -f $(EXELOADER)
+	rm -f $(OS_OBJS)
+	rm -f $(LOADER_OBJS)
 	rm -f *.bin
 	rm -f *.elf
 

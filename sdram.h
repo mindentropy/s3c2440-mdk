@@ -201,4 +201,7 @@
 
 void sdram_init();
 
+//TODO: Board dependent hence should be present in config.h
+
+
 #endif
