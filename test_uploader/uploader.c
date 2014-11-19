@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	read_str_response(serial_fd);
+	//read_str_response(serial_fd);
 
 	while(read(binary_fd,&ch,1)) {
 
@@ -122,7 +122,21 @@ int main(int argc, char **argv)
 	
 	printf("\n");
 
-	read_str_response(serial_fd);
+	printf("SRAM Dump\n");
+	serial_index = 0;
+	while(1) {
+//		read_str_response(serial_fd);
+		read(serial_fd,&val_ch,1);
+
+		if((serial_index & 0x1F) == 0)
+			printf("\n");
+
+		printf("%02x ",(unsigned char) val_ch);
+		
+		serial_index++;
+		fflush(stdout);
+	}
+	
 	
 	close(binary_fd);
 	close(serial_fd);

@@ -6,9 +6,7 @@
 #include "spkr.h"
 #include "interrupt.h"
 #include "sdram.h"
-
-#define PHYS_START   0x30000000U
-#define MAX_RAM_SIZE 0x4000000U
+#include "board_config.h"
 
 /*
  *  LED Orientation
@@ -58,7 +56,6 @@ static int read_size()
 char load_ch = 0;
 unsigned int i = 0,load_size = 0;
 
-
 int main(void) {
 	/* Note : Do not put any operations above this */
 	/* Disable watchdog.*/
@@ -74,12 +71,10 @@ int main(void) {
 
 	puts("Loader\r\n");
 
-
 	apb_clk_enable_gpio();
 	//init_spkr();
-	init_led();
-	//led_on(LED4|LED3|LED2|LED1);
-	led_off(LED4|LED3|LED2|LED1);
+//	init_led();
+//	led_off(LED4|LED3|LED2|LED1);
 
 	sdram_init();
 
@@ -88,10 +83,9 @@ int main(void) {
 /* Without delay the led blink rate is 2MHz. */
 
 	//print_hex(read_size());
+	//print_hex(load_size = read_size());
 
-
-	print_hex(load_size = read_size());
-
+	load_size = read_size();
 
 	for(i = 0; i<load_size; i++)
 	{
@@ -101,7 +95,6 @@ int main(void) {
 		putc_ch0(ram_ptr[i]);
 		led_off(LED4);
 	}
-
 
 	__asm__(
 		"mov pc,#0x30000000\n\t"

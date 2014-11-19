@@ -1,0 +1,11 @@
+#ifndef BOARD_CONFIG_H_
+
+#define BOARD_CONFIG_H_
+
+#define PHYS_START   0x30000000U
+#define MAX_RAM_SIZE 0x4000000U
+
+#define SRAM_PHYS_START 0x0U
+#define MAX_SRAM_SIZE 	0x1000U
+ 
+#endif

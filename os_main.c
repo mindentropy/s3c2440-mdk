@@ -6,10 +6,9 @@
 #include "spkr.h"
 #include "interrupt.h"
 #include "sdram.h"
+#include "board_config.h"
 
 
-#define PHYS_START   0x30000000U
-#define MAX_RAM_SIZE 0x4000000U
 /*
  *  LED Orientation
  *
@@ -38,18 +37,10 @@ void test_delay() {
 }
 
 
-//unsigned int test_val = 0;
-
-//RAM addr space 0x30000000 - 0x34000000
-volatile unsigned char *ram_ptr = PHYS_START;
-
-char load_ch = 0;
-unsigned int i = 0,load_size = 0;
-
-
 int main(void) {
 	/* Note : Do not put any operations above this */
 	/* Disable watchdog.*/
+	unsigned char *sram_loc;
 
 	disable_watchdog(); 
 
@@ -60,21 +51,28 @@ int main(void) {
 	init_clock();
 	init_uart0();
 
-	puts("TB\r\n");
+	//puts("TB\r\n");
 
 	apb_clk_enable_gpio();
-	//init_spkr();
+	init_spkr();
 	init_led();
-	//led_on(LED4|LED3|LED2|LED1);
 	led_off(LED4|LED3|LED2|LED1);
 
-
+	sram_loc = 0;
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 		led_on(LED4);
 		test_delay();
 		led_off(LED4);
 		test_delay();
-		puts("TB\r\n");
+
+//		puts("TB\r\n");
+
+		putc_ch0(*sram_loc);
+		sram_loc++;
+
+		if(sram_loc == 0x1000)
+			sram_loc = 0;
+
 	}
 }
