@@ -69,12 +69,7 @@ int main(void) {
 	led_off(LED4|LED3|LED2|LED1);
 
 
-	/*readreg32(BANKCON6,test_val);
-	print_hex(test_val);*/
 /* Without delay the led blink rate is 2MHz. */
-
-	//print_hex(read_size());
-
 	while(1) {
 		led_on(LED4);
 		test_delay();

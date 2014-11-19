@@ -13,6 +13,23 @@
 
 const char *serial_dev = "/dev/ttyUSB0";
 
+
+int read_str_response(int serial_fd)
+{
+	char ch;
+	unsigned int count = 0;
+	ch = 0;
+	while(ch != '\n') {
+		if(read(serial_fd,&ch,1) < 0) {
+			perror("read");
+			return -1;
+		}
+		count++;
+		printf("%c",ch);
+	}
+	return count;
+}
+
 int main(int argc, char **argv)
 {
 	struct termios attrib;
@@ -77,23 +94,16 @@ int main(int argc, char **argv)
 	
 
 	size = stat_buff.st_size;
-
 		
 	if(write(serial_fd,&size,sizeof(size)) < 0) {
 		perror("write");
 		return -1;
 	}
 
-	ch = 0;
-	while(ch != '\n') {
-		if(read(serial_fd,&ch,1) < 0) {
-			perror("read");
-			return -1;
-		}
-		printf("%c",ch);
-	}
+	read_str_response(serial_fd);
 
 	while(read(binary_fd,&ch,1)) {
+
 		write(serial_fd,&ch,1);
 		read(serial_fd,&val_ch,1);
 
@@ -112,13 +122,7 @@ int main(int argc, char **argv)
 	
 	printf("\n");
 
-	while(ch != '\n') {
-		if(read(serial_fd,&ch,1) < 0) {
-			perror("read");
-			return -1;
-		}
-		printf("%c",ch);
-	}
+	read_str_response(serial_fd);
 	
 	close(binary_fd);
 	close(serial_fd);

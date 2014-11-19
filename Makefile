@@ -1,6 +1,12 @@
 ASFLAGS = -mcpu=arm9tdmi  -gstabs
 CFLAGS = -mcpu=arm9tdmi -Wall -g -nostdlib -nodefaultlibs -O0 -ffreestanding -I.
 LDFLAGS =  -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
+
+# Please note that the linker processes the file in the order that is input. Hence 
+# *_glue files should be the first file as the code is hand crafted assembly with
+# interrupt vectors starting at the fixed address for e.g.: Reset vector starts 
+# at 0x00000000 etc. Therefore the file should be placed at the start.
+
 OS_OBJS = os_glue.o os_main.o
 LOADER_OBJS = loader_glue.o loader_main.o
 COMMON_OBJS = clock_pm.o sdram.o common.o interrupt.o uart.o wdt.o gpio_def.o led.o spkr.o nand.o
@@ -14,8 +20,9 @@ AS = $(TOOLCHAIN_PREFIX)as
 LD = $(TOOLCHAIN_PREFIX)ld
 OBJCOPY = $(TOOLCHAIN_PREFIX)objcopy
 
-mdkloader: $(EXELOADER)
+all: mdkloader mdkos
 
+mdkloader: $(EXELOADER)
 mdkos: $(EXEOS)
 
 

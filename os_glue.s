@@ -16,42 +16,12 @@
 
 .section .text
 .code 32
-.globl vectors
+.globl start_os
 
-vectors:
-	b reset 	/* Reset */
-	b .			/* Undefined instruction */
-	b .			/* Software Interrupt */
-	b .			/* Abort prefetch */
-	b .			/* Abort data */
-	b .			/* Reserved */
-	b .			/* IRQ */
-	b .			/* FIQ */
-
-
-/*
-	nLED_1 -> GPB5
-	nLED_2 -> GPB6
-	nLED_3 -> GPB7
-	nLED_4 -> GPB8
-*/
-
-reset:
+start_os:
 	ldr r3,WTCON
 	ldr r6,=0x00
 	str r6,[r3]
-
-/*	ldr r3,GPBCON
-	ldr	r4,GPBDAT
-	ldr r5,GPBUP
-
-	ldr r6,=0x15400
-	str r6,[r3]  @Set to output
-	ldr r6,=0x00
-	str r6,[r4]  @Set the led
-	ldr r6,=0x1E0
-	str r6,[r5]	 @Disable pullup */
-
 
 	/* Start by clearing bss section */
 	ldr r1, bss_start
@@ -68,17 +38,13 @@ clear_bss:
 
 	bl main
 
-	b vectors
+	b start_os
 
 
 stack_pointer: .word __stack_top__
 bss_start : .word __bss_start__
 bss_end : .word __bss_end__
 
-
-/*GPBCON:	.word	0x56000010
-GPBDAT:	.word	0x56000014
-GPBUP:	.word	0x56000018*/
 WTCON: 	.word 	0x53000000
 
 	.end

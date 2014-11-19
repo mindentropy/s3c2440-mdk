@@ -1,4 +1,4 @@
-ENTRY(vectors)
+ENTRY(start_os)
 
 SEARCH_DIR(.)
 
@@ -35,40 +35,6 @@ SECTIONS
 		__stack_top__ = .;
 
 	} > sdram
-
-
-/*
-	.rel.plt :
-	{
-		*(.rel.plt)
-	} > sdram
-
-	.gnu.version :
-	{
-		*(.gnu.version)
-	} > sdram
-
-	.gnu.version_r :
-	{
-		*(.gnu.version_r)
-	} > sdram
-
-	.gnu.hash :
-	{
-		*(.gnu.hash)
-	} > sdram
-
-	.dynsym :
-	{
-		*(.dynsym)
-	} > sdram 
-
-	.dynstr :
-	{
-		*(.dynstr)
-	} > sdram
-
-	*/
 
 	.stab 0 (NOLOAD) : 
 	{
