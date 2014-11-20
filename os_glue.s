@@ -1,22 +1,45 @@
 /*
- * Problems related to linker script addresses.
- * --------------------------------------------
+ * Approaches to overwrite the exception vector table of the bootloader.
+ * --------------------------------------------------------------------
+ * 1) Enable MMU and use virtual addresses.
+ * 2) Overwrite the exception vector table by copying the vectors from the OS section
+ *    to the sram section.
  *
- * If the address of the code is setup such that the .text
- * section is put in sdram say 0x32000000. Next if the program
- * is loaded to the address 0x30000000 then we expect that the
- * program should not work properly because the address generated
- * in the code is different. This is not the case as the branch
- * instruction is pc(program counter) relative. Hence the b reset
- * would be b <pc+offset>. The branch instructions create position
- * independent code which makes the above scenario work. Of course
- * if the code becomes somehow position dependent then the above 
- * condition would fail.
+ * Steps involved for approach (2)
+ * 1) Create a section in assembly and the ld script variables which identifies 
+ * 	  the start_vector_section and end_vector section.
+ * 2) Export the variables in C and use it to copy the section contents to the 
+ *    SRAM.
+ * 3) Test by running an exception and blinking an LED.
+ *
+ * References: 
+ * 1) https://balau82.wordpress.com/2012/04/15/arm926-interrupts-in-qemu/
+ * 2) ARM Baremetal programming: http://www.state-machine.com/arm/Building_bare-metal_ARM_with_GNU.pdf
+ *    and http://www.state-machine.com/resources/articles.php#ARM
  */
 
 .section .text
 .code 32
-.globl start_os
+.globl os_vector_jmp
+
+os_vector_jmp:
+	b start_os
+	b .
+	b os_software_intr
+	b .
+	b .
+	b .
+	b .
+	b .
+
+/*	b start_os
+	b os_undef_instr
+	b os_software_intr
+	b os_abrt_prefetch
+	b os_abrt_data
+	b os_reserved
+	b os_irq
+	b os_fiq*/
 
 start_os:
 	ldr r3,WTCON

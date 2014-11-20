@@ -36,6 +36,13 @@ void test_delay() {
 	}
 }
 
+void os_software_intr()
+{
+	while(1)
+	{
+		;
+	}
+}
 
 int main(void) {
 	/* Note : Do not put any operations above this */

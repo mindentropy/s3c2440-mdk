@@ -1,4 +1,4 @@
-ENTRY(start_os)
+ENTRY(os_vector_jmp)
 
 SEARCH_DIR(.)
 
@@ -36,6 +36,14 @@ SECTIONS
 
 	} > sdram
 
+	/*.exception_vectors_reloc :
+	{
+		__exception_vector_reloc_start = .;
+		*(.exception_vectors_reloc)
+		.=ALIGN(4);
+		__exception_vector_reloc_end = .;
+	} > sdram*/
+	
 	.stab 0 (NOLOAD) : 
 	{
 		[ .stab ]
