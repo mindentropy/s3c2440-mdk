@@ -4,16 +4,14 @@
 .globl exception_vectors
 
 exception_vectors:
-
-/*	ldr pc,[pc,#0x30000000] //Reset vector
-	ldr pc,[pc,#0x30000000] //Undefined instruction
-	ldr pc,[pc,#0x30000000] //Software Interrupt
-	ldr pc,[pc,#0x30000000] //Abort prefetch
-	ldr pc,[pc,#0x30000000] //Abort data
-	ldr pc,[pc,#0x30000000] //Reserved
-	ldr pc,[pc,#0x30000000] //IRQ
-	ldr pc,[pc,#0x30000000] //FIQ
-
-*/
+	ldr pc,=#0x30000000 //Reset vector
+	ldr pc,=#0x30000004 //Reset vector
+	ldr pc,=#0x30000008 //Undefined instruction
+	ldr pc,=#0x3000000C //Software Interrupt
+	ldr pc,=#0x30000010 //Abort prefetch
+	ldr pc,=#0x30000014 //Abort data
+	ldr pc,=#0x30000018 //Reserved
+	ldr pc,=#0x3000001C //IRQ
+	ldr pc,=#0x30000020 //FIQ
 .end
 	

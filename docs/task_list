@@ -7,6 +7,12 @@ Generic board bring up
 2) Creation of linker scripts to handle the binary -> Partially done. Optimization -> Pending.
 
 
+Memory Management Unit
+----------------------
+*Setup MMU to handle the interrupt vector table movement.
+
+1) Setup MMU page directory.
+
 GPIO
 ----
 1) Add GPIO definitions  -> Done

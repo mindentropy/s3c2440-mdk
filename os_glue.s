@@ -20,8 +20,9 @@
 
 .section .text
 .code 32
-.globl os_vector_jmp
+.globl start_os
 
+/*
 os_vector_jmp:
 	b start_os
 	b .
@@ -31,6 +32,7 @@ os_vector_jmp:
 	b .
 	b .
 	b .
+*/
 
 /*	b start_os
 	b os_undef_instr
@@ -39,7 +41,8 @@ os_vector_jmp:
 	b os_abrt_data
 	b os_reserved
 	b os_irq
-	b os_fiq*/
+	b os_fiq
+*/
 
 start_os:
 	ldr r3,WTCON

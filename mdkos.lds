@@ -1,4 +1,4 @@
-ENTRY(os_vector_jmp)
+ENTRY(start_os)
 
 SEARCH_DIR(.)
 
@@ -36,14 +36,23 @@ SECTIONS
 
 	} > sdram
 
-	/*.exception_vectors_reloc :
+	.exception_vectors_reloc :
 	{
-		__exception_vector_reloc_start = .;
+		__exception_vector_reloc_start__ = .;
 		*(.exception_vectors_reloc)
-		.=ALIGN(4);
-		__exception_vector_reloc_end = .;
-	} > sdram*/
-	
+		. = ALIGN(4);
+		__exception_vector_reloc_end__ = .;
+	} > sram AT>sdram
+
+	/* 
+	 * >vma region AT > lma region 
+	 */
+
+	/* 
+	 * eg: .data section is linked with LMA in ROM and
+	 * the VMA pointing to the real RAM versions
+	 */
+
 	.stab 0 (NOLOAD) : 
 	{
 		[ .stab ]
