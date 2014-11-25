@@ -16,9 +16,9 @@ const char *serial_dev = "/dev/ttyUSB0";
 
 int read_str_response(int serial_fd)
 {
-	char ch;
+	char ch = 0;
 	unsigned int count = 0;
-	ch = 0;
+
 	while(ch != '\n') {
 		if(read(serial_fd,&ch,1) < 0) {
 			perror("read");
@@ -122,18 +122,17 @@ int main(int argc, char **argv)
 	
 	printf("\n");
 
-	printf("SRAM Dump\n");
 	serial_index = 0;
 	while(1) {
-//		read_str_response(serial_fd);
-		read(serial_fd,&val_ch,1);
+		read_str_response(serial_fd);
+	/*	read(serial_fd,&val_ch,1);
 
 		if((serial_index & 0x1F) == 0)
 			printf("\n");
 
 		printf("%02x ",(unsigned char) val_ch);
 		
-		serial_index++;
+		serial_index++;*/
 		fflush(stdout);
 	}
 	

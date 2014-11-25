@@ -100,10 +100,24 @@ void init_clock()
 				HDIVN_FCLK_BY_4,
 				PDIVN_HCLK_BY_2);
 
+	/* 
+	 * Set CPU to asynchronous mode.
+	 * See Pg 2-11 of ARM920T Reference and Chapter 5.
+	 * 
+	 */
+	__asm__ __volatile__(
+		"mrc p15,0,r1,c1,c0,0\n\t"
+		"orr r1,r1,#0xC0000000\n\t"
+		"mcr p15,0,r1,c1,c0,0\n\t"
+		: /* No output */
+		: /* No input */
+		: "r1" /* r1 clobbered */
+		);
+
 	/* Set upll first, use 7 "nops" delay and then set mpll */
-	set_upll(56,2,2); //48 Mhz.
+	set_upll(0x38,0x2,0x2); //48 Mhz.
     
-	__asm__(
+	__asm__ __volatile__(
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
@@ -117,9 +131,9 @@ void init_clock()
 		);
 
 	
-	set_mpll(127,2,1); //405 Mhz
+	set_mpll(0x7f,0x2,0x1); //405 Mhz
 
-	__asm__(
+	__asm__ __volatile__(
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
 			"mov r0,r0\n\t"
@@ -133,5 +147,6 @@ void init_clock()
 		);
 
 	clear_slow_clk();
+
 
 }

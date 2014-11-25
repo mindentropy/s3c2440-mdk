@@ -7,6 +7,7 @@
 #include "interrupt.h"
 #include "sdram.h"
 #include "board_config.h"
+#include "cpu.h"
 
 
 /*
@@ -47,7 +48,8 @@ void os_software_intr()
 int main(void) {
 	/* Note : Do not put any operations above this */
 	/* Disable watchdog.*/
-	unsigned char *sram_loc;
+//	unsigned char *sram_loc;
+	unsigned int reg_dbg_val = 0;
 
 	disable_watchdog(); 
 
@@ -65,7 +67,38 @@ int main(void) {
 	init_led();
 	led_off(LED4|LED3|LED2|LED1);
 
-	sram_loc = 0;
+	//sram_loc = 0;
+
+	puts("************************\r\n");
+	puts("reg_locktime: ");
+	readreg32(REG_LOCKTIME,reg_dbg_val);
+	print_hex(reg_dbg_val);
+	puts("\r\n");
+	puts("mpllcon : ");
+	readreg32(MPLLCON,reg_dbg_val);
+	print_hex(reg_dbg_val);
+	puts("\r\n");
+	puts("upllcon : ");
+	readreg32(UPLLCON,reg_dbg_val);
+	print_hex(reg_dbg_val);
+	puts("\r\n");
+	puts("clkdivn: ");
+	readreg32(CLKDIVN,reg_dbg_val);
+	print_hex(reg_dbg_val);
+	puts("\r\n");
+	puts("clkslow: ");
+	readreg32(CLKSLOW,reg_dbg_val);
+	print_hex(reg_dbg_val);
+	puts("\r\n");
+	puts("clkcon: ");
+	readreg32(CLKCON,reg_dbg_val);
+	print_hex(reg_dbg_val);
+	puts("\r\n");
+
+	print_hex(get_cpu_id());
+
+	puts("************************\r\n");
+
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 		led_on(LED4);
@@ -75,11 +108,11 @@ int main(void) {
 
 //		puts("TB\r\n");
 
-		putc_ch0(*sram_loc);
+	/*	putc_ch0(*sram_loc);
 		sram_loc++;
 
 		if(sram_loc == 0x1000)
-			sram_loc = 0;
+			sram_loc = 0;*/
 
 	}
 }
