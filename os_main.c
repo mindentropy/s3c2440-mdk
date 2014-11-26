@@ -8,6 +8,7 @@
 #include "sdram.h"
 #include "board_config.h"
 #include "cpu.h"
+#include "cache.h"
 
 
 /*
@@ -37,37 +38,10 @@ void test_delay() {
 	}
 }
 
-void os_software_intr()
+
+void dump_clk()
 {
-	while(1)
-	{
-		;
-	}
-}
-
-int main(void) {
-	/* Note : Do not put any operations above this */
-	/* Disable watchdog.*/
-//	unsigned char *sram_loc;
 	unsigned int reg_dbg_val = 0;
-
-	disable_watchdog(); 
-
-	disable_all_interrupts();
-	disable_all_interrupt_subservice();
-
-	set_clk_dbg_port();
-	init_clock();
-	init_uart0();
-
-	//puts("TB\r\n");
-
-	apb_clk_enable_gpio();
-	init_spkr();
-	init_led();
-	led_off(LED4|LED3|LED2|LED1);
-
-	//sram_loc = 0;
 
 	puts("************************\r\n");
 	puts("reg_locktime: ");
@@ -95,9 +69,77 @@ int main(void) {
 	print_hex(reg_dbg_val);
 	puts("\r\n");
 
-	print_hex(get_cpu_id());
-
 	puts("************************\r\n");
+}
+
+void dump_cpu_info()
+{
+	print_hex(get_cpu_id());
+}
+
+void dump_cache_info()
+{
+	print_hex(get_cache_info());
+
+	puts("cache type:");
+	print_hex(get_cache_type(get_cache_info()));
+	puts("\r\n");
+
+	puts("sbit:");
+	print_hex(get_sbit(get_cache_info()));
+	puts("\r\n");
+	
+	puts("dsize info:");
+	print_hex(get_dsize_info(get_cache_info()));
+	puts("\r\n");
+
+	puts("isize info:");
+	print_hex(get_isize_info(get_cache_info()));
+	puts("\r\n");
+
+	puts("size:");
+	print_hex(get_size(get_dsize_info(get_cache_info())));
+	puts("\r\n");
+
+	puts("assoc:");
+	print_hex(get_assoc(get_dsize_info(get_cache_info())));
+	puts("\r\n");
+
+	puts("mbit:");
+	print_hex(get_mbit(get_dsize_info(get_cache_info())));
+	puts("\r\n");
+	
+	puts("line len:");
+	print_hex(get_line_len(get_dsize_info(get_cache_info())));
+	puts("\r\n");
+}
+
+int main(void) {
+	/* Note : Do not put any operations above this */
+	/* Disable watchdog.*/
+//	unsigned char *sram_loc;
+
+	disable_watchdog(); 
+
+	disable_all_interrupts();
+	disable_all_interrupt_subservice();
+
+	set_clk_dbg_port();
+	init_clock();
+	init_uart0();
+
+	//puts("TB\r\n");
+
+	apb_clk_enable_gpio();
+	init_spkr();
+	init_led();
+	led_off(LED4|LED3|LED2|LED1);
+
+	//sram_loc = 0;
+	
+	dump_clk();
+	dump_cpu_info();
+	dump_cache_info();
 
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
