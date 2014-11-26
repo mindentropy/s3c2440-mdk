@@ -7,7 +7,7 @@ LDFLAGS =  -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
 # interrupt vectors starting at the fixed address for e.g.: Reset vector starts 
 # at 0x00000000 etc. Therefore the file should be placed at the start.
 
-OS_OBJS = os_glue.o os_main.o os_vector.o cpu.o cache.o
+OS_OBJS = os_glue.o os_main.o os_vector.o cpu.o cache.o mmu.o
 LOADER_OBJS = loader_glue.o loader_main.o
 COMMON_OBJS = clock_pm.o sdram.o common.o interrupt.o uart.o wdt.o gpio_def.o led.o spkr.o nand.o
 EXELOADER = mdk_loader.elf

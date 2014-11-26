@@ -2,7 +2,6 @@
 #include "gpio_def.h"
 #include "common.h"
 
-
 unsigned int get_cpu_id()
 {
 	unsigned cpuid = 0;

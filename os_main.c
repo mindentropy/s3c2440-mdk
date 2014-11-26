@@ -140,7 +140,7 @@ int main(void) {
 	dump_clk();
 	dump_cpu_info();
 	dump_cache_info();
-
+	mmu_init();
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 		led_on(LED4);

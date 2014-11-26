@@ -39,7 +39,7 @@ void test_delay() {
 //unsigned int test_val = 0;
 
 //RAM addr space 0x30000000 - 0x34000000
-volatile unsigned char *ram_ptr = PHYS_START;
+volatile unsigned char *ram_ptr = (unsigned int *)PHYS_START;
 
 static int read_size()
 {
@@ -56,7 +56,7 @@ static int read_size()
 char load_ch = 0;
 unsigned int i = 0,load_size = 0;
 
-int main(void) {
+void main(void) {
 	/* Note : Do not put any operations above this */
 	/* Disable watchdog.*/
 
