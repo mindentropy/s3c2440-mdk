@@ -8,15 +8,15 @@ static unsigned int *ttb; //Translation table base address.
 static void setup_section_table(unsigned int flags)
 {
 	unsigned int i = 0;
-	unsigned int base = PHYS_START ;
+	unsigned int base = 0; //Map RAM and i/o address range.
+
 	base >>= 20;
 
-	puts("Section table dump \r\n");
-	for(i = 0;i<64;i++) { //64MB RAM
+//	puts("Section table dump \r\n");
+	for(i = 0;i<4096;i++) { //Complete 4096 entries.
 		ttb[i] = ((base + i)<<20) | flags;
-
-		print_hex(ttb[i]);
-		puts("\r\n");
+/*		print_hex(ttb[i]);
+		puts("\r\n");*/
 	}
 }
 
@@ -38,6 +38,10 @@ void turn_mmu_on()
 		: "r0" /* r0 gets clobbered */
 	);
 
+/*	while(1) {
+		blink_leds(LED2|LED3);
+	}
+*/
 
 }
 

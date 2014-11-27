@@ -39,7 +39,7 @@ void test_delay() {
 //unsigned int test_val = 0;
 
 //RAM addr space 0x30000000 - 0x34000000
-volatile unsigned char *ram_ptr = (unsigned int *)PHYS_START;
+volatile unsigned char *ram_ptr = (unsigned char *)PHYS_START;
 
 static int read_size()
 {
@@ -96,11 +96,11 @@ void main(void) {
 		led_off(LED4);
 	}
 
-	__asm__(
+	__asm__ __volatile__(
 		"mov pc,#0x30000000\n\t"
 	);
 
-	__asm__(
+	__asm__ __volatile__(
 		"b .\n\t"
 	);
 
