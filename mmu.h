@@ -6,7 +6,7 @@
 #include "gpio_def.h"
 
 /* The translation table base address should be @16kB boundary */
-#define TRANSLATION_TABLE_BASE_ADDR (0x32000000U)
+#define TRANSLATION_TABLE_BASE_ADDR (0x33000000U)
 
 #define L1_TABLE_MAX_ENTRIES 		(4096U)
 
@@ -23,13 +23,25 @@ void mmu_init();
 #define L1_PG_BASE_ADDR_MASK 	(0xFFF00000)
 #define L1_PG_SBZ_MASK 	  		(0xFF000)
 #define L1_PG_AP_MASK 		  	(0xC00)
-#define L1_PG_DOMAIN_MASK    	(0x1E0)
+#define L1_PG_DOMAIN_MASK    	(BIT8|BIT7|BIT6|BIT5)
+#define L1_PG_BIT4 				(BIT4)
 #define L1_PG_C_MASK         	(BIT3)
 #define L1_PG_B_MASK         	(BIT2)
 #define L1_PG_TYPE 				(0x2)
 
 #define L1_PG_CACHEABLE         (BIT3)
+/* 
+ * There is a small write buffer FIFO between the cache
+ * and RAM. This is present to manage the speed difference
+ * between cache and RAM. As RAM is slower the write buffer
+ * is used to ease the burst pressure from the cache.
+ *
+ * For more info see Chapter 12 Pg 416 of ARM System Developers
+ * guide.
+ */
 #define L1_PG_BUFFERABLE        (BIT2)
+
+
 
 #define L1_AP_RW_RW 	(BIT11|BIT10)
 #define L1_AP_RW_RO 	(BIT11)

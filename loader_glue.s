@@ -19,14 +19,14 @@
 .globl vectors
 
 vectors:
-	b reset 	/* Reset */
-	b .			/* Undefined instruction */
-	b .			/* Software Interrupt */
-	b .			/* Abort prefetch */
-	b .			/* Abort data */
-	b .			/* Reserved */
-	b .			/* IRQ */
-	b .			/* FIQ */
+	b reset 		/* Reset */
+	b fault_state 	/* Undefined instruction */
+	b fault_state	/* Software Interrupt */
+	b fault_state 	/* Abort prefetch */
+	b fault_state 	/* Abort data */
+	b .				/* Reserved */
+	b fault_state	/* IRQ */
+	b fault_state	/* FIQ */
 
 
 /*
@@ -36,8 +36,8 @@ vectors:
 	nLED_4 -> GPB8
 */
 
-reset:
-/*	ldr r3,GPBCON
+fault_state:
+	ldr r3,GPBCON
 	ldr	r4,GPBDAT
 	ldr r5,GPBUP
 
@@ -46,9 +46,11 @@ reset:
 	ldr r6,=0x00
 	str r6,[r4]  @Set the led
 	ldr r6,=0x1E0
-	str r6,[r5]	 @Disable pullup */
+	str r6,[r5]	 @Disable pullup 
 
+	b .
 
+reset:
 	/* Start by clearing bss section */
 	ldr r1, bss_start
 	ldr r2, bss_end
@@ -71,10 +73,10 @@ stack_pointer: .word __stack_top__
 bss_start : .word __bss_start__
 bss_end : .word __bss_end__
 
-/*
+
 GPBCON:	.word	0x56000010
 GPBDAT:	.word	0x56000014
 GPBUP:	.word	0x56000018
-*/
+
 
 	.end

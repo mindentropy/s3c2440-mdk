@@ -4,7 +4,7 @@
 
 unsigned int get_cpu_id()
 {
-	unsigned cpuid = 0;
+	unsigned int cpuid = 0;
 
 	__asm__ __volatile__(
 		"mrc p15,0,%[cpuid],c0,c0,0\n\t"

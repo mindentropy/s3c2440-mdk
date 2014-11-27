@@ -9,7 +9,7 @@
 #include "board_config.h"
 #include "cpu.h"
 #include "cache.h"
-
+#include "mmu.h"
 
 /*
  *  LED Orientation
@@ -114,6 +114,13 @@ void dump_cache_info()
 	puts("\r\n");
 }
 
+void blink_leds(unsigned int leds) {
+	led_on(leds);
+	test_delay();
+	led_off(leds);
+	test_delay();
+}
+
 int main(void) {
 	/* Note : Do not put any operations above this */
 	/* Disable watchdog.*/
@@ -143,11 +150,7 @@ int main(void) {
 	mmu_init();
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
-		led_on(LED4);
-		test_delay();
-		led_off(LED4);
-		test_delay();
-
+		blink_leds(LED1|LED4);
 //		puts("TB\r\n");
 
 	/*	putc_ch0(*sram_loc);
