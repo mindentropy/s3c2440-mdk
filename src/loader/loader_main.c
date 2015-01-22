@@ -69,7 +69,7 @@ void main(void) {
 	init_clock();
 	init_uart0();
 
-	puts("loader\r\n");
+	puts("Loader\r\n");
 
 	apb_clk_enable_gpio();
 	//init_spkr();

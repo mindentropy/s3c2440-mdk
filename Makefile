@@ -6,16 +6,18 @@
 
 INC_DIRS = -Iinclude/
 
-COMMON_OBJ_DIR 	= obj/common
-OS_OBJ_DIR 		= obj/os
-LOADER_OBJ_DIR 	= obj/loader
+OBJ_DIR := obj
+SRC_DIR := src
+LIB_DIR := lib
+BIN_DIR := bin
 
-COMMON_SRC_DIR = src/common
-LOADER_SRC_DIR = src/loader
-OS_SRC_DIR = src/os
+COMMON_OBJ_DIR 	:= $(OBJ_DIR)/common
+OS_OBJ_DIR 		:= $(OBJ_DIR)/os
+LOADER_OBJ_DIR 	:= $(OBJ_DIR)/loader
 
-LIB_DIR = lib
-BIN_DIR = bin
+COMMON_SRC_DIR := $(SRC_DIR)/common
+LOADER_SRC_DIR := $(SRC_DIR)/loader
+OS_SRC_DIR := $(SRC_DIR)/os
 
 OS_OBJS = $(OS_OBJ_DIR)/os_glue.o $(OS_OBJ_DIR)/os_main.o $(OS_OBJ_DIR)/os_vector.o $(OS_OBJ_DIR)/cpu.o $(OS_OBJ_DIR)/cache.o $(OS_OBJ_DIR)/mmu.o
 LOADER_OBJS = $(LOADER_OBJ_DIR)/loader_glue.o $(LOADER_OBJ_DIR)/loader_main.o
@@ -56,8 +58,9 @@ LDFLAGS =  -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
 all: mdkloader mdkos
 #	@echo $(COMMON_OBJS)
 
-mdkloader: $(EXELOADER)
-mdkos: $(EXEOS)
+mdkloader: $(OBJ_DIR) $(COMMON_OBJ_DIR) $(LOADER_OBJ_DIR) $(BIN_DIR) $(EXELOADER)
+
+mdkos: $(OBJ_DIR) $(COMMON_OBJ_DIR) $(OS_OBJ_DIR) $(BIN_DIR) $(EXEOS) 
 
 
 $(EXELOADER):  $(LOADER_AS_OBJ_FILES) $(LOADER_OBJ_FILES) $(COMMON_OBJS)
@@ -65,12 +68,12 @@ $(EXELOADER):  $(LOADER_AS_OBJ_FILES) $(LOADER_OBJ_FILES) $(COMMON_OBJS)
 	$(OBJCOPY) -O binary $(EXELOADER) $(BIN_DIR)/mdk_loader.bin
 	ls -al $(BIN_DIR)/mdk_loader.bin
 
-$(EXEOS): $(OS_AS_OBJ_FILES) $(OS_OBJ_FILES) $(COMMON_OBJS)
+$(EXEOS): $(OS_AS_OBJ_FILES) $(OS_OBJ_FILES) $(COMMON_OBJS) 
 	$(CC) -Wall -o $(EXEOS) $(OS_OBJS) $(COMMON_OBJS) $(OS_LDSCRIPT) $(LDFLAGS)
 	$(OBJCOPY) -O binary $(EXEOS) $(BIN_DIR)/mdk_os.bin
 	ls -al $(BIN_DIR)/mdk_os.bin
 
-$(COMMON_OBJ_DIR)/%.o: $(COMMON_SRC_DIR)/%.c
+$(COMMON_OBJ_DIR)/%.o: $(COMMON_SRC_DIR)/%.c 
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(OS_OBJ_DIR)/%.o: $(OS_SRC_DIR)/%.s
@@ -85,8 +88,35 @@ $(LOADER_OBJ_DIR)/%.o: $(LOADER_SRC_DIR)/%.s
 $(LOADER_OBJ_DIR)/%.o: $(LOADER_SRC_DIR)/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+
+$(COMMON_OBJ_DIR):
+	mkdir -p $(COMMON_OBJ_DIR)
+	
+$(LOADER_OBJ_DIR):
+	mkdir -p $(LOADER_OBJ_DIR)
+
+$(OS_OBJ_DIR):
+	mkdir -p $(OS_OBJ_DIR)
+
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
+.PHONY: clean cleandir cleanall
+
+cleanall: clean cleandir
+
 clean:
 	rm -fv $(BIN_DIR)/*
 	rm -fv $(COMMON_OBJ_DIR)/*.o
 	rm -fv $(LOADER_OBJ_DIR)/*.o
 	rm -fv $(OS_OBJ_DIR)/*.o
+
+
+cleandir:
+	rmdir $(OS_OBJ_DIR)
+	rmdir $(LOADER_OBJ_DIR)
+	rmdir $(COMMON_OBJ_DIR)
+	rmdir $(OBJ_DIR)
+	rmdir $(BIN_DIR)

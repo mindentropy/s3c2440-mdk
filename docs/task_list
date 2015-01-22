@@ -108,3 +108,12 @@ Speaker
 -------
 1) Create helper functions and test beeps -> Done.
 2) Connect pwm timer to it to generate patterns.
+
+Makefile
+--------
+1) Organize separate folders for the loader and the OS. --> Done.
+2) Optimize the makefile to better reuse the pattern variables.
+3) Create separate output files for the boot loader and the main OS.
+4) Create separate libraries for the boot loader and the main OS. Reason being the loader can be 
+optimized and added more functionalities. Also the main OS can have better peripheral library 
+support.
