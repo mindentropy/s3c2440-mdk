@@ -117,3 +117,4 @@ Makefile
 4) Create separate libraries for the boot loader and the main OS. Reason being the loader can be 
 optimized and added more functionalities. Also the main OS can have better peripheral library 
 support.
+5) Create a ld section for the startup code so that link order does not matter.

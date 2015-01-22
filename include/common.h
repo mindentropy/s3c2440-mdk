@@ -50,10 +50,15 @@
 
 #define BYTE_MASK (0xFF)
 
+#define set_bits(val,bitmask) { \
+	((val) = ((val) | (bitmask))); \
+}
 
+/*
 #define set_bits(val,bitmask) {	\
 		((val) = ((val) & (~(bitmask))) | (bitmask)); \
 	}
+*/
 
 #define clear_bits(val,bitmask) {	\
 		((val) = ((val) & (~(bitmask))));	\

@@ -147,6 +147,4 @@ void init_clock()
 		);
 
 	clear_slow_clk();
-
-
 }

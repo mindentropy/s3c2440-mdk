@@ -56,7 +56,6 @@ LDFLAGS =  -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
 
 #all: mdkloader mdkos
 all: mdkloader mdkos
-#	@echo $(COMMON_OBJS)
 
 mdkloader: $(OBJ_DIR) $(COMMON_OBJ_DIR) $(LOADER_OBJ_DIR) $(BIN_DIR) $(EXELOADER)
 
@@ -64,12 +63,12 @@ mdkos: $(OBJ_DIR) $(COMMON_OBJ_DIR) $(OS_OBJ_DIR) $(BIN_DIR) $(EXEOS)
 
 
 $(EXELOADER):  $(LOADER_AS_OBJ_FILES) $(LOADER_OBJ_FILES) $(COMMON_OBJS)
-	$(CC) -Wall -o $(EXELOADER) $(LOADER_OBJS) $(COMMON_OBJS) $(LOADER_LDSCRIPT) $(LDFLAGS) 
+	$(CC) -Wall -o $(EXELOADER) $(LOADER_AS_OBJ_FILES) $(LOADER_OBJ_FILES) $(COMMON_OBJS) $(LOADER_LDSCRIPT) $(LDFLAGS) 
 	$(OBJCOPY) -O binary $(EXELOADER) $(BIN_DIR)/mdk_loader.bin
 	ls -al $(BIN_DIR)/mdk_loader.bin
 
 $(EXEOS): $(OS_AS_OBJ_FILES) $(OS_OBJ_FILES) $(COMMON_OBJS) 
-	$(CC) -Wall -o $(EXEOS) $(OS_OBJS) $(COMMON_OBJS) $(OS_LDSCRIPT) $(LDFLAGS)
+	$(CC) -Wall -o $(EXEOS) $(OS_AS_OBJ_FILES) $(OS_OBJ_FILES) $(COMMON_OBJS) $(OS_LDSCRIPT) $(LDFLAGS)
 	$(OBJCOPY) -O binary $(EXEOS) $(BIN_DIR)/mdk_os.bin
 	ls -al $(BIN_DIR)/mdk_os.bin
 
