@@ -4,7 +4,8 @@
 # at 0x00000000 etc. Therefore the file should be placed at the start.
 #
 
-INC_DIRS = -Iinclude/
+INC_DIR = include
+COMMON_INC_DIR = $(INC_DIR)/common
 
 OBJ_DIR := obj
 SRC_DIR := src
@@ -50,7 +51,7 @@ LD = $(TOOLCHAIN_PREFIX)ld
 OBJCOPY = $(TOOLCHAIN_PREFIX)objcopy
 
 ASFLAGS = -mcpu=arm9tdmi  -gstabs
-CFLAGS = -mcpu=arm9tdmi -Wall -g -nostdlib -nodefaultlibs -O0 -ffreestanding $(INC_DIRS)
+CFLAGS = -mcpu=arm9tdmi -Wall -g -nostdlib -nodefaultlibs -O0 -ffreestanding -I$(COMMON_INC_DIR)
 LDFLAGS =  -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
 
 
