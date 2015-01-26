@@ -78,8 +78,7 @@ void main(void) {
 
 	sdram_init();
 
-	/*readreg32(BANKCON6,test_val);
-	print_hex(test_val);*/
+	//print_hex(readreg32(BANKCON6));
 /* Without delay the led blink rate is 2MHz. */
 
 	//print_hex(read_size());

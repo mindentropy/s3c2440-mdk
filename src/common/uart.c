@@ -35,28 +35,19 @@ static void init_uart0_registers()
 
 unsigned int isTxBuffEmpty(unsigned int channel)
 {
-	unsigned int val = 0;
-
-	readreg32(channel,val);
-	return ((val & Tx_BUFF_EMPTY) == (Tx_BUFF_EMPTY));
+	return ((readreg32(channel) & Tx_BUFF_EMPTY) == (Tx_BUFF_EMPTY));
 }
 
 
 unsigned int isTxEmpty(unsigned int channel)
 {
-	unsigned int val = 0;
-
-	readreg32(channel,val);
-	return ((val & Tx_EMPTY) == (Tx_EMPTY));
+	return ((readreg32(channel) & Tx_EMPTY) == (Tx_EMPTY));
 }
 
 
 unsigned int isRxBuffFull(unsigned int channel)
 {
-	unsigned int val = 0;
-
-	readreg32(channel,val);
-	return ((val & Rx_BUFF_DATA_RDY) == (Rx_BUFF_DATA_RDY));
+	return ((readreg32(channel) & Rx_BUFF_DATA_RDY) == (Rx_BUFF_DATA_RDY));
 }
 
 void putc_ch0(char ch)
@@ -69,14 +60,11 @@ void putc_ch0(char ch)
 
 char getc_ch0()
 {
-	char ch;
 
 	while(!isRxBuffFull(UTRSTAT0))
 		;
-	
-	uart_readl_ch0(ch);
 
-	return ch;
+	return uart_readl_ch0();
 }
 
 void puts(const char *str)

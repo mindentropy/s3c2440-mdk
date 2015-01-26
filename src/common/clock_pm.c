@@ -11,14 +11,6 @@ void set_mpll(unsigned int mdiv,
 				unsigned int pdiv,
 				unsigned int sdiv) 
 {
-	//unsigned val = 0;
-	//readreg32(MPLLCON,val);
-	//writereg32(MPLLCON,val);
-	
-	
-	//writereg32(MPLLCON,0x00096030);
-	//writereg32(MPLLCON,0x0007f021);
-	
 
 	writereg32(MPLLCON,
 				(mdiv<<MDIV_SHIFT) | 

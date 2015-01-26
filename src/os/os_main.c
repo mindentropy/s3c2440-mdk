@@ -41,32 +41,24 @@ void test_delay() {
 
 void dump_clk()
 {
-	unsigned int reg_dbg_val = 0;
-
 	puts("************************\r\n");
 	puts("reg_locktime: ");
-	readreg32(REG_LOCKTIME,reg_dbg_val);
-	print_hex(reg_dbg_val);
+	print_hex(readreg32(REG_LOCKTIME));
 	puts("\r\n");
 	puts("mpllcon : ");
-	readreg32(MPLLCON,reg_dbg_val);
-	print_hex(reg_dbg_val);
+	print_hex(readreg32(MPLLCON));
 	puts("\r\n");
 	puts("upllcon : ");
-	readreg32(UPLLCON,reg_dbg_val);
-	print_hex(reg_dbg_val);
+	print_hex(readreg32(UPLLCON));
 	puts("\r\n");
 	puts("clkdivn: ");
-	readreg32(CLKDIVN,reg_dbg_val);
-	print_hex(reg_dbg_val);
+	print_hex(readreg32(CLKDIVN));
 	puts("\r\n");
 	puts("clkslow: ");
-	readreg32(CLKSLOW,reg_dbg_val);
-	print_hex(reg_dbg_val);
+	print_hex(readreg32(CLKSLOW));
 	puts("\r\n");
 	puts("clkcon: ");
-	readreg32(CLKCON,reg_dbg_val);
-	print_hex(reg_dbg_val);
+	print_hex(readreg32(CLKCON));
 	puts("\r\n");
 
 	puts("************************\r\n");

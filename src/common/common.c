@@ -4,19 +4,12 @@ void set_reg_params(unsigned int reg,
 					unsigned int regmask
 					)
 {
-	unsigned int val = 0;
 
-	readreg32(reg,val);
-	set_bits(val,regmask);
-	writereg32(reg,val);
+	writereg32(reg,setbits(readreg32(reg),regmask));
 }
 
 void clear_reg_params(unsigned int reg,
 						unsigned int regmask)
 {
-	unsigned int val = 0;
-
-	readreg32(reg,val);
-	clear_bits(val,regmask);
-	writereg32(reg,val);
+	writereg32(reg,clearbits(readreg32(reg),regmask));
 }

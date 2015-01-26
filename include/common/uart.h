@@ -224,23 +224,23 @@ void init_uart0();
 #define uart_writeb_ch2(ch) \
 		writereg32(UTXH0_B,ch)
 
-#define uart_readl_ch0(ch) \
-		readreg32(URXH0_L,ch)
+#define uart_readl_ch0() \
+		readreg32(URXH0_L)
 
-#define uart_readl_ch1(ch) \
-		readreg32(URXH1_L,ch)
+#define uart_readl_ch1() \
+		readreg32(URXH1_L)
 
-#define uart_readl_ch2(ch) \
-		readreg32(URXH2_L,ch)
+#define uart_readl_ch2() \
+		readreg32(URXH2_L)
 
-#define uart_readb_ch0(ch) \
-		readreg32(URXH0_B,ch)
+#define uart_readb_ch0() \
+		readreg32(URXH0_B)
 
-#define uart_readb_ch1(ch) \
-		readreg32(URXH1_B,ch)
+#define uart_readb_ch1() \
+		readreg32(URXH1_B)
 
-#define uart_readb_ch2(ch) \
-		readreg32(URXH2_B,ch)
+#define uart_readb_ch2() \
+		readreg32(URXH2_B)
 
 
 void putc_ch0(char ch);

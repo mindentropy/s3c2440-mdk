@@ -54,6 +54,10 @@
 	((val) = ((val) | (bitmask))); \
 }
 
+#define setbits(val,bitmask) \
+	((val) | (bitmask)) 
+
+
 /*
 #define set_bits(val,bitmask) {	\
 		((val) = ((val) & (~(bitmask))) | (bitmask)); \
@@ -64,6 +68,9 @@
 		((val) = ((val) & (~(bitmask))));	\
 	}
 
+#define clearbits(val,bitmask) \
+		((val) & (~(bitmask)))
+	
 /*
  * For more info on problems associated with volatile casting see.
  * http://infocenter.arm.com/help/topic/com.arm.doc.faqs/ka3750.html
@@ -77,6 +84,7 @@
 #define writereg8(addr,value) \
 	*((volatile unsigned char *) (addr) ) = ((value) & (0xFF))
 
+/*
 #define readreg32(addr,value) \
 	value = ((*((volatile unsigned int *)(addr))) & (0xFFFFFFFF))
 
@@ -85,7 +93,16 @@
 
 #define readreg8(addr,value) \
 	value = ((*((volatile unsigned int *)(addr))) & (0xFF))
+*/
 
+#define readreg32(addr) \
+	((*((volatile unsigned int *)(addr))) & (0xFFFFFFFF))
+	
+#define readreg16(addr,value) \
+	((*((volatile unsigned int *)(addr))) & (0xFFFF))
+
+#define readreg8(addr,value) \
+	value = ((*((volatile unsigned int *)(addr))) & (0xFF))
 
 #define set_bitval_pos(value,shift) \
 	((value)<<(shift))

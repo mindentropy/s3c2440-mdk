@@ -23,19 +23,12 @@ void disable_interrupt_service(unsigned int_mask)
 
 unsigned get_interrupt_pending_status(unsigned interrupt_line)
 {
-	unsigned int val = 0;
-
-	readreg32(INTPND,val);
-
-	return (val & interrupt_line);
+	return (readreg32(INTPND) & interrupt_line);
 }
 
 unsigned get_interrupt_subservice_pending_status(unsigned interrupt_line)
 {
-	unsigned int val = 0;
-	readreg32(SUBSRCPND,val);
-
-	return (val & interrupt_line);
+	return (readreg32(SUBSRCPND) & interrupt_line);
 }
 
 void enable_interrupt_sub_service(unsigned int_mask)
