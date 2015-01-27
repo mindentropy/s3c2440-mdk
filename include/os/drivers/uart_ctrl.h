@@ -1,7 +1,9 @@
 #ifndef UART_CTRL_H_
 #define UART_CTRL_H_
 
-struct UART_regs {
+#include <stdint.h>
+
+struct uart_hw_regs {
 	unsigned int ULCON; /* Line control register */
 	unsigned int UCON;  /* Control register */
 	unsigned int UFCON; /* FIFO Control register */
@@ -18,5 +20,22 @@ struct UART_regs {
 
 };
 
+struct uart_hw_resource {
+	struct uart_hw_regs *regs;
+};
+
+struct uart_cntrl
+{
+	int32_t (*init_gpio)(struct uart_hw_resource *uart_resource); //Initialize gpio pins
+
+	int32_t (*deinit_gpio)(struct uart_hw_resource *uart_resource); //Deinitialize gpio pins
+	int32_t (*clk_enable)(struct uart_hw_resource *uart_resource);
+	int32_t (*clk_disable)(struct uart_hw_resource *uart_resource);
+	int32_t (*send) (struct uart_hw_resource  *uart_resource);
+	int32_t (*receive) (struct uart_hw_resource  *uart_resource);
+	uint32_t (*get_tx_count) (struct uart_hw_resource *uart_resource);
+	uint32_t (*get_rx_count) (struct uart_hw_resource *uart_resource);
+
+};
 
 #endif

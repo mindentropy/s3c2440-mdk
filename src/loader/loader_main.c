@@ -7,6 +7,7 @@
 #include "interrupt.h"
 #include "sdram.h"
 #include "board_config.h"
+#include <stdint.h>
 
 /*
  *  LED Orientation
@@ -26,7 +27,7 @@
 
 void test_delay() {
 
-	register unsigned int i = 0, j = 0;
+	register uint32_t i = 0, j = 0;
 
 	for(j = 0; j<3; j++) {
 		for(i = 0; i<100000;i++) {
@@ -36,14 +37,14 @@ void test_delay() {
 }
 
 
-//unsigned int test_val = 0;
+//uint32_t test_val = 0;
 
 //RAM addr space 0x30000000 - 0x34000000
 volatile unsigned char *ram_ptr = (unsigned char *)PHYS_START;
 
 static int read_size()
 {
-	unsigned int size = 0;
+	uint32_t size = 0;
 
 	size = getc_ch0();
 	size |= getc_ch0()<<8;
@@ -54,7 +55,7 @@ static int read_size()
 }
 
 char load_ch = 0;
-unsigned int i = 0,load_size = 0;
+uint32_t i = 0,load_size = 0;
 
 void main(void) {
 	/* Note : Do not put any operations above this */

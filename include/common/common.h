@@ -2,6 +2,8 @@
 
 #define COMMON_H_
 
+#include <stdint.h>
+
 #define SET 1
 #define RESET 0
 
@@ -76,45 +78,45 @@
  * http://infocenter.arm.com/help/topic/com.arm.doc.faqs/ka3750.html
  */
 #define writereg32(addr,value) \
-	*((volatile unsigned int *) (addr) ) = ((value) & (0xFFFFFFFF))
+	*((volatile uint32_t *) (addr) ) = ((value) & (0xFFFFFFFF))
 
 #define writereg16(addr,value) \
-	*((volatile unsigned short *) (addr) ) = ((value) & (0xFFFF))
+	*((volatile uint16_t *) (addr) ) = ((value) & (0xFFFF))
 
 #define writereg8(addr,value) \
-	*((volatile unsigned char *) (addr) ) = ((value) & (0xFF))
+	*((volatile uint8_t *) (addr) ) = ((value) & (0xFF))
 
 /*
 #define readreg32(addr,value) \
-	value = ((*((volatile unsigned int *)(addr))) & (0xFFFFFFFF))
+	value = ((*((volatile uint32_t *)(addr))) & (0xFFFFFFFF))
 
 #define readreg16(addr,value) \
-	value = ((*((volatile unsigned int *)(addr))) & (0xFFFF))
+	value = ((*((volatile uint32_t *)(addr))) & (0xFFFF))
 
 #define readreg8(addr,value) \
-	value = ((*((volatile unsigned int *)(addr))) & (0xFF))
+	value = ((*((volatile uint32_t *)(addr))) & (0xFF))
 */
 
 #define readreg32(addr) \
-	((*((volatile unsigned int *)(addr))) & (0xFFFFFFFF))
+	((*((volatile uint32_t *)(addr))) & (0xFFFFFFFF))
 	
 #define readreg16(addr,value) \
-	((*((volatile unsigned int *)(addr))) & (0xFFFF))
+	((*((volatile uint32_t *)(addr))) & (0xFFFF))
 
 #define readreg8(addr,value) \
-	value = ((*((volatile unsigned int *)(addr))) & (0xFF))
+	value = ((*((volatile uint32_t *)(addr))) & (0xFF))
 
 #define set_bitval_pos(value,shift) \
 	((value)<<(shift))
 
 
 void set_reg_params(
-					unsigned int reg,
-					unsigned int regmask
+					uint32_t reg,
+					uint32_t regmask
 					);
 
 void clear_reg_params(
-					unsigned int reg,
-					unsigned int regmask
+					uint32_t reg,
+					uint32_t regmask
 					);
 #endif

@@ -1,0 +1,64 @@
+Driver Design
+=============
+
+Bootloader:
+
+For the bootloader all the definitions are present in include/common. This can be used
+by C code as well as assembly code. The bootloader has to be as small as possible.
+
+OS:
+Initial design will have drivers without structures. We will have to pass the base address
+of the instance. The reason of using helper macro's and small functions is because during
+an ISR we do no want to call functions using callbacks.
+
+The problem has arisen because of the target of the code for both small and large memories with
+slow clock speeds.
+
+The modelling of the driver will be similar to starterware architecture provided by TI and CMSIS
+provided by ARM.
+
+
+Architecture.
+-------------
+
+Have a register structure.
+
+struct peripheral_regs {
+	unsigned int REG1;
+	unsigned int REG2;
+	unsigned int REG3;
+};
+
+Have a control structure with the peripheral registers as an element in it.
+
+What should be other parameters? Should it contain buffers? Should it contain
+initialization of the controller and the devices attached to it?
+
+1) Any hot path should be inlined or should be a macro.
+2) Init should be modular and hence has to have good callbacks.
+
+Hence the implementation should be a mixture of function callbacks and macros. For this
+implementation how should the user prevented from being confused as to what to use?
+
+struct peripheral_ctrl {
+	/* 
+	  State parameters
+	 */
+
+	
+	structure peripheral_regs *regs;
+};
+
+We can create common functions which form the HAL. The layer underneath the HAL can
+be changed for different architectures. This will not be callbacks.
+
+All the above common functions will take an instance of the peripheral which is a pointer
+to the structure. This will be also be modified based on the architecture.
+
+All macro's has to be modified to take this instance. In this way we can achieve minimum
+latency in interrupt servicing.
+
+We will presently not use callbacks in a structure as we would like to reduce in function
+calls in critical and hot code sections.
+
+SRC: STM32FCube HAL library.

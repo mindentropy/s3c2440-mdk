@@ -11,6 +11,8 @@
 #include "cache.h"
 #include "mmu.h"
 
+#include <stdint.h>
+
 /*
  *  LED Orientation
  *
@@ -29,7 +31,7 @@
 
 void test_delay() {
 
-	register unsigned int i = 0, j = 0;
+	register uint32_t i = 0, j = 0;
 
 	for(j = 0; j<3; j++) {
 		for(i = 0; i<100000;i++) {
@@ -106,7 +108,7 @@ void dump_cache_info()
 	puts("\r\n");
 }
 
-void blink_leds(unsigned int leds) {
+void blink_leds(uint32_t leds) {
 	led_on(leds);
 	test_delay();
 	led_off(leds);

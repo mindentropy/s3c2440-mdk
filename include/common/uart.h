@@ -3,6 +3,7 @@
 #define UART_H_
 
 #include "common.h"
+#include <stdint.h>
 
 /* UART Line Control Register Base Address*/
 #define ULCON0 	0x50000000
@@ -115,12 +116,12 @@
 #define Rx_BUFF_DATA_RDY    (BIT0)
 
 //Bit will be set if buffer is empty.
-unsigned int isTxBuffEmpty(unsigned int channel);
+uint32_t isTxBuffEmpty(uint32_t channel);
 
 //Bit will be set if buffer is full.
-unsigned int isRxBuffFull(unsigned int channel);
+uint32_t isRxBuffFull(uint32_t channel);
 
-unsigned int isTxEmpty(unsigned int channel);
+uint32_t isTxEmpty(uint32_t channel);
 /*#define is_tx_buff_empty_uart0() \
 	isTxBuffEmpty(UTRSTAT0)
 
@@ -253,6 +254,6 @@ char getc_ch0();
 
 
 void puts(const char *str);
-void print_hex(unsigned int num);
+void print_hex(uint32_t num);
 
 #endif
