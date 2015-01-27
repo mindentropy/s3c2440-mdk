@@ -7,6 +7,8 @@
 #include "interrupt.h"
 #include "sdram.h"
 #include "board_config.h"
+#include "uart_util.h"
+
 #include <stdint.h>
 
 /*

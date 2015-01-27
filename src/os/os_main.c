@@ -1,7 +1,7 @@
 #include "gpio_def.h"
 #include "led.h"
 #include "clock_pm.h"
-#include "uart.h"
+#include "uart_util.h"
 #include "wdt.h"
 #include "spkr.h"
 #include "interrupt.h"
