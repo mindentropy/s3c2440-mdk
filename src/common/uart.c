@@ -1,5 +1,5 @@
 #include "common.h"
-#include "uart.h"
+#include "uart_util.h"
 #include "gpio_def.h"
 #include "clock_pm.h"
 
@@ -13,9 +13,9 @@ static void set_uart_line_control()
 static void set_uart_uclk_select(unsigned int channel)
 {
 	set_reg_params(channel,
-					PCLK_SELECT|Tx_INTR_TYPE_LVL|Rx_INTR_TYPE_LVL|
-					TRANSMIT_MODE_INTR_REQ|RECEIVE_MODE_INTR_REQ
-					);
+			PCLK_SELECT|Tx_INTR_TYPE_LVL|Rx_INTR_TYPE_LVL|
+			TRANSMIT_MODE_INTR_REQ|RECEIVE_MODE_INTR_REQ
+			);
 }
 
 

@@ -5,6 +5,11 @@
 #include "common.h"
 #include <stdint.h>
 
+
+#define UART0_BA 0x50000000
+#define UART1_BA 0x50004000
+#define UART2_BA 0x50008000
+
 /* UART Line Control Register Base Address*/
 #define ULCON0 	0x50000000
 #define ULCON1 	0x50004000
@@ -58,12 +63,6 @@
 #define TRANSMIT_MODE_DMA0_DMA3_REQ (BIT3)
 #define TRANSMIT_MODE_DMA1_REQ 		(BIT3|BIT2)
 
-
-/*#define TRANSMIT_MODE_INTR_REQ 		set_bitval_pos((BIT0),TRANSMIT_MODE_POS)
-#define TRANSMIT_MODE_DMA0_DMA3_REQ set_bitval_pos((BIT1),TRANSMIT_MODE_POS)
-#define TRANSMIT_MODE_DMA1_REQ 		set_bitval_pos((BIT1|BIT0),TRANSMIT_MODE_POS)*/
-
-
 #define RECEIVE_MODE 				(BIT1|BIT0)
 
 #define RECEIVE_MODE_DISABLE 		(0)
@@ -115,30 +114,6 @@
 #define Tx_BUFF_EMPTY   	(BIT1)
 #define Rx_BUFF_DATA_RDY    (BIT0)
 
-//Bit will be set if buffer is empty.
-uint32_t isTxBuffEmpty(uint32_t channel);
-
-//Bit will be set if buffer is full.
-uint32_t isRxBuffFull(uint32_t channel);
-
-uint32_t isTxEmpty(uint32_t channel);
-/*#define is_tx_buff_empty_uart0() \
-	isTxBuffEmpty(UTRSTAT0)
-
-#define is_tx_buff_empty_uart1() \
-	isTxBuffEmpty(UTRSTAT1)
-
-#define is_tx_buff_empty_uart2() \
-	isTxBuffEmpty(UTRSTAT2)
-
-#define is_rx_buff_full_uart0() \
-	isRxBuffFull(UTRSTAT0)
-
-#define is_rx_buff_full_uart1() \
-	isRxBuffFull(UTRSTAT1)
-
-#define is_rx_buff_full_uart2() \
-	isRxBuffFull(UTRSTAT2)*/
 
 /* UART Error Status Register Base Address */
 #define UERSTAT0  0x50000014
@@ -203,57 +178,5 @@ uint32_t isTxEmpty(uint32_t channel);
 
 #define UBRDIVn     (SHORT_MASK)
 
-
-void init_uart0();
-
-
-#define uart_writel_ch0(ch) \
-		writereg32(UTXH0_L,ch)
-
-#define uart_writel_ch1(ch) \
-		writereg32(UTXH1_L,ch)
-
-#define uart_writel_ch2(ch) \
-		writereg32(UTXH2_L,ch)
-
-#define uart_writeb_ch0(ch) \
-		writereg32(UTXH0_B,ch)
-
-#define uart_writeb_ch1(ch) \
-		writereg32(UTXH0_B,ch)
-
-#define uart_writeb_ch2(ch) \
-		writereg32(UTXH0_B,ch)
-
-#define uart_readl_ch0() \
-		readreg32(URXH0_L)
-
-#define uart_readl_ch1() \
-		readreg32(URXH1_L)
-
-#define uart_readl_ch2() \
-		readreg32(URXH2_L)
-
-#define uart_readb_ch0() \
-		readreg32(URXH0_B)
-
-#define uart_readb_ch1() \
-		readreg32(URXH1_B)
-
-#define uart_readb_ch2() \
-		readreg32(URXH2_B)
-
-
-void putc_ch0(char ch);
-//void putc_ch1(char ch)
-//void putc_ch2(char ch)
-
-char getc_ch0();
-//char getc_ch1();
-//char getc_ch2();
-
-
-void puts(const char *str);
-void print_hex(uint32_t num);
 
 #endif
