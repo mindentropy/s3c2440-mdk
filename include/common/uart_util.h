@@ -39,6 +39,31 @@
 
 #define uart_readb_ch2() \
 		readreg32(URXH2_B)
+/*
+#define uart_set_ulcon(uart,val) \
+		writereg32(uart+ULCON,val)
+
+#define uart_set_ucon(uart,val) \
+	writereg32(uart+UCON,val)
+
+#define uart_set_ufcon(uart,val) \
+	writereg32(uart+UFCON,val)
+
+#define uart_set_umcon(uart,val) \
+	writereg32(uart+UMCON,val)
+
+#define uart_get_ulcon(uart,val) \
+	readreg32(uart+ULCON)
+
+#define uart_get_ucon(uart,val) \
+	readreg32(uart+UCON)
+
+#define uart_get_ufcon(uart,val) \
+	readreg32(uart+UFCON)
+
+#define uart_get_umcon(uart,val) \
+	readreg32(uart+UMCON)
+*/
 
 void init_uart0();
 void putc_ch0(char ch);

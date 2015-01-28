@@ -89,6 +89,7 @@ void print_hex(unsigned int num)
 	puts("\r\n");
 }
 
+
 void init_uart0()
 {
 
@@ -107,3 +108,16 @@ void init_uart0()
 	set_uart0_baud_gen();
 }
 
+
+
+
+void init_uart(uint32_t UART_BA)
+{
+	writereg32(ULCON_REG(UART_BA),WORD_LENGTH); //Set line control.
+	
+	writereg32(UCON_REG(UART_BA),
+			(PCLK_SELECT|Tx_INTR_TYPE_LVL|Rx_INTR_TYPE_LVL|
+			TRANSMIT_MODE_INTR_REQ|RECEIVE_MODE_INTR_REQ));
+
+	writereg32(UBRDIV_REG(UART_BA),26); //Set the baud rate.
+}
