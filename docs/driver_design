@@ -14,8 +14,8 @@ an ISR we do no want to call functions using callbacks.
 The problem has arisen because of the target of the code for both small and large memories with
 slow clock speeds.
 
-The modelling of the driver will be similar to starterware architecture provided by TI and CMSIS
-provided by ARM.
+The modelling of the driver will be similar to the mixture TI's starterware architecture 
+ARM's CMSIS library.
 
 
 Architecture.
@@ -49,16 +49,29 @@ struct peripheral_ctrl {
 	structure peripheral_regs *regs;
 };
 
-We can create common functions which form the HAL. The layer underneath the HAL can
+1) We can create common functions which form the HAL. The layer underneath the HAL can
 be changed for different architectures. This will not be callbacks.
 
-All the above common functions will take an instance of the peripheral which is a pointer
+2) All the above common functions will take an instance of the peripheral which is a pointer
 to the structure. This will be also be modified based on the architecture.
 
-All macro's has to be modified to take this instance. In this way we can achieve minimum
+3) All macro's has to be modified to take this instance. In this way we can achieve minimum
 latency in interrupt servicing.
 
-We will presently not use callbacks in a structure as we would like to reduce in function
+4) We will presently not use callbacks in a structure as we would like to reduce in function
 calls in critical and hot code sections.
 
 SRC: STM32FCube HAL library.
+
+
+Final Implementation
+====================
+1) Have the same setup as was before i.e. macro's and function calls.
+2) Refactoring has to be done in the macro definitions. After providing the base address
+   all other registers should be offsets from the previous registers. In this way I need
+   to provide only the base address for a particular function. For different instances
+   the instance of the peripheral will be starting from the base address.
+   ** The above register structure is an assumption that will be followed by the vendors **
+   If the above assumption is not followed then we still have the flexibility of providing
+   only the base address.
+

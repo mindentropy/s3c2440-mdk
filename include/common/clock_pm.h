@@ -4,6 +4,7 @@
 
 #include "common.h"
 
+#define CLOCK_REG_BA 	0x4C000000
 
 #define REG_LOCKTIME	0x4C000000
 
