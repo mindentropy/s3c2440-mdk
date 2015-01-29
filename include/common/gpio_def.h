@@ -4,9 +4,33 @@
 
 #include "common.h"
 
+/**********************************/
+#define GPA_BA  0x56000000
+#define GPB_BA  0x56000010
+#define GPC_BA  0x56000020
+#define GPD_BA  0x56000030
+#define GPE_BA  0x56000040
+#define GPF_BA  0x56000050
+#define GPG_BA  0x56000060
+#define GPH_BA  0x56000070
+#define GPJ_BA  0x560000D0
+
+#define GPCON   0x00
+#define GPDAT   0x04
+
+#define GPCON_REG(GPIO_BA) \
+		HW_REG(GPIO_BA,GPCON)
+
+#define GPDAT_REG(GPIO_BA) \
+		HW_REG(GPIO_BA,GPDAT)
+
+#define GPUP_REG(GPIO_BA) \
+		HW_REG(GPIO_BA,GPUP)
+
+/**********************************/
+
 #define GPACON	0x56000000
 #define GPADAT	0x56000004
-
 
 #define GPBCON	0x56000010
 #define GPBDAT	0x56000014
@@ -81,5 +105,8 @@
 
 void set_gpio_clk_dbg();
 void set_gpio_uart_ch0();
+
+#define set_gpio_con(GPIO_REG_BA,param) \
+	set_reg_params(GPCON_REG(GPIO_REG_BA),param)
 
 #endif

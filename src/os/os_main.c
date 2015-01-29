@@ -43,69 +43,69 @@ void test_delay() {
 
 void dump_clk()
 {
-	puts("************************\r\n");
-	puts("reg_locktime: ");
-	print_hex(readreg32(REG_LOCKTIME));
-	puts("\r\n");
-	puts("mpllcon : ");
-	print_hex(readreg32(MPLLCON));
-	puts("\r\n");
-	puts("upllcon : ");
-	print_hex(readreg32(UPLLCON));
-	puts("\r\n");
-	puts("clkdivn: ");
-	print_hex(readreg32(CLKDIVN));
-	puts("\r\n");
-	puts("clkslow: ");
-	print_hex(readreg32(CLKSLOW));
-	puts("\r\n");
-	puts("clkcon: ");
-	print_hex(readreg32(CLKCON));
-	puts("\r\n");
+	uart_puts(UART0_BA,"************************\r\n");
+	uart_puts(UART0_BA,"reg_locktime: ");
+	print_hex_uart(UART0_BA,readreg32(REG_LOCKTIME));
+	uart_puts(UART0_BA,"\r\n");
+	uart_puts(UART0_BA,"mpllcon : ");
+	print_hex_uart(UART0_BA,readreg32(MPLLCON));
+	uart_puts(UART0_BA,"\r\n");
+	uart_puts(UART0_BA,"upllcon : ");
+	print_hex_uart(UART0_BA,readreg32(UPLLCON));
+	uart_puts(UART0_BA,"\r\n");
+	uart_puts(UART0_BA,"clkdivn: ");
+	print_hex_uart(UART0_BA,readreg32(CLKDIVN));
+	uart_puts(UART0_BA,"\r\n");
+	uart_puts(UART0_BA,"clkslow: ");
+	print_hex_uart(UART0_BA,readreg32(CLKSLOW));
+	uart_puts(UART0_BA,"\r\n");
+	uart_puts(UART0_BA,"clkcon: ");
+	print_hex_uart(UART0_BA,readreg32(CLKCON));
+	uart_puts(UART0_BA,"\r\n");
 
-	puts("************************\r\n");
+	uart_puts(UART0_BA,"************************\r\n");
 }
 
 void dump_cpu_info()
 {
-	print_hex(get_cpu_id());
+	print_hex_uart(UART0_BA,get_cpu_id());
 }
 
 void dump_cache_info()
 {
-	print_hex(get_cache_info());
+	print_hex_uart(UART0_BA,get_cache_info());
 
-	puts("cache type:");
-	print_hex(get_cache_type(get_cache_info()));
-	puts("\r\n");
+	uart_puts(UART0_BA,"cache type:");
+	print_hex_uart(UART0_BA,get_cache_type(get_cache_info()));
+	uart_puts(UART0_BA,"\r\n");
 
-	puts("sbit:");
-	print_hex(get_sbit(get_cache_info()));
-	puts("\r\n");
+	uart_puts(UART0_BA,"sbit:");
+	print_hex_uart(UART0_BA,get_sbit(get_cache_info()));
+	uart_puts(UART0_BA,"\r\n");
 	
-	puts("dsize info:");
-	print_hex(get_dsize_info(get_cache_info()));
-	puts("\r\n");
+	uart_puts(UART0_BA,"dsize info:");
+	print_hex_uart(UART0_BA,get_dsize_info(get_cache_info()));
+	uart_puts(UART0_BA,"\r\n");
 
-	puts("isize info:");
-	print_hex(get_isize_info(get_cache_info()));
-	puts("\r\n");
+	uart_puts(UART0_BA,"isize info:");
+	print_hex_uart(UART0_BA,get_isize_info(get_cache_info()));
+	uart_puts(UART0_BA,"\r\n");
 
-	puts("size:");
-	print_hex(get_size(get_dsize_info(get_cache_info())));
-	puts("\r\n");
+	uart_puts(UART0_BA,"size:");
+	print_hex_uart(UART0_BA,get_size(get_dsize_info(get_cache_info())));
+	uart_puts(UART0_BA,"\r\n");
 
-	puts("assoc:");
-	print_hex(get_assoc(get_dsize_info(get_cache_info())));
-	puts("\r\n");
+	uart_puts(UART0_BA,"assoc:");
+	print_hex_uart(UART0_BA,get_assoc(get_dsize_info(get_cache_info())));
+	uart_puts(UART0_BA,"\r\n");
 
-	puts("mbit:");
-	print_hex(get_mbit(get_dsize_info(get_cache_info())));
-	puts("\r\n");
+	uart_puts(UART0_BA,"mbit:");
+	print_hex_uart(UART0_BA,get_mbit(get_dsize_info(get_cache_info())));
+	uart_puts(UART0_BA,"\r\n");
 	
-	puts("line len:");
-	print_hex(get_line_len(get_dsize_info(get_cache_info())));
-	puts("\r\n");
+	uart_puts(UART0_BA,"line len:");
+	print_hex_uart(UART0_BA,get_line_len(get_dsize_info(get_cache_info())));
+	uart_puts(UART0_BA,"\r\n");
 }
 
 void blink_leds(uint32_t leds) {
@@ -120,18 +120,21 @@ int main(void) {
 	/* Disable watchdog.*/
 //	unsigned char *sram_loc;
 
-	disable_watchdog(); 
+	disable_watchdog(WT_BA); 
 
 	disable_all_interrupts();
 	disable_all_interrupt_subservice();
 
 	set_clk_dbg_port();
 	init_clock();
-	init_uart0();
+	//init_uart0();
+	init_uart(UART0_BA);
 
 	//puts("TB\r\n");
 
-	apb_clk_enable_gpio();
+	//apb_clk_enable_gpio();
+	apb_clk_enable(CLK_BA,CLK_GPIO);
+
 	init_spkr();
 	init_led();
 	led_off(LED4|LED3|LED2|LED1);

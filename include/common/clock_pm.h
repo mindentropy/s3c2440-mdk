@@ -4,7 +4,41 @@
 
 #include "common.h"
 
-#define CLOCK_REG_BA 	0x4C000000
+/***********************************/
+
+#define CLK_BA 		0x4C000000
+
+#define LOCKTIME_OFF    0x00
+#define MPLLCON_OFF 	0x04
+#define UPLLCON_OFF 	0x08
+#define CLKCON_OFF 		0x0C
+#define CLKSLOW_OFF 	0x10
+#define CLKDIVN_OFF 	0x14
+#define CAMDIVN_OFF		0x18
+
+#define LOCKTIME_REG(CLK_BA) \
+	HW_REG(CLK_BA,LOCKTIME_OFF)
+
+
+#define MPLLCON_REG(CLK_BA) \
+	HW_REG(CLK_BA,MPLLCON_OFF)
+
+#define UPLLCON_REG(CLK_BA) \
+	HW_REG(CLK_BA,UPLLCON_OFF)
+
+#define CLKCON_REG(CLK_BA) \
+	HW_REG(CLK_BA,CLKCON_OFF)
+
+#define CLKSLOW_REG(CLK_BA) \
+	HW_REG(CLK_BA,CLKSLOW_OFF)
+
+#define CLKDIVN_REG(CLK_BA) \
+	HW_REG(CLK_BA,CLKDIVN_OFF)
+
+#define CAMDIVN_REG(CLK_BA) \
+	HW_REG(CLK_BA,CAMDIVN_OFF)
+
+/***********************************/
 
 #define REG_LOCKTIME	0x4C000000
 
@@ -48,6 +82,9 @@
 #define CLK_SLEEP				BIT3
 #define CLK_IDLE				BIT2
 
+
+#define apb_clk_enable(CLK_BA,CLK) \
+	set_reg_params(CLKCON_REG(CLK_BA),CLK)
 
 #define apb_clk_enable_uart0() \
 	enable_apb_clk(CLK_UART0)

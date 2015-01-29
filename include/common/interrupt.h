@@ -4,6 +4,41 @@
 
 #include "common.h"
 
+#define INT_BA 			0x4A000000
+
+#define SRCPND_OFF 		0x00
+#define INTMOD_OFF  	0x04
+#define INTMSK_OFF  	0x08
+#define INTPRIORITY_OFF 0x0C
+#define INTPND_OFF 		0x10
+#define INTOFFSET_OFF   0x14
+#define SUBSRCPND_OFF 	0x18
+#define INTSUBMSK_OFF 	0x1C
+
+#define SRCPND_REG(BA) \
+		HW_REG(BA,SRCPND_OFF)
+
+#define INTMOD_REG(BA) \
+		HW_REG(BA,INTMOD_OFF)
+
+#define INTMSK_REG(BA) \
+		HW_REG(BA,INTMSK_OFF)
+
+#define INTPRIORITY_REG(BA) \
+		HW_REG(BA,INTPRIORITY_OFF)
+
+#define INTPND_REG(BA) \
+		HW_REG(BA,INTPND_OFF)
+
+#define INTOFFSET_REG(BA) \
+		HW_REG(BA,INTOFFSET_OFF)
+
+#define SUBSRCPND_REG(BA) \
+		HW_REG(BA,SUBSRCPND_OFF)
+
+#define INTSUBMSK_REG(BA) \
+		HW_REG(BA,INTSUBMSK_OFF)
+
 #define SRCPND 		0x4A000000
 #define INTMOD 		0x4A000004
 #define INTMSK 		0x4A000008

@@ -48,10 +48,10 @@ static int read_size()
 {
 	uint32_t size = 0;
 
-	size = getc_ch0();
-	size |= getc_ch0()<<8;
-	size |= getc_ch0()<<16;
-	size |= getc_ch0()<<24;
+	size = getc(UART0_BA);
+	size |= getc(UART0_BA)<<8;
+	size |= getc(UART0_BA)<<16;
+	size |= getc(UART0_BA)<<24;
 
 	return size;
 }
@@ -63,18 +63,20 @@ void main(void) {
 	/* Note : Do not put any operations above this */
 	/* Disable watchdog.*/
 
-	disable_watchdog(); 
+	disable_watchdog(WT_BA); 
 
 	disable_all_interrupts();
 	disable_all_interrupt_subservice();
 
 	set_clk_dbg_port();
 	init_clock();
-	init_uart0();
+	//init_uart0();
+	init_uart(UART0_BA);
 
-	puts("ldr\r\n");
+	uart_puts(UART0_BA,"ldr\r\n");
 
-	apb_clk_enable_gpio();
+	//apb_clk_enable_gpio();
+	apb_clk_enable(CLK_BA,CLK_GPIO);
 	//init_spkr();
 //	init_led();
 //	led_off(LED4|LED3|LED2|LED1);
@@ -87,14 +89,17 @@ void main(void) {
 	//print_hex(read_size());
 	//print_hex(load_size = read_size());
 
+	
 	load_size = read_size();
 
 	for(i = 0; i<load_size; i++)
 	{
-		load_ch = getc_ch0();
+		//load_ch = getc_ch0();
+		load_ch = getc(UART0_BA);
 		ram_ptr[i] = load_ch;
 		led_on(LED4);
-		putc_ch0(ram_ptr[i]);
+		//putc_ch0(ram_ptr[i]);
+		putc(UART0_BA,ram_ptr[i]);
 		led_off(LED4);
 	}
 

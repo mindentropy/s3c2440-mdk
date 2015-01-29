@@ -119,4 +119,9 @@ void clear_reg_params(
 					uint32_t reg,
 					uint32_t regmask
 					);
+
+
+#define HW_REG(BASE_ADDRESS,OFFSET) \
+	((BASE_ADDRESS) + (OFFSET))
+
 #endif

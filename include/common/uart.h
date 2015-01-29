@@ -14,7 +14,7 @@
 #define ULCON   0x00
 
 #define ULCON_REG(UART_BA) \
-	((UART_BA) + ULCON)
+	HW_REG(UART_BA,ULCON)
 
 #define ULCON0 	0x50000000
 #define ULCON1 	0x50004000
@@ -39,7 +39,7 @@
 #define UCON 	0x04
 
 #define UCON_REG(UART_BA) \
-	((UART_BA) + UCON)
+	HW_REG(UART_BA,UCON)
 
 #define UCON0 	0x50000004
 #define UCON1 	0x50004004
@@ -87,7 +87,7 @@
 #define UFCON 	0x08
 
 #define UFCON_REG(UART_BA) \
-	((UART_BA) + UFCON)
+	HW_REG(UART_BA,UFCON)
 
 #define UFCON0 	0x50000008
 #define UFCON1 	0x50004008
@@ -119,7 +119,7 @@
 #define UMCON 	0x0C
 
 #define UMCON_REG(UART_BA) \
-	((UART_BA) + UMCON)
+	HW_REG(UART_BA,UMCON)
 
 #define UMCON0  0x5000000C
 #define UMCON1 	0x5000400C
@@ -132,7 +132,7 @@
 #define UTRSTAT   0x10
 
 #define UTRSTAT_REG(UART_BA) \
-	((UART_BA) + UTRSTAT)
+	HW_REG(UART_BA,UTRSTAT)
 
 #define UTRSTAT0  0x50000010
 #define UTRSTAT1  0x50004010
@@ -147,7 +147,7 @@
 #define UERSTAT   0x14
 
 #define UERSTAT_REG(UART_BA) \
-	((UART_BA) + UERSTAT)
+	HW_REG(UART_BA,UERSTAT)
 
 #define UERSTAT0  0x50000014
 #define UERSTAT1  0x50004014
@@ -162,7 +162,7 @@
 #define UFSTAT 	0x18
 
 #define UFSTAT_REG(UART_BA) \
-	((UART_BA) + UFSTAT)
+	HW_REG(UART_BA,UFSTAT)
 
 #define UFSTAT0  0x50000018
 #define UFSTAT1  0x50004018
@@ -178,7 +178,7 @@
 #define UMSTAT 	0x1C
 
 #define UMSTAT_REG(UART_BA) \
-	((UART_BA) + UMSTAT)
+	HW_REG(UART_BA,UMSTAT)
 
 #define UMSTAT0  			0x5000001C
 #define UMSTAT1  			0x5000401C
@@ -192,10 +192,10 @@
 #define UTXH_B 		0x23
 
 #define UTXH_L_REG(UART_BA) \
-	((UART_BA) + UTXH_L)
+	HW_REG(UART_BA,UTXH_L)
 
 #define UTXH_B_REG(UART_BA) \
-	((UART_BA) + UTXH_B)
+	HW_REG(UART_BA,UTXH_B)
 
 #define UTXH0_L 	0x50000020
 #define UTXH0_B 	0x50000023
@@ -216,10 +216,10 @@
 #define URXH_B  	0x27
 
 #define URXH_L_REG(UART_BA) \
-	((UART_BA) + URXH_L)
+	HW_REG(UART_BA,URXH_L)
 
 #define URXH_B_REG(UART_BA) \
-	((UART_BA) + URXH_B)
+	HW_REG(UART_BA,URXH_B)
 
 #define URXH0_L 	0x50000024
 #define URXH0_B 	0x50000027
@@ -236,7 +236,7 @@
 #define UBRDIV 		0x28
 
 #define UBRDIV_REG(UART_BA) \
-	((UART_BA) + UBRDIV)
+	HW_REG(UART_BA,UBRDIV)
 
 #define UBRDIV0 	0x50000028
 #define UBRDIV1 	0x50004028

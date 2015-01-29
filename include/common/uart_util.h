@@ -81,12 +81,16 @@
 	readreg32(uart+UMCON)
 */
 
-void init_uart0();
-void putc_ch0(char ch);
-char getc_ch0();
-void puts(const char *str);
-void print_hex(uint32_t num);
 
+void init_uart(uint32_t UART_BA);
+char getc(uint32_t UART_BA);
+void uart_puts(uint32_t UART_BA,const char *str);
+
+//void putc_ch0(char ch);
+//char getc_ch0();
+//void puts(const char *str);
+//void print_hex(uint32_t num);
+void print_hex_uart(uint32_t UART_BA,uint32_t num);
 //Bit will be set if buffer is empty.
 uint32_t isTxBuffEmpty(uint32_t channel);
 
@@ -103,9 +107,9 @@ uint32_t isTxBuffEmpty(uint32_t channel);
 	
 
 //Bit will be set if buffer is full.
-uint32_t isRxBuffFull(uint32_t channel);
+/*uint32_t isRxBuffFull(uint32_t channel);
 
-uint32_t isTxEmpty(uint32_t channel);
+uint32_t isTxEmpty(uint32_t channel);*/
 
 #define putc(UART_BA,ch) \
 { \
