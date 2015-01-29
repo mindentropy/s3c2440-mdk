@@ -4,6 +4,22 @@
 
 #include "uart.h"
 
+/**************************************/
+
+#define uart_writel_ch(UART_BA,ch) \
+	writereg32(UTXH_L_REG(UART_BA),ch)
+
+#define uart_writeb_ch(UART_BA,ch) \
+	writereg32(UTXH_B_REG(UART_BA),ch)
+
+#define uart_readl_ch(UART_BA) \
+	readreg32(URXH_L_REG(UART_BA))
+
+#define uart_readb_ch(UART_BA) \
+	readreg32(URXH_B_REG(UART_BA))
+
+/*************************************/
+
 #define uart_writel_ch0(ch) \
 		writereg32(UTXH0_L,ch)
 
@@ -74,9 +90,29 @@ void print_hex(uint32_t num);
 //Bit will be set if buffer is empty.
 uint32_t isTxBuffEmpty(uint32_t channel);
 
+//Bit will be set if buffer is empty.
+#define uart_is_tx_buff_empty(UART_BA) \
+	((readreg32(UTRSTAT_REG(UART_BA)) & Tx_BUFF_EMPTY) == (Tx_BUFF_EMPTY))
+
+#define uart_is_tx_empty(UART_BA) \
+	((readreg32(UTRSTAT_REG(UART_BA)) & Tx_EMPTY) == (Tx_EMPTY))
+
+//Bit will be set if buffer is full.
+#define uart_is_rx_buff_full(UART_BA) \
+	((readreg32(UTRSTAT_REG(UART_BA)) & Rx_BUFF_DATA_RDY) == (Rx_BUFF_DATA_RDY))
+	
+
 //Bit will be set if buffer is full.
 uint32_t isRxBuffFull(uint32_t channel);
 
 uint32_t isTxEmpty(uint32_t channel);
+
+#define putc(UART_BA,ch) \
+{ \
+	uart_writel_ch(UART_BA,ch); \
+	while(!uart_is_tx_empty(UART_BA)) \
+		; \
+}
+
 
 #endif

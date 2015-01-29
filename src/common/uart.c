@@ -58,6 +58,34 @@ void putc_ch0(char ch)
 		;
 }
 
+/*
+void putc(uint32_t UART_BA,char ch)
+{
+	uart_writel_ch(UART_BA,ch);
+
+	while(!uart_is_tx_empty(UART_BA))
+		;
+}
+*/
+
+char getc(uint32_t UART_BA)
+{
+	while(!uart_is_rx_buff_full(UART_BA))
+		;
+
+	return uart_readl_ch(UART_BA);
+}
+
+
+void uart_puts(uint32_t UART_BA,const char *str)
+{
+	while((*str) != '\0') {
+		putc(UART_BA,*str++);
+	}
+}
+
+
+
 char getc_ch0()
 {
 
@@ -66,6 +94,7 @@ char getc_ch0()
 
 	return uart_readl_ch0();
 }
+
 
 void puts(const char *str)
 {
@@ -109,8 +138,6 @@ void init_uart0()
 }
 
 
-
-
 void init_uart(uint32_t UART_BA)
 {
 	writereg32(ULCON_REG(UART_BA),WORD_LENGTH); //Set line control.
@@ -121,3 +148,4 @@ void init_uart(uint32_t UART_BA)
 
 	writereg32(UBRDIV_REG(UART_BA),26); //Set the baud rate.
 }
+
