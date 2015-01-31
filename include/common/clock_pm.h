@@ -6,7 +6,7 @@
 
 /***********************************/
 
-#define CLK_BA 		0x4C000000
+#define CLK_BASE_ADDR	0x4C000000
 
 #define LOCKTIME_OFF    0x00
 #define MPLLCON_OFF 	0x04
@@ -140,5 +140,35 @@ void init_clock();
 void set_clk_dbg_port();
 void enable_gpio_clk();
 void enable_apb_clk(unsigned int peripheral_clk);
+
+
+#define set_clk_lock_time(CLK_BA,upll_lock_time,mpll_lock_time)\
+		writereg32(LOCKTIME_REG(CLK_BA),((upll_lock_time)<<U_LTIME_SHIFT) | (mpll_lock_time))
+
+
+#define set_clk_mpll(CLK_BA,mdiv,pdiv,sdiv) \
+	writereg32(MPLLCON_REG(CLK_BA), \
+							(((mdiv)<<MDIV_SHIFT)| \
+							((pdiv)<<PDIV_SHIFT)| \
+							((sdiv)<<SDIV_SHIFT))
+
+#define set_clk_upll(CLK_BA,mdiv,pdiv,sdiv) \
+	writereg32(UPLLCON_REG(CLK_BA), \
+					(((mdiv)<<MDIV_SHIFT)| \
+					((pdiv)<<PDIV_SHIFT)| \
+					((sdiv)<<SDIV_SHIFT))
+
+
+#define set_clock_divn(CLK_BA,divn_upll,hdivn,pdivn) \
+	writereg32(CLKDIVN_REG(CLK_BA), \
+					(divn_upll) | (hdivn) | (pdivn))
+				
+
+#define clear_slow_clock(CLK_BA) do { \
+	clear_reg_params(CLKSLOW_REG(CLK_BA),SLOW_BIT); \
+	clear_reg_params(CLKSLOW_REG(CLK_BA),UCLK_ON); \
+	clear_reg_params(CLKSLOW_REG(CLK_BA),MPLL_OFF); \
+	} while(0)
+
 
 #endif

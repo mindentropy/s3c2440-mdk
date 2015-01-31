@@ -133,7 +133,7 @@ int main(void) {
 	//puts("TB\r\n");
 
 	//apb_clk_enable_gpio();
-	apb_clk_enable(CLK_BA,CLK_GPIO);
+	apb_clk_enable(CLK_BASE_ADDR,CLK_GPIO);
 
 	init_spkr();
 	init_led();

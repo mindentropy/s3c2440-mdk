@@ -41,7 +41,7 @@ void print_hex_uart(uint32_t UART_BA,uint32_t num)
 void init_uart(uint32_t UART_BA)
 {
 
-	apb_clk_enable(CLK_BA,CLK_UART0);
+	apb_clk_enable(CLK_BASE_ADDR,CLK_UART0);
 	set_gpio_con(GPH_BA,nCTS0|nRTS0|TXD0|RXD0);
 	writereg32(ULCON_REG(UART_BA),WORD_LENGTH); //Set line control.
 	
