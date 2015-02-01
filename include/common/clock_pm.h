@@ -86,17 +86,6 @@
 #define apb_clk_enable(CLK_BA,CLK) \
 	set_reg_params(CLKCON_REG(CLK_BA),CLK)
 
-#define apb_clk_enable_uart0() \
-	enable_apb_clk(CLK_UART0)
-
-#define apb_clk_enable_uart1() \
-	enable_apb_clk(CLK_UART1)
-
-#define apb_clk_enable_uart2() \
-	enable_apb_clk(CLK_UART2)
-	
-#define apb_clk_enable_gpio() \
-	enable_apb_clk(CLK_GPIO)
 
 #define CLKSLOW	0x4C000010
 
@@ -150,13 +139,13 @@ void enable_apb_clk(unsigned int peripheral_clk);
 	writereg32(MPLLCON_REG(CLK_BA), \
 							(((mdiv)<<MDIV_SHIFT)| \
 							((pdiv)<<PDIV_SHIFT)| \
-							((sdiv)<<SDIV_SHIFT))
+							((sdiv)<<SDIV_SHIFT)))
 
 #define set_clk_upll(CLK_BA,mdiv,pdiv,sdiv) \
 	writereg32(UPLLCON_REG(CLK_BA), \
-					(((mdiv)<<MDIV_SHIFT)| \
-					((pdiv)<<PDIV_SHIFT)| \
-					((sdiv)<<SDIV_SHIFT))
+			(((mdiv)<<MDIV_SHIFT)| \
+			((pdiv)<<PDIV_SHIFT)| \
+			((sdiv)<<SDIV_SHIFT)))
 
 
 #define set_clock_divn(CLK_BA,divn_upll,hdivn,pdivn) \

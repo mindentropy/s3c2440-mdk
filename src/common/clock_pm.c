@@ -2,60 +2,6 @@
 #include "clock_pm.h"
 #include "gpio_def.h"
 
-void enable_apb_clk(unsigned int peripheral_clk)
-{
-	set_reg_params(CLKCON,peripheral_clk);
-}
-
-void set_mpll(unsigned int mdiv,
-				unsigned int pdiv,
-				unsigned int sdiv) 
-{
-
-	writereg32(MPLLCON,
-				(mdiv<<MDIV_SHIFT) | 
-				(pdiv<<PDIV_SHIFT) | 
-				(sdiv<<SDIV_SHIFT));
-
-}
-
-
-void set_upll(unsigned int mdiv,
-				unsigned int pdiv,
-				unsigned int sdiv) 
-{
-	
-	writereg32(UPLLCON,
-				(mdiv<<MDIV_SHIFT) | 
-				(pdiv<<PDIV_SHIFT) | 
-				(sdiv<<SDIV_SHIFT));
-}
-
-
-void set_clk_divn(unsigned int divn_upll,
-				unsigned int hdivn,
-				unsigned int pdivn)
-{
-	
-	//writereg32(CLKDIVN,0x00000005);
-	writereg32(CLKDIVN,divn_upll|hdivn|pdivn);
-}
-
-
-void set_clock_lock_time(unsigned short upll_lock_time,
-					unsigned short mpll_lock_time)
-{
-/*	writereg32(REG_LOCKTIME,
-		((upll_lock_time << U_LTIME_SHIFT)|(mpll_lock_time)));*/
-	writereg32(REG_LOCKTIME,0xFFFFFFFF);
-}
-
-void clear_slow_clk()
-{
-	clear_reg_params(CLKSLOW,SLOW_BIT);
-	clear_reg_params(CLKSLOW,UCLK_ON);
-	clear_reg_params(CLKSLOW,MPLL_OFF);
-}
 							
 void set_clk_dbg_port()
 {
@@ -73,11 +19,10 @@ void init_clock()
 {
 	//unsigned int i = 0, j = 0;
 
-
 	disable_pull_up(GPHUP,CLKOUT0_PIN|CLKOUT1_PIN);
 
-	set_clock_lock_time(0xFFFF,0xFFFF);
-
+	set_clk_lock_time(CLK_BASE_ADDR,
+						0xFFFF,0xFFFF);
 
 	/* 
 	 *------
@@ -88,9 +33,10 @@ void init_clock()
 	 * myled 2440init.s
 	 */
 
-	set_clk_divn(DIVN_UPLL_BY_1,
-				HDIVN_FCLK_BY_4,
-				PDIVN_HCLK_BY_2);
+	set_clock_divn(CLK_BASE_ADDR,
+					DIVN_UPLL_BY_1,
+					HDIVN_FCLK_BY_4,
+					PDIVN_HCLK_BY_2);
 
 	/* 
 	 * Set CPU to asynchronous mode.
@@ -107,7 +53,8 @@ void init_clock()
 		);
 
 	/* Set upll first, use 7 "nops" delay and then set mpll */
-	set_upll(0x38,0x2,0x2); //48 Mhz.
+
+	set_clk_upll(CLK_BASE_ADDR,0x38,0x2,0x2); //48 Mhz.
     
 	__asm__ __volatile__(
 			"mov r0,r0\n\t"
@@ -123,7 +70,7 @@ void init_clock()
 		);
 
 	
-	set_mpll(0x7f,0x2,0x1); //405 Mhz
+	set_clk_mpll(CLK_BASE_ADDR,0x7f,0x2,0x1); //405 Mhz
 
 	__asm__ __volatile__(
 			"mov r0,r0\n\t"
@@ -138,5 +85,5 @@ void init_clock()
 			"mov r0,r0\n\t"
 		);
 
-	clear_slow_clk();
+	clear_slow_clock(CLK_BASE_ADDR);
 }
