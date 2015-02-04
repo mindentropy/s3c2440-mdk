@@ -103,8 +103,8 @@
 #define disable_pull_up(port_reg,linemask) \
 	set_reg_params(port_reg,linemask)
 
-void set_gpio_clk_dbg();
-void set_gpio_uart_ch0();
+//void set_gpio_clk_dbg();
+//void set_gpio_uart_ch0();
 
 #define set_gpio_con(GPIO_REG_BA,param) \
 	set_reg_params(GPCON_REG(GPIO_REG_BA),param)

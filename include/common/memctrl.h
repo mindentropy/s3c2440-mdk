@@ -4,7 +4,15 @@
 
 #include "common.h"
 
+
+#define MEM_BA  0x48000000
+
+#define BWSCON_OFF 0x0
 #define BWSCON 	0x48000000
+
+#define BWSCON_REG (BA) \
+	HW_REG(BA,BWSCON_OFF)
+	
 
 #define ST7 	BIT31
 #define WS7 	BIT30
@@ -37,6 +45,14 @@
 
 #define DW0 	(BIT2|BIT1) //Read only determined by OM[[1:0] pins.
 
+#define BANKCON0_OFF 	0x04
+#define BANKCON1_OFF	0x08
+#define BANKCON2_OFF	0x0C
+#define BANKCON3_OFF	0x10
+#define BANKCON4_OFF	0x14
+#define BANKCON5_OFF	0x18
+#define BANKCON6_OFF	0x1C
+#define BANKCON7_OFF	0x20
 
 #define BANKCON0 	0x48000004
 #define BANKCON1 	0x48000008
@@ -46,6 +62,31 @@
 #define BANKCON5 	0x48000018
 #define BANKCON6 	0x4800001C
 #define BANKCON7 	0x48000020
+
+#define BANKCON0_REG(BA) \
+	HW_REG(BA,BANKCON0_OFF)
+
+#define BANKCON1_REG(BA) \
+	HW_REG(BA,BANKCON1_OFF)
+	
+#define BANKCON2_REG(BA) \
+	HW_REG(BA,BANKCON2_OFF)
+
+#define BANKCON3_REG(BA) \
+	HW_REG(BA,BANKCON3_OFF)
+
+#define BANKCON4_REG(BA) \
+	HW_REG(BA,BANKCON4_OFF)
+
+#define BANKCON5_REG(BA) \
+	HW_REG(BA,BANKCON5_OFF)
+
+#define BANKCON6_REG(BA) \
+	HW_REG(BA,BANKCON6_OFF)
+
+#define BANKCON7_REG(BA) \
+	HW_REG(BA,BANKCON7_OFF)
+
 
 #define Tacs 		(BIT14|BIT13)
 #define Tacs_0CLK   (0)
@@ -110,6 +151,11 @@
 
 #define REFRESH 	0x48000024
 
+#define REFRESH_OFF 0x24
+
+#define REFRESH_REG(BA) \
+	HW_REG(BA,REFRESH_OFF)
+
 #define REFEN 							(BIT23)
 #define TREFMD  						(BIT22)
 #define Trp_SDRAM_RAS_PRECHARGE_TIME 	(BIT21|BIT20)
@@ -124,6 +170,11 @@
 #define Tsrc_7CLK 	(BIT19|BIT18)
 
 #define BANKSIZE    (0x48000028)
+
+#define BANKSIZE_OFF (0x28)
+
+#define BANKSIZE_REG(BA) \
+	HW_REG(BA,BANKSIZE_OFF)
 
 #define BURST_EN    (BIT7)
 
@@ -141,6 +192,15 @@
 
 #define MRSRB6 		(0x4800002C)
 #define MRSRB7 		(0x48000030)
+
+#define MRSRB6_OFF  (0x2C)
+#define MRSRB7_OFF  (0x30)
+
+#define MRSRB6_REG(BA) \
+	HW_REG(BA,MRSRB6_OFF)
+
+#define MRSRB7_REG(BA) \
+	HW_REG(BA,MRSRB7_OFF)
 
 #define WBL 		(BIT9)
 #define TM 			(BIT8|BIT7)

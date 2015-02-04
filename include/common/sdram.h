@@ -6,7 +6,13 @@
 #include "gpio_def.h"
 #include "clock_pm.h"
 
+#define MEM_BA  	0x48000000
+
+#define BWSCON_OFF 0x0
 #define BWSCON 		0x48000000
+
+#define BWSCON_REG(BA) \
+	HW_REG(BA,BWSCON_OFF)
 
 #define ST7 			(BIT31)
 #define WS7     		(BIT30)
@@ -84,6 +90,30 @@
 #define BANKCON4	0x48000014
 #define BANKCON5	0x48000018
 
+#define BANKCON0_OFF 	0x04
+#define BANKCON1_OFF	0x08
+#define BANKCON2_OFF	0x0C
+#define BANKCON3_OFF	0x10
+#define BANKCON4_OFF	0x14
+#define BANKCON5_OFF	0x18
+
+#define BANKCON0_REG(BA) \
+	HW_REG(BA,BANKCON0_OFF)
+
+#define BANKCON1_REG(BA) \
+	HW_REG(BA,BANKCON1_OFF)
+	
+#define BANKCON2_REG(BA) \
+	HW_REG(BA,BANKCON2_OFF)
+
+#define BANKCON3_REG(BA) \
+	HW_REG(BA,BANKCON3_OFF)
+
+#define BANKCON4_REG(BA) \
+	HW_REG(BA,BANKCON4_OFF)
+
+#define BANKCON5_REG(BA) \
+	HW_REG(BA,BANKCON5_OFF)
 
 #define Tacs        (BIT14|BIT13)
 #define Tacs_CLK_0	0x0
@@ -136,6 +166,15 @@
 #define BANKCON6	0x4800001C
 #define BANKCON7	0x48000020
 
+#define BANKCON6_OFF	0x1C
+#define BANKCON7_OFF	0x20
+
+#define BANKCON6_REG(BA) \
+	HW_REG(BA,BANKCON6_OFF)
+
+#define BANKCON7_REG(BA) \
+	HW_REG(BA,BANKCON7_OFF)
+
 #define MT_ROM_SRAM			0
 #define MT_RESERVED_01		(BIT15)
 #define MT_RESERVED_02		(BIT16)
@@ -150,6 +189,10 @@
 #define SCAN_10BIT		BIT1
 
 #define REFRESHCTL		0x48000024
+#define REFRESHCTL_OFF	0x24
+
+#define REFRESHCTL_REG(BA) \
+	HW_REG(BA,REFRESHCTL_OFF)
 
 #define REFEN				BIT23
 #define TREFMD_SELF_REFRESH	BIT22
@@ -168,7 +211,11 @@
 #define Tsrc_7	(BIT19|BIT18)
 
 
-#define BANKSIZE	0x48000028
+#define BANKSIZE		0x48000028
+#define BANKSIZE_OFF	0x28
+
+#define BANKSIZE_REG(BA) \
+	HW_REG(BA,BANKSIZE_OFF)
 
 #define BURST_EN	BIT7
 #define SCKE_EN		BIT5
@@ -184,6 +231,15 @@
 
 #define MRSRB6		0x4800002C
 #define MRSRB7		0x48000030
+
+#define MRSRB6_OFF  (0x2C)
+#define MRSRB7_OFF  (0x30)
+
+#define MRSRB6_REG(BA) \
+	HW_REG(BA,MRSRB6_OFF)
+
+#define MRSRB7_REG(BA) \
+	HW_REG(BA,MRSRB7_OFF)
 
 #define WBL 				BIT9
 #define TM 					(BIT8|BIT7)

@@ -160,4 +160,7 @@ void enable_apb_clk(unsigned int peripheral_clk);
 	} while(0)
 
 
+#define set_gpio_clk_dbg() \
+	set_reg_params(GPCON_REG(GPH_BA),(CLKOUT1|CLKOUT0))
+
 #endif
