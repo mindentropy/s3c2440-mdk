@@ -16,27 +16,27 @@
 #define CLKDIVN_OFF 	0x14
 #define CAMDIVN_OFF		0x18
 
-#define LOCKTIME_REG(CLK_BA) \
-	HW_REG(CLK_BA,LOCKTIME_OFF)
+#define LOCKTIME_REG(BA) \
+	HW_REG(BA,LOCKTIME_OFF)
 
 
-#define MPLLCON_REG(CLK_BA) \
-	HW_REG(CLK_BA,MPLLCON_OFF)
+#define MPLLCON_REG(BA) \
+	HW_REG(BA,MPLLCON_OFF)
 
-#define UPLLCON_REG(CLK_BA) \
-	HW_REG(CLK_BA,UPLLCON_OFF)
+#define UPLLCON_REG(BA) \
+	HW_REG(BA,UPLLCON_OFF)
 
-#define CLKCON_REG(CLK_BA) \
-	HW_REG(CLK_BA,CLKCON_OFF)
+#define CLKCON_REG(BA) \
+	HW_REG(BA,CLKCON_OFF)
 
-#define CLKSLOW_REG(CLK_BA) \
-	HW_REG(CLK_BA,CLKSLOW_OFF)
+#define CLKSLOW_REG(BA) \
+	HW_REG(BA,CLKSLOW_OFF)
 
-#define CLKDIVN_REG(CLK_BA) \
-	HW_REG(CLK_BA,CLKDIVN_OFF)
+#define CLKDIVN_REG(BA) \
+	HW_REG(BA,CLKDIVN_OFF)
 
-#define CAMDIVN_REG(CLK_BA) \
-	HW_REG(CLK_BA,CAMDIVN_OFF)
+#define CAMDIVN_REG(BA) \
+	HW_REG(BA,CAMDIVN_OFF)
 
 /***********************************/
 
@@ -83,8 +83,8 @@
 #define CLK_IDLE				BIT2
 
 
-#define apb_clk_enable(CLK_BA,CLK) \
-	set_reg_params(CLKCON_REG(CLK_BA),CLK)
+#define apb_clk_enable(BA,CLK) \
+	set_reg_params(CLKCON_REG(BA),CLK)
 
 
 #define CLKSLOW	0x4C000010
@@ -131,32 +131,32 @@ void enable_gpio_clk();
 void enable_apb_clk(unsigned int peripheral_clk);
 
 
-#define set_clk_lock_time(CLK_BA,upll_lock_time,mpll_lock_time)\
-		writereg32(LOCKTIME_REG(CLK_BA),((upll_lock_time)<<U_LTIME_SHIFT) | (mpll_lock_time))
+#define set_clk_lock_time(BA,upll_lock_time,mpll_lock_time)\
+		writereg32(LOCKTIME_REG(BA),((upll_lock_time)<<U_LTIME_SHIFT) | (mpll_lock_time))
 
 
-#define set_clk_mpll(CLK_BA,mdiv,pdiv,sdiv) \
-	writereg32(MPLLCON_REG(CLK_BA), \
+#define set_clk_mpll(BA,mdiv,pdiv,sdiv) \
+	writereg32(MPLLCON_REG(BA), \
 							(((mdiv)<<MDIV_SHIFT)| \
 							((pdiv)<<PDIV_SHIFT)| \
 							((sdiv)<<SDIV_SHIFT)))
 
-#define set_clk_upll(CLK_BA,mdiv,pdiv,sdiv) \
-	writereg32(UPLLCON_REG(CLK_BA), \
+#define set_clk_upll(BA,mdiv,pdiv,sdiv) \
+	writereg32(UPLLCON_REG(BA), \
 			(((mdiv)<<MDIV_SHIFT)| \
 			((pdiv)<<PDIV_SHIFT)| \
 			((sdiv)<<SDIV_SHIFT)))
 
 
-#define set_clock_divn(CLK_BA,divn_upll,hdivn,pdivn) \
-	writereg32(CLKDIVN_REG(CLK_BA), \
+#define set_clock_divn(BA,divn_upll,hdivn,pdivn) \
+	writereg32(CLKDIVN_REG(BA), \
 					(divn_upll) | (hdivn) | (pdivn))
 				
 
-#define clear_slow_clock(CLK_BA) do { \
-	clear_reg_params(CLKSLOW_REG(CLK_BA),SLOW_BIT); \
-	clear_reg_params(CLKSLOW_REG(CLK_BA),UCLK_ON); \
-	clear_reg_params(CLKSLOW_REG(CLK_BA),MPLL_OFF); \
+#define clear_slow_clock(BA) do { \
+	clear_reg_params(CLKSLOW_REG(BA),SLOW_BIT); \
+	clear_reg_params(CLKSLOW_REG(BA),UCLK_ON); \
+	clear_reg_params(CLKSLOW_REG(BA),MPLL_OFF); \
 	} while(0)
 
 

@@ -137,29 +137,44 @@ enum int_offset
 	INT_ADC_OFFSET,
 };
 
-void set_interrupt_mode(unsigned int_line);
-void set_fiq_mode(unsigned int_line);
-void enable_interrupt_service(unsigned int_mask);
-void disable_interrupt_service(unsigned int_mask);
-
-#define  disable_all_interrupts() \
-	writereg32(INTMSK,0xFFFFFFFF)
+#define  disable_all_interrupts(BA) \
+	writereg32(INTMSK_REG(BA),0xFFFFFFFF)
 	
-#define enable_all_interrupts() \
-	writereg32(INTMSK,0x0)
-	
-
-unsigned get_interrupt_pending_status(unsigned interrupt_line);
-unsigned get_interrupt_subservice_pending_status(unsigned interrupt_line);
-void enable_interrupt_sub_service(unsigned int_mask);
-void disable_interrupt_sub_service(unsigned int_mask);
+#define enable_all_interrupts(BA) \
+	writereg32(INTMSK_REG(BA),0x0)
 
 
-#define disable_all_interrupt_subservice() \
-	writereg32(INTSUBMSK,0xFFFF)
+#define disable_all_interrupt_subservice(BA) \
+	writereg32(INTSUBMSK_REG(BA),0xFFFF)
 	
-#define enable_all_interrupt_subservice() \
-	writereg32(INTSUBMSK,0)
+#define enable_all_interrupt_subservice(BA) \
+	writereg32(INTSUBMSK_REG(BA),0)
 	
+
+#define enable_interrupt_sub_service(BA,mask) \
+	clear_reg_params(INTSUBMSK_REG(BA),mask)
+
+#define disable_interrupt_sub_service(BA,mask) \
+	set_reg_params(INTSUBMSK_REG(BA),mask)
+
+
+#define get_interrupt_pending_status(BA,interrupt_line) \
+	(readreg32(INTPND_REG(BA)) & (interrupt_line))
+
+#define get_interrupt_subservice_pending_status(BA,interrupt_line) \
+	(readreg32(SUBSRCPND_REG(BA)) & (interrupt_line))
+
+#define set_interrupt_mode(BA,interrupt_line) \
+	set_reg_params(INTMOD_REG(BA),interrupt_line)
+
+#define set_fiq_mode(BA,interrupt_line) \
+	clear_reg_params(INTMOD_REG(BA),interrupt_line)
+
+#define enable_interrupt_service(BA,interrupt_mask) \
+	clear_reg_params(INTMSK_REG(BA),interrupt_mask)
+
+#define disable_interrupt_service(BA,interrupt_mask) \
+	set_reg_params(INTMSK_REG(BA),interrupt_mask)
+
 
 #endif

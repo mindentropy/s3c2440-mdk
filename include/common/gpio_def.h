@@ -17,6 +17,7 @@
 
 #define GPCON   0x00
 #define GPDAT   0x04
+#define GPUP    0x08
 
 #define GPCON_REG(GPIO_BA) \
 		HW_REG(GPIO_BA,GPCON)

@@ -2,6 +2,6 @@
 
 void init_spkr()
 {
-	disable_pull_up(GPBUP,SPKR_GPIO_PIN);
-	set_reg_params(GPBCON,SPKR_GPIO_OUT);
+	disable_pull_up(GPUP_REG(GPB_BA),SPKR_GPIO_PIN);
+	set_reg_params(GPCON_REG(GPB_BA),SPKR_GPIO_OUT);
 }

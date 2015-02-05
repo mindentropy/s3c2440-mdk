@@ -8,7 +8,7 @@
 
 #define MEM_BA  	0x48000000
 
-#define BWSCON_OFF 0x0
+#define BWSCON_OFF 	0x0
 #define BWSCON 		0x48000000
 
 #define BWSCON_REG(BA) \

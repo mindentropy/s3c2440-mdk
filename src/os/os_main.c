@@ -122,8 +122,8 @@ int main(void) {
 
 	disable_watchdog(WT_BA); 
 
-	disable_all_interrupts();
-	disable_all_interrupt_subservice();
+	disable_all_interrupts(INT_BA);
+	disable_all_interrupt_subservice(INT_BA);
 
 	set_clk_dbg_port();
 	init_clock();
