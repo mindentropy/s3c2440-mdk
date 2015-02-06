@@ -14,7 +14,7 @@ void sdram_init()
 
 	/* Configure BANKCON6/BANKCON7 */
 /*	writereg32(BANKCON6,MT_SYNC_DRAM|SCAN_9BIT);*/
-	writereg32(BANKCON0_REG(MEM_BA),MT_SYNC_DRAM|SCAN_9BIT);
+	writereg32(BANKCON6_REG(MEM_BA),MT_SYNC_DRAM|SCAN_9BIT);
 
 
 	/* Set BANKCON7 to ROM/SRAM */
@@ -22,7 +22,7 @@ void sdram_init()
 	writereg32(BANKCON7_REG(MEM_BA),MT_ROM_SRAM);
 
 	/* Configure SDRAM Refresh settings */
-	writereg32(BANKCON7_REG(MEM_BA),REFEN|Tsrc_5|1269);
+	writereg32(REFRESHCTL_REG(MEM_BA),REFEN|Tsrc_5|1269);
 
 	/* Configure Banksize setting */
 	writereg32(BANKSIZE_REG(MEM_BA),BURST_EN|SCKE_EN|SCLK_EN|BK76MAP_64MB);
