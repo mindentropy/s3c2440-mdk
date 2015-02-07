@@ -77,7 +77,7 @@ void main(void) {
 
 	//apb_clk_enable_gpio();
 	apb_clk_enable(CLK_BASE_ADDR,CLK_GPIO);
-//	init_spkr();
+	init_spkr();
 //	init_led();
 //	led_off(LED4|LED3|LED2|LED1);
 
@@ -97,12 +97,12 @@ void main(void) {
 		//load_ch = getc_ch0();
 		load_ch = getc(UART0_BA);
 		ram_ptr[i] = load_ch;
-//		set_spkr_hi();
+		set_spkr_hi();
 		led_on(LED4);
 		//putc_ch0(ram_ptr[i]);
 		putc(UART0_BA,ram_ptr[i]);
 		led_off(LED4);
-//		set_spkr_lo();
+		set_spkr_lo();
 	}
 
 	__asm__ __volatile__(

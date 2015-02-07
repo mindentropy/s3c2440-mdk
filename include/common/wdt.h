@@ -11,13 +11,13 @@
 #define WTCNT_OFF 	0x08
 
 #define WTCON_REG(BA) \
-	HW_REG(BA,WTCON_OFF)
+	HW_REG((BA),WTCON_OFF)
 
 #define WTDAT_REG(BA) \
-	HW_REG(BA,WTDAT_OFF)
+	HW_REG((BA),WTDAT_OFF)
 
 #define WTCNT_REG(BA) \
-	HW_REG(BA,WTCNT_OFF)
+	HW_REG((BA),WTCNT_OFF)
 
 
 #define PRESCALER_VAL 		(BIT15|BIT14|BIT13|BIT12|BIT11|BIT10|BIT9|BIT8)
@@ -32,9 +32,11 @@
 #define WDT_CLK_INT_EN 	     (BIT2)
 #define WDT_CLK_RESET_EN     (BIT0)
 
+/*
 #define WTCON 	0x53000000
 #define WTDAT 	0x53000004
 #define WTCNT 	0x53000008
+*/
 
 #define disable_watchdog(BA) \
 	writereg32(WTCON_REG(BA),0)

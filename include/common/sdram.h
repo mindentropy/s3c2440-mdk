@@ -8,8 +8,9 @@
 
 #define MEM_BA  	0x48000000
 
+//#define BWSCON 		0x48000000
+//
 #define BWSCON_OFF 	0x0
-#define BWSCON 		0x48000000
 
 #define BWSCON_REG(BA) \
 	HW_REG(BA,BWSCON_OFF)
@@ -82,13 +83,14 @@
 #define DW0_16b 		(BIT1)
 #define DW0_32b 		(BIT2)
 
-
+/*
 #define BANKCON0	0x48000004
 #define BANKCON1	0x48000008
 #define BANKCON2	0x4800000C
 #define BANKCON3	0x48000010
 #define BANKCON4	0x48000014
 #define BANKCON5	0x48000018
+*/
 
 #define BANKCON0_OFF 	0x04
 #define BANKCON1_OFF	0x08
@@ -162,9 +164,10 @@
 #define Tacc_CLK_10	(BIT10|BIT9)
 #define Tacc_CLK_14	(BIT10|BIT9|BIT8)
 
-
+/*
 #define BANKCON6	0x4800001C
 #define BANKCON7	0x48000020
+*/
 
 #define BANKCON6_OFF	0x1C
 #define BANKCON7_OFF	0x20
@@ -188,7 +191,8 @@
 #define SCAN_9BIT		BIT0
 #define SCAN_10BIT		BIT1
 
-#define REFRESHCTL		0x48000024
+//#define REFRESHCTL		0x48000024
+
 #define REFRESHCTL_OFF	0x24
 
 #define REFRESHCTL_REG(BA) \
@@ -211,7 +215,8 @@
 #define Tsrc_7	(BIT19|BIT18)
 
 
-#define BANKSIZE		0x48000028
+//#define BANKSIZE		0x48000028
+
 #define BANKSIZE_OFF	0x28
 
 #define BANKSIZE_REG(BA) \
@@ -229,8 +234,10 @@
 #define BK76MAP_4MB		(BIT2|BIT0)
 #define BK76MAP_2MB		(BIT2)
 
+/*
 #define MRSRB6		0x4800002C
 #define MRSRB7		0x48000030
+*/
 
 #define MRSRB6_OFF  (0x2C)
 #define MRSRB7_OFF  (0x30)

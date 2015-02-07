@@ -109,16 +109,16 @@
 #define set_bitval_pos(value,shift) \
 	((value)<<(shift))
 
+#define set_reg_params(reg,regmask) \
+	do { \
+		writereg32((reg),setbits(readreg32(reg),(regmask))); \
+	} while(0)
 
-void set_reg_params(
-					uint32_t reg,
-					uint32_t regmask
-					);
 
-void clear_reg_params(
-					uint32_t reg,
-					uint32_t regmask
-					);
+#define clear_reg_params(reg,regmask) \
+	do { \
+		writereg32((reg),clearbits(readreg32(reg),(regmask))); \
+	} while(0)
 
 
 #define HW_REG(BASE_ADDRESS,OFFSET) \

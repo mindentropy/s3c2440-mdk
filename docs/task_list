@@ -1,6 +1,10 @@
 S3C2440 TODO LIST
 =================
 
+Refactoring
+-----------
+1) Refactoring of code to have proper design API's --> Done.
+
 Generic board bring up
 ----------------------
 1) Code to bring up to main -> Done
@@ -11,7 +15,8 @@ Memory Management Unit
 ----------------------
 *Setup MMU to handle the interrupt vector table movement.
 
-1) Setup MMU page directory.
+1) Setup MMU page directory. --> Done
+2) Setup MMU to vary the mapping of interrupts and exception table -->
 
 GPIO
 ----
@@ -34,7 +39,7 @@ MEMORY CONTROLLER
 2) Add Memory controller helper functions --> Done.
 3) Initialze the SDRAM with fixed parameters --> Done.
 4) Test the SDRAM controller. --> Done.
-5) Jump to code loaded in the memory controller.
+5) Jump to code loaded in the memory. --> Done.
 
 NAND FLASH CONTROLLER
 ---------------------
@@ -65,8 +70,8 @@ USB DEVICE CONTROLLER
 
 INTERRUPT CONTROLLER
 --------------------
-1) Update interrupt definitions.
-2) Helper functions for interrupts.
+1) Update interrupt definitions. --> Done. Testing pending.
+2) Helper functions for interrupts. --> Done. Testing pending.
 3) Disable all interrupt for testing. --> Done.
 
 LCD CONTROLLER
@@ -112,9 +117,9 @@ Speaker
 Makefile
 --------
 1) Organize separate folders for the loader and the OS. --> Done.
-2) Optimize the makefile to better reuse the pattern variables.
-3) Create separate output files for the boot loader and the main OS.
+2) Optimize the makefile to better reuse the pattern variables. --> Done
+3) Create separate output files for the boot loader and the main OS. --> Done
 4) Create separate libraries for the boot loader and the main OS. Reason being the loader can be 
 optimized and added more functionalities. Also the main OS can have better peripheral library 
-support.
-5) Create a ld section for the startup code so that link order does not matter.
+support. --> Design issue and pending.
+5) Create a ld section for the startup code so that link order does not matter. 

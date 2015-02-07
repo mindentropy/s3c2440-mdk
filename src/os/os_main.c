@@ -44,23 +44,24 @@ void test_delay() {
 void dump_clk()
 {
 	uart_puts(UART0_BA,"************************\r\n");
+
 	uart_puts(UART0_BA,"reg_locktime: ");
-	print_hex_uart(UART0_BA,readreg32(REG_LOCKTIME));
+	print_hex_uart(UART0_BA,readreg32(LOCKTIME_REG(CLK_BASE_ADDR)));
 	uart_puts(UART0_BA,"\r\n");
 	uart_puts(UART0_BA,"mpllcon : ");
-	print_hex_uart(UART0_BA,readreg32(MPLLCON));
+	print_hex_uart(UART0_BA,readreg32(MPLLCON_REG(CLK_BASE_ADDR)));
 	uart_puts(UART0_BA,"\r\n");
 	uart_puts(UART0_BA,"upllcon : ");
-	print_hex_uart(UART0_BA,readreg32(UPLLCON));
+	print_hex_uart(UART0_BA,readreg32(UPLLCON_REG(CLK_BASE_ADDR)));
 	uart_puts(UART0_BA,"\r\n");
 	uart_puts(UART0_BA,"clkdivn: ");
-	print_hex_uart(UART0_BA,readreg32(CLKDIVN));
+	print_hex_uart(UART0_BA,readreg32(CLKDIVN_REG(CLK_BASE_ADDR)));
 	uart_puts(UART0_BA,"\r\n");
 	uart_puts(UART0_BA,"clkslow: ");
-	print_hex_uart(UART0_BA,readreg32(CLKSLOW));
+	print_hex_uart(UART0_BA,readreg32(CLKSLOW_REG(CLK_BASE_ADDR)));
 	uart_puts(UART0_BA,"\r\n");
 	uart_puts(UART0_BA,"clkcon: ");
-	print_hex_uart(UART0_BA,readreg32(CLKCON));
+	print_hex_uart(UART0_BA,readreg32(CLKCON_REG(CLK_BASE_ADDR)));
 	uart_puts(UART0_BA,"\r\n");
 
 	uart_puts(UART0_BA,"************************\r\n");

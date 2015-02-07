@@ -19,17 +19,18 @@
 #define GPDAT   0x04
 #define GPUP    0x08
 
-#define GPCON_REG(GPIO_BA) \
-		HW_REG(GPIO_BA,GPCON)
+#define GPCON_REG(BA) \
+		HW_REG((BA),GPCON)
 
-#define GPDAT_REG(GPIO_BA) \
-		HW_REG(GPIO_BA,GPDAT)
+#define GPDAT_REG(BA) \
+		HW_REG((BA),GPDAT)
 
-#define GPUP_REG(GPIO_BA) \
-		HW_REG(GPIO_BA,GPUP)
+#define GPUP_REG(BA) \
+		HW_REG((BA),GPUP)
 
 /**********************************/
 
+/*
 #define GPACON	0x56000000
 #define GPADAT	0x56000004
 
@@ -66,8 +67,14 @@
 #define GPJDAT	0x560000d4
 #define GPJUP	0x560000d8
 
+#define MISCCR  0x56000080 
+*/
 
-#define MISCCR  0x56000080
+#define MISCCR_OFF 0x80
+
+#define MISCCR_REG() \
+		((GPA_BA) + MISCCR_OFF)
+
 
 #define CLK_SEL1 		(BIT10|BIT9|BIT8)
 #define CLK_SEL1_MPLL  	(0)

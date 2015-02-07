@@ -11,15 +11,16 @@ void set_clk_dbg_port()
 	/*set_reg_params(MISCCR,BIT8);
 	clear_reg_params(MISCCR,BIT10|BIT9);*/
 	//set_reg_params(MISCCR,BIT5|BIT4);
-	set_reg_params(MISCCR,(BIT5|BIT4));
-	clear_reg_params(MISCCR,(BIT6));
+	set_reg_params(MISCCR_REG(),(BIT5|BIT4));
+	clear_reg_params(MISCCR_REG(),(BIT6));
 }
 
 void init_clock()
 {
 	//unsigned int i = 0, j = 0;
 
-	disable_pull_up(GPHUP,CLKOUT0_PIN|CLKOUT1_PIN);
+	//disable_pull_up(GPHUP,CLKOUT0_PIN|CLKOUT1_PIN);
+	disable_pull_up(GPUP_REG(GPH_BA),CLKOUT0_PIN|CLKOUT1_PIN);
 
 	set_clk_lock_time(CLK_BASE_ADDR,
 						0xFFFF,0xFFFF);

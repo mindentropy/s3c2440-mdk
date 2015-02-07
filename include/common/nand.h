@@ -4,9 +4,8 @@
 
 #define NAND_BA 0x4E000000
 
-#define NFCONF 	0x4E000000
+//#define NFCONF 	0x4E000000
 #define NFCONF_OFF 0x00
-
 #define NFCONF_REG(BA) \
 	HW_REG(BA,NFCONF_OFF)
 
@@ -19,9 +18,8 @@
 #define ADDRCYCLE 	(BIT1)
 #define BUSWIDTH 	(BIT0)
 
-#define NFCONT 	0x4E000004
+//#define NFCONT 	0x4E000004
 #define NFCONT_OFF 0x04
-
 #define NFCONT_REG(BA) \
 	HW_REG(BA,NFCONT_OFF)
 
@@ -36,7 +34,7 @@
 #define REG_nCE 			(BIT1)
 #define MODE 				(BIT0)
 
-#define NFCMMD 			0x4E000008
+//#define NFCMMD 			0x4E000008
 #define NFCMMD_OFF 		0x08
 
 #define NFCMMD_REG(BA) \
@@ -44,7 +42,7 @@
 
 #define NFCMMD_MSK BYTE_MASK
 
-#define NFADDR 		0x4E00000C
+//#define NFADDR 		0x4E00000C
 #define NFADDR_OFF 	0x0C
 
 #define NFADDR_REG(BA) \
@@ -52,7 +50,7 @@
 
 #define NFADDR_MSK BYTE_MASK
 
-#define NFDATA 		0x4E000010
+//#define NFDATA 		0x4E000010
 #define NFDATA_OFF 	0x10
 
 #define NFDATA_REG(BA) \
@@ -60,9 +58,11 @@
 
 #define NFDATA_MSK  WORD_MASK
 
+/*
 #define NFMECCD0 	0x4E000014
 #define NFMECCD1 	0x4E000018
 #define NFSECCD 	0x4E00001C
+*/
 
 #define NFMECCD0_OFF 0x14
 #define NFMECCD1_OFF 0x18
@@ -89,7 +89,7 @@
 #define ECCDATA2_1 (BYTE_MASK<<8)
 #define ECCDATA2_0 (BYTE_MASK)
 
-#define NFSTAT 			0x4E000020
+//#define NFSTAT 			0x4E000020
 #define NFSTAT_OFF 		0x20
 #define NFSTAT_REG(BA) \
 	HW_REG(BA,NFSTAT_OFF)
@@ -99,8 +99,10 @@
 #define nCE 			(BIT1)
 #define RnB 			(BIT0)
 
+/*
 #define NFESTAT0 	0x4E000024
 #define NFESTAT1 	0x4E000028
+*/
 
 #define NFESTAT0_OFF 	0x24
 #define NFESTAT1_OFF 	0x28
@@ -118,8 +120,10 @@
 #define SpareError 		(BIT3|BIT2)
 #define MainError 		(BIT1|BIT0)
 
+/*
 #define NFMECC0 	0x4E00002C
 #define NFMECC1 	0x4E000030
+*/
 
 #define NFMECC0_OFF	0x2C
 #define NFMECC1_OFF	0x30
@@ -140,7 +144,7 @@
 #define MECC1_1 	(BYTE_MASK<<8)
 #define MECC1_0 	(BYTE_MASK)
 
-#define NFSECC 		0x4E000034
+//#define NFSECC 		0x4E000034
 #define NFSECC_OFF	0x34
 
 #define NFSECC_REG(BA) \
@@ -152,8 +156,10 @@
 #define SECC0_1 	(BYTE_MASK<<8)
 #define SECC0_0 	(BYTE_MASK)
 
+/*
 #define NFSBLK      0x4E000038
 #define NFEBLK      0x4E00003C
+*/
 
 #define NFSBLK_OFF  0x38
 #define NFEBLK_OFF  0x3C

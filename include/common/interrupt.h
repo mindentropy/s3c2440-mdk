@@ -39,13 +39,14 @@
 #define INTSUBMSK_REG(BA) \
 		HW_REG(BA,INTSUBMSK_OFF)
 
+/*
 #define SRCPND 		0x4A000000
 #define INTMOD 		0x4A000004
 #define INTMSK 		0x4A000008
 #define INTPRIORITY 0x4A00000C
 #define INTPND 		0x4A000010
 #define INTOFFSET 	0x4A000014
-
+*/
 
 #define EINT0 			BIT0
 #define EINT1   		BIT1
@@ -80,10 +81,10 @@
 #define INT_RTC         BIT30
 #define INT_ADC 		BIT31
 
-
-
+/*
 #define SUBSRCPND 	0x4A000018
 #define INTSUBMSK 	0x4A00001C
+*/
 
 #define INT_AC97 	BIT14
 #define INT_WDT 	BIT13

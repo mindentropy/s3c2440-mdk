@@ -1,5 +1,6 @@
 #include "common.h"
 
+/*
 void set_reg_params(unsigned int reg,
 					unsigned int regmask
 					)
@@ -13,3 +14,4 @@ void clear_reg_params(unsigned int reg,
 {
 	writereg32(reg,clearbits(readreg32(reg),regmask));
 }
+*/
