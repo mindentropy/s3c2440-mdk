@@ -5,18 +5,47 @@
 
 static unsigned int *ttb; //Translation table base address.
 
-static void setup_section_table(unsigned int flags)
+
+/* 
+ * How is the MMU setup?
+ * =====================
+ * (Before modification on anything related to MMU please go through MMU section
+ * 	please go through the ARM920T reference manual Chapter 3).
+ * 
+ * The setup_l1_section_table sets up level-1 page tables. This has 4096 entries.
+ * This means that each page size is equal to 1MB. So totally the memory space 
+ * covered is 4096 entries x 1048576 Bytes = 4GB.
+ *
+ * The ttb is the translation table base. 
+ * -This holds the translation table base address(TRANSLATION_TABLE_BASE_ADDR). 
+ * -This is starts at 0x33000000 and ends at 0x33004096 (L1 Page table has a maximum of 4096 entries)
+ * -This ttb is stored in CP15 register. The processor will know where the MMU table is
+ *  by accessing this register.
+ *  
+ *  -Now for 32bit ttb entries the top 31-20 (12 bits) contain the addresses 0-4095.
+ *  -The remainings bits are used as flags. For a single level l1 table to address translation
+ *  the flag is a L1_PG_TYPE (10b)
+ *  -Next if the table is a section page table see Fig3-4 in page 3-9 of the reference manual.
+ *  -In this there is always a Bit4 set bit present. The global domain access is the 
+ *  domain manager.
+ *  -The access permissions AP is the L1_AP_RW_RW.
+ *  -The section pages are set to (00b) non-cached and non-buffered.
+ *
+ *  When the MMU wants to fetch a address content it walks the translation table and
+ *  uses the remaining address as offset from the memory region base address into
+ *  the 1MB section.
+ *
+ */
+static void setup_l1_section_table(unsigned int flags)
 {
 	unsigned int i = 0;
 	unsigned int base = 0; //Map RAM and i/o address range.
 
 	base >>= 20;
 
-//	puts("Section table dump \r\n");
+	/* Map complete 4GB address space */
 	for(i = 0;i<4096;i++) { //Complete 4096 entries.
 		ttb[i] = ((base + i)<<20) | flags;
-/*		print_hex(ttb[i]);
-		puts("\r\n");*/
 	}
 }
 
@@ -116,7 +145,7 @@ void mmu_init()
 		: /* No clobbers */
 	);
 
-	setup_section_table(L1_AP_RW_RW|L1_PG_TYPE|L1_PG_BIT4);
+	setup_l1_section_table(L1_AP_RW_RW|L1_PG_TYPE|L1_PG_BIT4);
 
 	turn_mmu_on();
 
