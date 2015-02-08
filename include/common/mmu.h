@@ -90,5 +90,7 @@ void mmu_init();
 #define RESERVED_BUS_MODE  	(BIT31)
 #define ASYNCH_BUS_MODE 	(BIT31|BIT30)
 
+void blink_led_test() __attribute__((section(".handler")));
+
 #endif
 

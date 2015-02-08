@@ -1,6 +1,7 @@
 #include "mmu.h"
 #include "uart.h"
 #include "board_config.h"
+#include "uart_util.h"
 #include "led.h"
 
 static unsigned int *ttb; //Translation table base address.
@@ -31,11 +32,57 @@ static unsigned int *ttb; //Translation table base address.
  *  -The access permissions AP is the L1_AP_RW_RW.
  *  -The section pages are set to (00b) non-cached and non-buffered.
  *
- *  When the MMU wants to fetch a address content it walks the translation table and
- *  uses the remaining address as offset from the memory region base address into
- *  the 1MB section.
+ *  When an MMU wants to fetch the data for a virtual address it walks the translation table 
+ *  and dereferences the array to find the starting base address[e.g. ttb[i] ]. Next it uses the
+ *  remaining address bit [19-0] as an offset into the section [Section size being 1MB].
  *
  */
+
+/*
+ * TODO: Test by putting the vector table at 0x34000000 - 0x100000 = 0x33F00000 and mapping 0 to that address.
+ * Also map 0x34000000 - 0x100000 = 0x33F00000 to the same.
+ * To test set up an exception to see there is jump to that location.
+ *
+ */
+
+extern char __exception_vector_reloc_start__[];
+extern char __exception_vector_reloc_end__[];
+
+extern char __exception_handler_start__[];
+extern char __exception_handler_end__[];
+
+static void setup_interrupt_vector_table()
+{
+/*
+ * TODO: Optimize it to remove the extra index variables. Unoptimized only for test purposes.
+ *
+ */
+
+	char *vector_table = (char *)0x33F00000;
+	char *src = (char *)__exception_vector_reloc_start__;
+	uint32_t i = 0, j = 0;
+
+	print_hex_uart(UART0_BA,(uint32_t)__exception_vector_reloc_start__);
+	print_hex_uart(UART0_BA,(uint32_t)__exception_vector_reloc_end__);
+
+	for(i = (uint32_t)__exception_vector_reloc_start__,j = 0; i<(uint32_t)__exception_vector_reloc_end__; i++,j++) {
+		vector_table[j] = src[j];
+		print_hex_uart(UART0_BA,vector_table[j]);
+	}
+
+	print_hex_uart(UART0_BA,(uint32_t)__exception_handler_start__);
+	print_hex_uart(UART0_BA,(uint32_t)__exception_handler_end__);
+
+	vector_table = vector_table + j;
+
+	src = (char *)__exception_handler_start__;
+
+	for(i = (uint32_t)__exception_handler_start__,j = 0; i<(uint32_t)__exception_handler_end__;i++,j++) {
+		vector_table[j] = src[j];
+		print_hex_uart(UART0_BA,vector_table[j]);
+	}
+
+}
 static void setup_l1_section_table(unsigned int flags)
 {
 	unsigned int i = 0;
@@ -47,6 +94,10 @@ static void setup_l1_section_table(unsigned int flags)
 	for(i = 0;i<4096;i++) { //Complete 4096 entries.
 		ttb[i] = ((base + i)<<20) | flags;
 	}
+	
+	ttb[0] = (0x33F00000) | flags; /* Make the first 0-1MB point to 0x33F00000 i.e. 
+									  location of the IVT.*/
+	setup_interrupt_vector_table();
 }
 
 extern void blink_leds(unsigned int leds);
@@ -72,6 +123,12 @@ void turn_mmu_on()
 	}
 */
 
+}
+
+void blink_led_test()
+{
+	while(1)
+		blink_leds(LED2|LED3);
 }
 
 #if 0
@@ -113,6 +170,9 @@ void mmu_init()
 
 	ttb = (unsigned int *)TRANSLATION_TABLE_BASE_ADDR;
 
+	
+	setup_l1_section_table(L1_AP_RW_RW|L1_PG_TYPE|L1_PG_BIT4);
+
 	/* 
 	 * Set translation table base address.
 	 */
@@ -145,7 +205,6 @@ void mmu_init()
 		: /* No clobbers */
 	);
 
-	setup_l1_section_table(L1_AP_RW_RW|L1_PG_TYPE|L1_PG_BIT4);
 
 	turn_mmu_on();
 

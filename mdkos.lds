@@ -10,16 +10,18 @@ MEMORY
 
 SECTIONS
 {
+
 	.text :
 	{
 		*(.text);
 		. = ALIGN(4);
 	} > sdram
 
+
 	.data :
 	{
 		__data_start__ = .;
-		*(.data)
+		*(.data);
 		. = ALIGN(4);
 		__data_end__ = .;
 	} > sdram
@@ -39,10 +41,18 @@ SECTIONS
 	.exception_vectors_reloc :
 	{
 		__exception_vector_reloc_start__ = .;
-		*(.exception_vectors_reloc)
+		*(.exception_vectors_reloc);
 		. = ALIGN(4);
 		__exception_vector_reloc_end__ = .;
-	} > sram AT>sdram
+	} > sdram
+
+	.handler :
+	{
+		__exception_handler_start__ = .;
+		*(.handler);
+		. = ALIGN(4);
+		__exception_handler_end__ = .;
+	} > sdram
 
 	/* 
 	 * >vma region AT > lma region 

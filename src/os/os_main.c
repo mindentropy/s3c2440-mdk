@@ -11,6 +11,7 @@
 #include "cache.h"
 #include "mmu.h"
 
+
 #include <stdint.h>
 
 /*
@@ -149,7 +150,11 @@ int main(void) {
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 		blink_leds(LED1|LED4);
-//		puts("TB\r\n");
+		//
+		__asm__ __volatile__ (
+			"swi 0x123456\n\t"
+		);
+	//	uart_puts(UART0_BA,"TB\r\n");
 
 	/*	putc_ch0(*sram_loc);
 		sram_loc++;
