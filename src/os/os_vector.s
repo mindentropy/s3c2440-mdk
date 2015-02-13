@@ -5,12 +5,12 @@
 .globl exception_vectors
 
 exception_vectors:
-	b blink_led_test	//Reset vector
-	b blink_led_test 	//Undefined instruction
-	b blink_led_test 	//Software Interrupt
-	b blink_led_test 	//Abort prefetch
-	b blink_led_test	//Abort data
-	b blink_led_test	//Reserved
-	b blink_led_test	//IRQ
-	b blink_led_test	//FIQ
+	ldr pc,=blink_led_test	//Reset vector
+	ldr pc,=blink_led_test 	//Undefined instruction
+	ldr pc,=blink_led_test 	//Software Interrupt
+	ldr pc,=blink_led_test 	//Abort prefetch
+	ldr pc,=blink_led_test	//Abort data
+	ldr pc,=blink_led_test	//Reserved
+	ldr pc,=blink_led_test	//IRQ
+	ldr pc,=blink_led_test	//FIQ
 .end

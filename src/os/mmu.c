@@ -50,6 +50,7 @@ extern char __exception_vector_reloc_end__[];
 
 extern char __exception_handler_start__[];
 extern char __exception_handler_end__[];
+extern char __stack_top__[];
 
 static void setup_interrupt_vector_table()
 {
@@ -59,27 +60,27 @@ static void setup_interrupt_vector_table()
  */
 
 	char *vector_table = (char *)0x33F00000;
-	char *src = (char *)__exception_vector_reloc_start__;
-	uint32_t i = 0, j = 0;
+	char *src = (char *)__stack_top__; /* Need to get the lma of the code.
+										* The __stack_top__ is the lma i.e. the address in the file.
+										* I need to use this as the start address for the later vectors
+										* and handlers.
+										*/
 
-	print_hex_uart(UART0_BA,(uint32_t)__exception_vector_reloc_start__);
-	print_hex_uart(UART0_BA,(uint32_t)__exception_vector_reloc_end__);
+	uint32_t i = 0;
 
-	for(i = (uint32_t)__exception_vector_reloc_start__,j = 0; i<(uint32_t)__exception_vector_reloc_end__; i++,j++) {
-		vector_table[j] = src[j];
-		print_hex_uart(UART0_BA,vector_table[j]);
+	for(i = (uint32_t)__exception_vector_reloc_start__; i<(uint32_t)__exception_vector_reloc_end__; i++) {
+		*vector_table = *src;
+		vector_table++;
+		src++;
+	//	print_hex_uart(UART0_BA,vector_table[j]);
 	}
 
-	print_hex_uart(UART0_BA,(uint32_t)__exception_handler_start__);
-	print_hex_uart(UART0_BA,(uint32_t)__exception_handler_end__);
-
-	vector_table = vector_table + j;
-
-	src = (char *)__exception_handler_start__;
-
-	for(i = (uint32_t)__exception_handler_start__,j = 0; i<(uint32_t)__exception_handler_end__;i++,j++) {
-		vector_table[j] = src[j];
-		print_hex_uart(UART0_BA,vector_table[j]);
+	/* Continue with the same place for handler source  */
+	for(i = (uint32_t)__exception_handler_start__; i<(uint32_t)__exception_handler_end__;i++) {
+		*vector_table = *src;
+		vector_table++;
+		src++;
+	//	print_hex_uart(UART0_BA,vector_table[j]);
 	}
 
 }

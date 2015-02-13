@@ -15,7 +15,8 @@ char getc(uint32_t UART_BA)
 void uart_puts(uint32_t UART_BA,const char *str)
 {
 	while((*str) != '\0') {
-		putc(UART_BA,*str++);
+		putc(UART_BA,*str); /* Do not increment for the macro. Do it in the next line */
+		str++;
 	}
 }
 
