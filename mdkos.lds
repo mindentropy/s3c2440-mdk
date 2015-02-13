@@ -38,10 +38,10 @@ SECTIONS
 
 	} > sdram
 
-	.exception_vectors_reloc :
+	.vector_reloc :
 	{
 		__exception_vector_reloc_start__ = .;
-		*(.exception_vectors_reloc);
+		*(.vector_reloc);
 		. = ALIGN(4);
 		__exception_vector_reloc_end__ = .;
 	} > sdram

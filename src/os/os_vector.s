@@ -1,4 +1,5 @@
-.section .exception_vectors_reloc
+.section .vector_reloc,"ax" //Apparent fix for missing section when objcopy is to have allocatable and executable flags-"ax"
+//TODO: Understand the reason for the above flag.
 .code 32
 
 .globl exception_vectors
