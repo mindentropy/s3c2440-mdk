@@ -13,10 +13,11 @@ Generic board bring up
 
 Memory Management Unit
 ----------------------
-*Setup MMU to handle the interrupt vector table movement.
 
-1) Setup MMU page directory. --> Done
-2) Setup MMU to vary the mapping of interrupts and exception table -->
+0) Setup MMU to handle the interrupt vector table movement. --> Done
+1) Setup MMU page directory. --> Done.
+2) Setup MMU to vary the mapping of interrupts and exception table --> Done.
+3) Option of having l1,l2 and l3 level mappings.
 
 GPIO
 ----

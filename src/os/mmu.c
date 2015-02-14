@@ -59,7 +59,7 @@ static void setup_interrupt_vector_table()
  *
  */
 
-	char *vector_table = (char *)0x33F00000;
+	char *vector_table = (char *)VECTOR_TABLE_START;
 	char *src = (char *)__stack_top__; /* Need to get the lma of the code.
 										* The __stack_top__ is the lma i.e. the address in the file.
 										* I need to use this as the start address for the later vectors

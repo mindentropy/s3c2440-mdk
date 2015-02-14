@@ -90,7 +90,63 @@ void mmu_init();
 #define RESERVED_BUS_MODE  	(BIT31)
 #define ASYNCH_BUS_MODE 	(BIT31|BIT30)
 
-void blink_led_test() __attribute__((section(".handler")));
+/************* Memory Partition *****************************
+ *
+ *
+ *
+ *          +-------------------------+ ----> 0x00000000
+ *          |                         |       ^
+ *          |   Initial bootloader    |       |---> Stepping stone buffer.
+ *          |  		(mdk_loader)      |       v
+ *          +-------------------------+ ----> 0x00001000
+ *          |                         |
+ *          |                         |
+ *          |  Peripheral memory map  |
+ *          |          hole           |
+ *          .                         .
+ *          .                         .
+ *          .                         .
+ *          +-------------------------+ ----> 0x30000000
+ *          |   mdk_os (.text)        |
+ *          |         .               |
+ *          |         .               |
+ *          |   mdk_os (.data)        |
+ *          |         .               |
+ *          |         .               |
+ *          |   mdk_os (.rodata)      |
+ *          |         .               |
+ *          |         .               |
+ *          |   mdk_os (.bss)         |
+ *          |         .               |
+ *          |         .               |
+ *          |   mdk_os (.stack)       |
+ *          .                         .
+ *          .                         .
+ *          .                         .
+ *          .                         .
+ *          +-------------------------+
+ *          +-------------------------+ ----> 0x33F00000
+ *          |                         |
+ *          | Interrupt Vector table  |
+ *          | (section .vector_reloc) |
+ *          |                         |
+ *          +-------------------------+ ----> 0x33F00020
+ *          |                         |
+ *          |                         |
+ *          | Interrupt handlers      |
+ *          | (section .isrhandler)   |
+ *          |                         |
+ *          |                         |
+ *          +-------------------------+ ----> 0x34000000
+ *
+ * **********************************************************/
+
+
+/*  Memory partitions */
+
+#define VECTOR_TABLE_START 0x33F00000
+
+void blink_led_test() __attribute__((section(".isrhandler")));
 
 #endif
 
