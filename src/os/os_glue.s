@@ -59,15 +59,19 @@ clear_bss:
 	str r3,[r1],#4
 	bne clear_bss
 
-	/* load r13 i.e. stack pointer with stack_pointer */
-	ldr r13,stack_pointer
+	/* load r13 i.e. svc stack pointer with svc_stack_pointer */
+	ldr r13,svc_stack_pointer
 
 	bl main
 
 	b start_os
 
 
-stack_pointer: .word __stack_top__
+svc_stack_pointer: .word __svc_stack_top__
+irq_stack_pointer: .word __irq_stack_top__
+sys_stack_pointer: .word __sys_stack_top__
+usr_stack_pointer: .word __usr_stack_top__
+
 bss_start : .word __bss_start__
 bss_end : .word __bss_end__
 

@@ -56,9 +56,22 @@ SECTIONS
 		*(.bss); *(COMMON)
 		__bss_end__ = .;
 
-		__stack_bottom__ = .;
+		__usr_stack_bottom__ = .;
 		. += 0x1000;
-		__stack_top__ = .;
+		__usr_stack_top__ = .;
+
+		__irq_stack_bottom__ = .;
+		. += 0x1000;
+		__irq_stack_top__ = .;
+
+		__svc_stack_bottom__ = .;
+		. += 0x1000;
+		__svc_stack_top__ = .;
+
+		__sys_stack_bottom__ = .;
+		. += 0x1000;
+		__sys_stack_top__ = .;
+
 	} > sdram
 
 	.vector_reloc :
