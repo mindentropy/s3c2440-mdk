@@ -2,6 +2,7 @@
 
 #define NAND_H_
 
+
 #define NAND_BA 0x4E000000
 
 //#define NFCONF 	0x4E000000
