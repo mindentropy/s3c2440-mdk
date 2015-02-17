@@ -1,6 +1,10 @@
 S3C2440 TODO LIST
 =================
 
+CPU Core
+--------
+1) Setup stacks for different processor modes.
+
 Refactoring
 -----------
 1) Refactoring of code to have proper design API's --> Done.
@@ -62,6 +66,7 @@ constraints present. RAM will be initialized by supervivi. With this we can
 build different components. -->Done.
 
 2) Design a polling driver. --> Done
+3) Design a interrupt driven driver. -->
 
 USB HOST CONTROLLER
 -------------------
