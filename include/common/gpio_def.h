@@ -108,6 +108,7 @@
 #define SPKR_GPIO_OUT ((~BIT1) & (BIT0)) //GPB0
 #define SPKR_GPIO_PIN (BIT0)
 
+
 #define disable_pull_up(port_reg,linemask) \
 	set_reg_params(port_reg,linemask)
 

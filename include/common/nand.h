@@ -2,6 +2,7 @@
 
 #define NAND_H_
 
+#include "common.h"
 
 #define NAND_BA 0x4E000000
 
@@ -178,5 +179,19 @@
 #define EBLK_ADDR2  (BYTE_MASK<<16)
 #define EBLK_ADDR1  (BYTE_MASK<<8)
 #define EBLK_ADDR0  (BYTE_MASK)
+
+
+/** NAND GPIO configuration pins **/
+
+#define NAND_MEM_PG_CAP_SEL 	(BIT13)
+#define NAND_MEM_ADDR_CYCL_SEL 	(BIT14)
+#define NAND_MEM_BUS_WIDTH_SEL 	(BIT15)
+
+#define NAND1_GPG13_INPUT (~(BIT27|BIT26)) //GPG13
+#define NAND2_GPG14_INPUT (~(BIT29|BIT28)) //GPG14
+#define NAND3_GPG15_INPUT (~(BIT31|BIT30)) //GPG15
+
+
+
 
 #endif
