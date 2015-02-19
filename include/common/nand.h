@@ -187,11 +187,18 @@
 #define NAND_MEM_ADDR_CYCL_SEL 	(BIT14)
 #define NAND_MEM_BUS_WIDTH_SEL 	(BIT15)
 
-#define NAND1_GPG13_INPUT (~(BIT27|BIT26)) //GPG13
-#define NAND2_GPG14_INPUT (~(BIT29|BIT28)) //GPG14
-#define NAND3_GPG15_INPUT (~(BIT31|BIT30)) //GPG15
+#define NAND1_GPG13_INPUT ((BIT27|BIT26)) //GPG13
+#define NAND2_GPG14_INPUT ((BIT29|BIT28)) //GPG14
+#define NAND3_GPG15_INPUT ((BIT31|BIT30)) //GPG15
 
+#define get_nand_flash_mem_bus_width_status() \
+	((readreg16(GPDAT_REG(GPG_BA))) & NAND_MEM_BUS_WIDTH_SEL)
+	
+#define get_nand_flash_mem_addr_cycle_status() \
+	((readreg16(GPDAT_REG(GPG_BA))) & NAND_MEM_ADDR_CYCL_SEL)
 
-
+#define get_nand_flash_mem_page_cap_status() \
+	((readreg16(GPDAT_REG(GPG_BA))) & NAND_MEM_PG_CAP_SEL)
+	
 
 #endif
