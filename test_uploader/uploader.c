@@ -8,6 +8,7 @@
 #include <termios.h>
 #include <errno.h>
 
+//#define OS_UPLOAD_DBG 
 
 #define TERM_SPEED 115200
 
@@ -112,14 +113,18 @@ int main(int argc, char **argv)
 			break;
 		} else {
 
+#ifdef OS_UPLOAD_DBG
 			if((serial_index & 0x1F) == 0) 
 				printf("\n");
 
 			printf("%02x ",(unsigned char)ch);
+#endif
+
 			serial_index++;
 		}
 	}
 	
+	printf("OS uploaded\n");
 	printf("\n");
 
 	serial_index = 0;

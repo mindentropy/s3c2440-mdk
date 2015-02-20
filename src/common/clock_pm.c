@@ -43,6 +43,8 @@ void init_clock()
 	 * Set CPU to asynchronous mode.
 	 * See Pg 2-11 of ARM920T Reference and Chapter 5.
 	 * 
+	 * Also see page 7-9. S3C2440 does not support 
+	 * synchronous bus mode.
 	 */
 	__asm__ __volatile__(
 		"mrc p15,0,r1,c1,c0,0\n\t"

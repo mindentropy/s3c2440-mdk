@@ -4,20 +4,41 @@
 
 #include "common.h"
 
-/**********************************/
-#define GPA_BA  0x56000000
-#define GPB_BA  0x56000010
-#define GPC_BA  0x56000020
-#define GPD_BA  0x56000030
-#define GPE_BA  0x56000040
-#define GPF_BA  0x56000050
-#define GPG_BA  0x56000060
-#define GPH_BA  0x56000070
-#define GPJ_BA  0x560000D0
+#define GPIO_BA 	0x56000000
 
-#define GPCON   0x00
-#define GPDAT   0x04
-#define GPUP    0x08
+#define GPA_OFF 	0x00
+#define GPB_OFF 	0x10
+#define GPC_OFF 	0x20
+#define GPD_OFF 	0x30
+#define GPE_OFF 	0x40
+#define GPF_OFF 	0x50
+#define GPG_OFF 	0x60
+#define GPH_OFF 	0x70
+#define GPJ_OFF 	0xD0
+
+#define GPA_BA  HW_REG(GPIO_BA,GPA_OFF)
+#define GPB_BA  HW_REG(GPIO_BA,GPB_OFF)
+#define GPC_BA  HW_REG(GPIO_BA,GPC_OFF)
+#define GPD_BA  HW_REG(GPIO_BA,GPD_OFF)
+#define GPE_BA  HW_REG(GPIO_BA,GPE_OFF)
+#define GPF_BA  HW_REG(GPIO_BA,GPF_OFF)
+#define GPG_BA  HW_REG(GPIO_BA,GPG_OFF)
+#define GPH_BA  HW_REG(GPIO_BA,GPH_OFF)
+#define GPJ_BA  HW_REG(GPIO_BA,GPJ_OFF)
+
+#define GPCON   	0x00
+#define GPDAT   	0x04
+#define GPUP    	0x08
+#define MISCCR_OFF 	0x80
+
+#define GSTATUS0 	0xAC
+#define GSTATUS1 	0xB0
+#define GSTATUS2 	0xB4
+#define GSTATUS3 	0xB8
+#define GSTATUS4 	0xBC
+
+#define GSTATUS_REG(STATUS_OFF)\
+	HW_REG(GPIO_BA,STATUS_OFF)
 
 #define GPCON_REG(BA) \
 		HW_REG((BA),GPCON)
@@ -28,52 +49,9 @@
 #define GPUP_REG(BA) \
 		HW_REG((BA),GPUP)
 
-/**********************************/
-
-/*
-#define GPACON	0x56000000
-#define GPADAT	0x56000004
-
-#define GPBCON	0x56000010
-#define GPBDAT	0x56000014
-#define GPBUP	0x56000018
-
-#define GPCCON	0x56000020
-#define GPCDAT	0x56000024
-#define GPCUP	0x56000028
-
-
-#define GPDCON	0x56000030
-#define GPDDAT	0x56000034
-#define GDPUP	0x56000038
-
-#define GPECON	0x56000040
-#define	GPEDAT	0x56000044
-#define GPEUP	0x56000048
-
-#define GPFCON	0x56000050
-#define	GPFDAT	0x56000054
-#define GPFUP	0x56000058
-
-#define GPGCON	0x56000060
-#define GPGDAT	0x56000064
-#define GPGUP	0x56000068
-
-#define GPHCON	0x56000070
-#define GPHDAT	0x56000074
-#define GPHUP	0x56000078
-
-#define GPJCON	0x560000d0
-#define GPJDAT	0x560000d4
-#define GPJUP	0x560000d8
-
-#define MISCCR  0x56000080 
-*/
-
-#define MISCCR_OFF 0x80
 
 #define MISCCR_REG() \
-		((GPA_BA) + MISCCR_OFF)
+		((GPIO_BA) + MISCCR_OFF)
 
 
 #define CLK_SEL1 		(BIT10|BIT9|BIT8)
@@ -108,6 +86,50 @@
 #define SPKR_GPIO_OUT ((~BIT1) & (BIT0)) //GPB0
 #define SPKR_GPIO_PIN (BIT0)
 
+/* GSTATUS0 */
+#define nWAIT_PIN 		(BIT3)
+#define NCON_PIN		(BIT2)
+#define RnB_PIN			(BIT1)
+#define BATT_FLT_PIN 	(BIT0)
+
+#define get_gstatus_nwait() \
+	((readreg32(GSTATUS_REG(GSTATUS0)))&nWAIT_PIN)
+
+#define get_gstatus_ncon() \
+	((readreg32(GSTATUS_REG(GSTATUS0)))&NCON_PIN)
+
+#define get_gstatus_rnb() \
+	((readreg32(GSTATUS_REG(GSTATUS0)))&RnB_PIN)
+
+#define get_gstatus_batt_flt() \
+	((readreg32(GSTATUS_REG(GSTATUS0)))&BATT_FLT_PIN)
+
+/* GSTATUS1 */
+#define CHIP_ID     (BIT0) //TODO: Correction needed in the datasheet.
+
+
+#define get_gstatus_chipid() \
+	(readreg32(GSTATUS_REG(GSTATUS1)))
+
+/* GSTATUS2 */
+#define WDTRST 		(BIT2)
+#define SLEEPRST 	(BIT1)
+#define PWRST 		(BIT0)
+
+#define LAST_BOOT_MASK (BIT2|BIT1|BIT0)
+
+
+#define get_last_boot_status() \
+	((readreg32(GSTATUS_REG(GSTATUS2))) & LAST_BOOT_MASK)
+
+#define get_boot_reset_status_wdt() \
+	((readreg32(GSTATUS_REG(GSTATUS2))) & WDTRST)
+
+#define get_boot_reset_status_sleep() \
+	((readreg32(GSTATUS_REG(GSTATUS2))) & SLEEPRST)
+
+#define get_boot_reset_status_power() \
+	((readreg32(GSTATUS_REG(GSTATUS2))) & PWRST)
 
 #define disable_pull_up(port_reg,linemask) \
 	set_reg_params(port_reg,linemask)
@@ -115,7 +137,7 @@
 //void set_gpio_clk_dbg();
 //void set_gpio_uart_ch0();
 
-#define set_gpio_con(GPIO_REG_BA,param) \
-	set_reg_params(GPCON_REG(GPIO_REG_BA),param)
+#define set_gpio_con(BA,param) \
+	set_reg_params(GPCON_REG(BA),param)
 
 #endif

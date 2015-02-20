@@ -45,34 +45,29 @@
 #define BIT31	BIT(31)
 
 #define WORD_MASK  (0xFFFFFFFF)
-
 #define SHORT_MASK_MSB ((0xFFFF) << 16)
 #define SHORT_MASK_LSB ((0xFFFF))
-
-
 #define BYTE_MASK (0xFF)
 
-#define set_bits(val,bitmask) { \
-	((val) = ((val) | (bitmask))); \
-}
 
 #define setbits(val,bitmask) \
 	((val) | (bitmask)) 
 
-
-/*
-#define set_bits(val,bitmask) {	\
-		((val) = ((val) & (~(bitmask))) | (bitmask)); \
-	}
-*/
-
-#define clear_bits(val,bitmask) {	\
-		((val) = ((val) & (~(bitmask))));	\
-	}
-
 #define clearbits(val,bitmask) \
 		((val) & (~(bitmask)))
+
+#define clear_and_setbits(val,bitmask) \
+	(((val) & ~(bitmask)) | (bitmask))
+
+#define is_bit_set(reg,regmask) \
+	((reg & regmask) ? (1) : (0))
 	
+#define set_bitval_pos(value,shift) \
+	((value)<<(shift))
+
+#define HW_REG(BASE_ADDRESS,OFFSET) \
+	((BASE_ADDRESS) + (OFFSET))
+
 /*
  * For more info on problems associated with volatile casting see.
  * http://infocenter.arm.com/help/topic/com.arm.doc.faqs/ka3750.html
@@ -86,28 +81,16 @@
 #define writereg8(addr,value) \
 	*((volatile uint8_t *) (addr) ) = ((value) & (0xFF))
 
-/*
-#define readreg32(addr,value) \
-	value = ((*((volatile uint32_t *)(addr))) & (0xFFFFFFFF))
-
-#define readreg16(addr,value) \
-	value = ((*((volatile uint32_t *)(addr))) & (0xFFFF))
-
-#define readreg8(addr,value) \
-	value = ((*((volatile uint32_t *)(addr))) & (0xFF))
-*/
 
 #define readreg32(addr) \
 	((*((volatile uint32_t *)(addr))) & (0xFFFFFFFF))
 	
-#define readreg16(addr,value) \
+#define readreg16(addr) \
 	((*((volatile uint32_t *)(addr))) & (0xFFFF))
 
-#define readreg8(addr,value) \
-	value = ((*((volatile uint32_t *)(addr))) & (0xFF))
+#define readreg8(addr) \
+	((*((volatile uint32_t *)(addr))) & (0xFF))
 
-#define set_bitval_pos(value,shift) \
-	((value)<<(shift))
 
 #define set_reg_params(reg,regmask) \
 	do { \
@@ -121,7 +104,5 @@
 	} while(0)
 
 
-#define HW_REG(BASE_ADDRESS,OFFSET) \
-	((BASE_ADDRESS) + (OFFSET))
 
 #endif

@@ -21,7 +21,7 @@
 #define BUSWIDTH 	(BIT0)
 
 //#define NFCONT 	0x4E000004
-#define NFCONT_OFF 0x04
+#define NFCONT_OFF 	0x04
 #define NFCONT_REG(BA) \
 	HW_REG(BA,NFCONT_OFF)
 
@@ -98,8 +98,8 @@
 
 #define ILLEGAL_ACC 	(BIT3)
 #define RnB_TRANSDETECT (BIT2)
-#define nCE 			(BIT1)
-#define RnB 			(BIT0)
+#define nCE_STATUS		(BIT1)
+#define RnB_STATUS		(BIT0)
 
 /*
 #define NFESTAT0 	0x4E000024
@@ -147,7 +147,7 @@
 #define MECC1_0 	(BYTE_MASK)
 
 //#define NFSECC 		0x4E000034
-#define NFSECC_OFF	0x34
+#define NFSECC_OFF 	0x34
 
 #define NFSECC_REG(BA) \
 	HW_REG(BA,NFSECC_OFF)
@@ -183,22 +183,25 @@
 
 /** NAND GPIO configuration pins **/
 
-#define NAND_MEM_PG_CAP_SEL 	(BIT13)
-#define NAND_MEM_ADDR_CYCL_SEL 	(BIT14)
-#define NAND_MEM_BUS_WIDTH_SEL 	(BIT15)
+#define NAND_MEM_PG_CAP_SEL_PIN 	(BIT13)
+#define NAND_MEM_ADDR_CYCL_SEL_PIN 	(BIT14)
+#define NAND_MEM_BUS_WIDTH_SEL_PIN 	(BIT15)
 
-#define NAND1_GPG13_INPUT ((BIT27|BIT26)) //GPG13
-#define NAND2_GPG14_INPUT ((BIT29|BIT28)) //GPG14
-#define NAND3_GPG15_INPUT ((BIT31|BIT30)) //GPG15
+#define NAND_GPG13_INPUT ((BIT27|BIT26)) //GPG13
+#define NAND_GPG14_INPUT ((BIT29|BIT28)) //GPG14
+#define NAND_GPG15_INPUT ((BIT31|BIT30)) //GPG15
 
 #define get_nand_flash_mem_bus_width_status() \
-	((readreg16(GPDAT_REG(GPG_BA))) & NAND_MEM_BUS_WIDTH_SEL)
+	((readreg32(GPDAT_REG(GPG_BA))) & NAND_MEM_BUS_WIDTH_SEL_PIN)
 	
 #define get_nand_flash_mem_addr_cycle_status() \
-	((readreg16(GPDAT_REG(GPG_BA))) & NAND_MEM_ADDR_CYCL_SEL)
+	((readreg32(GPDAT_REG(GPG_BA))) & NAND_MEM_ADDR_CYCL_SEL_PIN)
 
 #define get_nand_flash_mem_page_cap_status() \
-	((readreg16(GPDAT_REG(GPG_BA))) & NAND_MEM_PG_CAP_SEL)
+	((readreg32(GPDAT_REG(GPG_BA))) & NAND_MEM_PG_CAP_SEL_PIN)
+
+
 	
+void nand_init();
 
 #endif

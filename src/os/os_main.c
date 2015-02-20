@@ -10,6 +10,7 @@
 #include "cpu.h"
 #include "cache.h"
 #include "mmu.h"
+#include "nand.h"
 
 
 #include <stdint.h>
@@ -110,11 +111,53 @@ void dump_cache_info()
 	uart_puts(UART0_BA,"\r\n");
 }
 
-void blink_leds(uint32_t leds) {
+
+void dump_nand_dbg()
+{
+	uart_puts(UART0_BA,"mem bus width :");
+	print_hex_uart(UART0_BA,get_nand_flash_mem_bus_width_status());
+	uart_puts(UART0_BA,"\r\n");
+	uart_puts(UART0_BA,"mem bus addr cycle :");
+	print_hex_uart(UART0_BA,get_nand_flash_mem_addr_cycle_status());
+	uart_puts(UART0_BA,"\r\n");
+	uart_puts(UART0_BA,"mem page cap :");
+	print_hex_uart(UART0_BA,get_nand_flash_mem_page_cap_status());
+	uart_puts(UART0_BA,"\r\n");
+	uart_puts(UART0_BA,"NCON : ");
+	print_hex_uart(UART0_BA,get_gstatus_ncon());
+	uart_puts(UART0_BA,"\r\n");
+
+	uart_puts(UART0_BA,"NFCONF : ");
+	print_hex_uart(UART0_BA,readreg32(NFCONF_REG(NAND_BA)));
+	uart_puts(UART0_BA,"\r\n");
+}
+
+void blink_leds(uint32_t leds) 
+{
 	led_on(leds);
 	test_delay();
 	led_off(leds);
 	test_delay();
+}
+
+
+void last_boot_cause() 
+{
+	uart_puts(UART0_BA,"Last boot cause : ");
+	switch(get_last_boot_status()) {
+		case WDTRST:
+			uart_puts(UART0_BA,"WDT reset\r\n");
+			break;
+		case SLEEPRST:
+			uart_puts(UART0_BA,"Sleep reset\r\n");
+			break;
+		case PWRST:
+			uart_puts(UART0_BA,"Power reset\r\n");
+			break;
+		default:
+			uart_puts(UART0_BA,"Unknown cause of reset\r\n");
+			break;
+	}
 }
 
 int main(void) {
@@ -143,10 +186,19 @@ int main(void) {
 
 	//sram_loc = 0;
 	
-	dump_clk();
+	//dump_clk();
 	dump_cpu_info();
-	dump_cache_info();
+	//dump_cache_info();
 	mmu_init();
+	nand_init();
+
+	dump_nand_dbg();
+	uart_puts(UART0_BA,"chipid : ");
+	print_hex_uart(UART0_BA,get_gstatus_chipid());
+	uart_puts(UART0_BA,"\r\n");
+
+	last_boot_cause();
+
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 		blink_leds(LED1|LED4);
