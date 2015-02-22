@@ -96,7 +96,7 @@
 #define NFSTAT_REG(BA) \
 	HW_REG(BA,NFSTAT_OFF)
 
-#define ILLEGAL_ACC 	(BIT3)
+#define ILLEGAL_ACCESS 	(BIT3)
 #define RnB_TRANSDETECT (BIT2)
 #define nCE_STATUS		(BIT1)
 #define RnB_STATUS		(BIT0)
@@ -199,6 +199,59 @@
 
 #define get_nand_flash_mem_page_cap_status() \
 	((readreg32(GPDAT_REG(GPG_BA))) & NAND_MEM_PG_CAP_SEL_PIN)
+
+#define set_tacls_twrph(TACLS,TWRPH1,TWRPH0) \
+	(writereg32(NFCONF_REG(NAND_BA),(TACLS<<13) | (TWRPH1<<6) | (TWRPH0<<10)))
+
+
+
+
+#define nand_set_spare_ecc_lock() \
+	set_reg_params(NFCONT_REG(NAND_BA),SPARE_ECC_LOCK)
+
+#define nand_clear_spare_ecc_lock() \
+	clear_reg_params(NFCONT_REG(NAND_BA),SPARE_ECC_LOCK)
+
+#define nand_set_main_ecc_lock() \
+	set_reg_params(NFCONT_REG(NAND_BA),MAIN_ECC_LOCK)
+
+#define nand_clear_main_ecc_lock() \
+	clear_reg_params(NFCONT_REG(NAND_BA),MAIN_ECC_LOCK)
+
+#define nand_init_ecc() \
+	set_reg_params(NFCONT_REG(NAND_BA),INIT_ECC)
+
+#define nand_deinit_ecc() \
+	clear_reg_params(NFCONT_REG(NAND_BA),INIT_ECC)
+
+
+#define enable_nand_flash_controller() \
+	set_reg_params(NFCONT_REG(NAND_BA),MODE)
+
+#define disable_nand_flash_controller() \
+	clear_reg_params(NFCONT_REG(NAND_BA),MODE)
+
+
+#define get_nCE_status() \
+	(readreg32(NFSTAT_REG(NAND_BA)) & nCE_STATUS)
+
+#define get_RnB_status() \
+	(readreg32(NFSTAT_REG(NAND_BA)) & RnB_STATUS)
+
+#define get_RnB_Transdetect_status() \
+	(readreg32(NFSTAT_REG(NAND_BA)) & RnB_TRANSDETECT)
+
+#define get_illegal_access_status() \
+	(readreg32(NFSTAT_REG(NAND_BA)) & ILLEGAL_ACCESS)
+
+#define send_nand_cmd(cmd) \
+	(writereg32(NFCMMD_REG(NAND_BA),cmd))
+
+#define send_nand_addr(addr) \
+	(writereg32(NFADDR_REG(NAND_BA),addr))
+
+#define send_nand_data(data) \
+	(writereg32(NFDATA_REG(NAND_BA),data))
 
 
 	

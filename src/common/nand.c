@@ -24,4 +24,15 @@ void nand_init()
 {
 	set_nand_gpio_config_pins();
 	apb_clk_enable(CLK_BASE_ADDR,CLK_NAND_FLASH_CNTRL);
+
+	/* 
+	 * TODO: Understand flash timing parameters
+	 * Setting default to max.
+	 *
+	 * Tacls = 3
+	 * Twrph0 = 7
+	 * Twrph1 = 7
+	 *
+	 */
+	set_tacls_twrph(3,7,7);
 }

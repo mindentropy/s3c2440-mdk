@@ -4,8 +4,8 @@
 
 #include <stdint.h>
 
-#define SET 1
-#define RESET 0
+#define SET 0x1
+#define RESET 0x0
 
 /* Set the exact bit positions rather than shifting */
 

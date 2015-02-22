@@ -32,6 +32,13 @@ void init_clock()
 	 *
 	 * Set the divider register first. Example code from
 	 * myled 2440init.s
+	 *
+	 */
+
+	/* 	
+	 *  FCLK = 405 MHz.
+	 *  HCLK = 405/4 = 101MHz
+	 *  PCLK = 405/8 = 50 Mhz
 	 */
 
 	set_clock_divn(CLK_BASE_ADDR,
