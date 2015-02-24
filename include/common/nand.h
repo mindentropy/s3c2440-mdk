@@ -224,12 +224,24 @@
 #define nand_deinit_ecc() \
 	clear_reg_params(NFCONT_REG(NAND_BA),INIT_ECC)
 
+//Chip select disable
+#define set_nand_nfce_high() \
+	set_reg_params(NFCONT_REG(NAND_BA),REG_nCE)
 
-#define enable_nand_flash_controller() \
+//Chip select enable
+#define set_nand_nfce_low() \
+	clear_reg_params(NFCONT_REG(NAND_BA),REG_nCE)
+
+#define set_nand_flash_mode() \
 	set_reg_params(NFCONT_REG(NAND_BA),MODE)
 
-#define disable_nand_flash_controller() \
+#define disable_nand_flash_mode() \
 	clear_reg_params(NFCONT_REG(NAND_BA),MODE)
+
+#define enable_nand_flash_controller() do {\
+		set_nand_flash_mode();\
+		set_nand_nfce_low();\
+	} while(0)
 
 
 #define get_nCE_status() \
@@ -245,7 +257,7 @@
 	(readreg32(NFSTAT_REG(NAND_BA)) & ILLEGAL_ACCESS)
 
 #define send_nand_cmd(cmd) \
-	(writereg32(NFCMMD_REG(NAND_BA),cmd))
+	(writereg16(NFCMMD_REG(NAND_BA),cmd))
 
 #define send_nand_addr(addr) \
 	(writereg32(NFADDR_REG(NAND_BA),addr))
@@ -253,8 +265,30 @@
 #define send_nand_data(data) \
 	(writereg32(NFDATA_REG(NAND_BA),data))
 
+#define read_nand_data() \
+	(readreg32(NFDATA_REG(NAND_BA)))
 
-	
+/**** NAND Commands ****/
+
+#define CMD_READ_PAGE 						0x00
+#define CMD_READ_PAGE_CACHE_SEQUENTIAL 		0x31
+#define CMD_READ_PAGE_CACHE_SEQUENTIAL_LAST 0x3F
+#define CMD_READ_FOR_INTERNAL_DATA_MOVE 	0x00
+#define CMD_RANDOM_DATA_READ 				0x05
+#define CMD_READ_ID 						0x90
+#define CMD_READ_STATUS 					0x70
+#define CMD_PROGRAM_PAGE 					0x80
+#define CMD_PROGRAM_PAGE_CACHE 				0x80
+#define CMD_PROGRAM_FOR_INTERNAL_DATA_MOVE  0x85
+#define CMD_RANDOM_DATA_INPUT 				0x85
+#define CMD_ERASE_BLOCK 					0x60
+#define CMD_RESET 							0xFF
+
+/************************/
+
+
+#define nand_reset() \
+	send_nand_cmd(CMD_RESET)
+
 void nand_init();
-
 #endif
