@@ -4,8 +4,8 @@
 #include "uart_util.h"
 
 /*
- * NAND driver will be written for Samsung K9F2G08U0B -> 256MB NAND Flash (Old mini2440) 0xECDA109544
- * NAND driver will be written for Samsung K9K8G08U0D SCB0 -> 1GB NAND Flash (New mini2440)
+ * NAND driver will be written for Samsung K9F2G08U0B -> 256MB NAND Flash (Old mini2440) 0xECDA109544 ID 0x9510DAEC
+ * NAND driver will be written for Samsung K9K8G08U0D SCB0 -> 1GB NAND Flash (New mini2440) ID 0x9551D3EC
  */
 
 void set_nand_gpio_config_pins()
@@ -61,5 +61,6 @@ void nand_init()
 	
 	nand_reset();
 	
+	uart_puts(UART0_BA,"NAND ID:");
 	print_hex_uart(UART0_BA,read_nand_id());
 }
