@@ -204,8 +204,6 @@
 	(writereg32(NFCONF_REG(NAND_BA),(TACLS<<13) | (TWRPH1<<6) | (TWRPH0<<10)))
 
 
-
-
 #define nand_set_spare_ecc_lock() \
 	set_reg_params(NFCONT_REG(NAND_BA),SPARE_ECC_LOCK)
 

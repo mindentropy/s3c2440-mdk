@@ -41,6 +41,39 @@ uint32_t read_nand_id()
 	return read_nand_data();
 }
 
+
+void nand_page_read(uint8_t row,uint8_t col)
+{
+}
+
+
+/*
+ * NAND Init timing calculation explanation:
+ * =========================================
+ *
+ * All credits go to Juergen Borleis of Pengutronix for the below explanation.
+ *
+ * Twrph0 is the "setup time", Twrph1 is the "hold time" for the data, command and address. 
+ * Tacls is the additional time prior a command or address cycle.
+ * Your NAND needs 12 ns for Tacls (they call it "CLE Setup Time" and "ALE Setup Time"), 
+ * and 12 ns for Twrph0 (they call it "Data Setup Time") and 5 ns for 
+ * Twrph1 (they call it "Data Hold Time") [1].
+ * The S3C2440 manual shows an example[2]. To get 12 ns setup time you need to 
+ * set Twrph0 to 1 which means two clocks at 100 MHz (= 20 ns), to get the 5 ns 
+ * for Twrph1 you set it 0 which means one clock at 100 MHz (= 10 ns). For the 
+ * Tacls your need to set it to two to get two clocks at 100 MHz (= 20 ns).  
+ * For a read or write cycle this will result into 30 ns per byte which matches 
+ * the 25 ns cycle time your NAND needs.
+ *
+ * [1] K9F2G08x0B.pdf, page 10, "AC Timing Characteristics for Command/Address/Data Input"
+ * [2] Page 216, section 6-4, Figure 6-3 and Figure 6-4
+ *
+ * Source:
+ * -------
+ *   http://article.gmane.org/gmane.comp.embedded.ptxdist.oselas.community/2080 
+ *
+ */
+
 void nand_init()
 {
 	set_nand_gpio_config_pins();
@@ -63,4 +96,5 @@ void nand_init()
 	
 	uart_puts(UART0_BA,"NAND ID:");
 	print_hex_uart(UART0_BA,read_nand_id());
+	print_hex_uart(UART0_BA,read_nand_data());
 }
