@@ -258,7 +258,7 @@
 	(writereg16(NFCMMD_REG(NAND_BA),cmd))
 
 #define send_nand_addr(addr) \
-	(writereg32(NFADDR_REG(NAND_BA),addr))
+	(writereg16(NFADDR_REG(NAND_BA),addr))
 
 #define send_nand_data(data) \
 	(writereg32(NFDATA_REG(NAND_BA),data))
@@ -269,6 +269,7 @@
 /**** NAND Commands ****/
 
 #define CMD_READ_PAGE 						0x00
+#define CMD_READ_START  					0x30
 #define CMD_READ_PAGE_CACHE_SEQUENTIAL 		0x31
 #define CMD_READ_PAGE_CACHE_SEQUENTIAL_LAST 0x3F
 #define CMD_READ_FOR_INTERNAL_DATA_MOVE 	0x00

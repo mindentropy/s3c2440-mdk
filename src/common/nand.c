@@ -22,30 +22,50 @@ void set_nand_gpio_config_pins()
 }
 
 
+void wait_until_free()
+{
+	while(!get_RnB_status())
+	{
+		uart_puts(UART0_BA,"NAND Busy\n");
+	}
+}
+
 uint32_t read_nand_id()
 {
 	send_nand_cmd(CMD_READ_ID);
-	while(!get_RnB_status())
-	{
-		uart_puts(UART0_BA,"NAND Busy\n");
-	}
+
+	wait_until_free();
 
 	send_nand_addr(0x00);
 
-	while(!get_RnB_status())
-	{
-		uart_puts(UART0_BA,"NAND Busy\n");
-	}
-	
+	wait_until_free();
 
 	return read_nand_data();
 }
 
 
-void nand_page_read(uint8_t row,uint8_t col)
+void nand_page_read(uint32_t addr)
 {
+	send_nand_cmd(CMD_READ_PAGE);
+
+	wait_until_free();
+
+	send_nand_addr(0x00);
+	send_nand_addr(0x00);
+	send_nand_addr(0x00);
+	send_nand_addr(0x00);
+	send_nand_addr(0x01);
+	
+	wait_until_free();
+
+	send_nand_cmd(CMD_READ_START);
 }
 
+uint32_t read_nand_page_data()
+{
+	wait_until_free();
+	return read_nand_data();
+}
 
 /*
  * NAND Init timing calculation explanation:
@@ -76,13 +96,11 @@ void nand_page_read(uint8_t row,uint8_t col)
 
 void nand_init()
 {
+	int i = 0;
 	set_nand_gpio_config_pins();
 	apb_clk_enable(CLK_BASE_ADDR,CLK_NAND_FLASH_CNTRL);
 
 	/* 
-	 * TODO: Understand flash timing parameters
-	 * Setting default to max.
-	 *
 	 * Tacls = 3
 	 * Twrph0 = 7
 	 * Twrph1 = 7
@@ -97,4 +115,12 @@ void nand_init()
 	uart_puts(UART0_BA,"NAND ID:");
 	print_hex_uart(UART0_BA,read_nand_id());
 	print_hex_uart(UART0_BA,read_nand_data());
+
+	nand_page_read(10);
+
+	
+	for(i = 0;i<8;i++) {
+		print_hex_uart(UART0_BA,read_nand_page_data());
+	}
+
 }
