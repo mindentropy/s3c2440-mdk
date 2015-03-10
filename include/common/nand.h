@@ -258,7 +258,7 @@
 	(writereg16(NFCMMD_REG(NAND_BA),cmd))
 
 #define send_nand_addr(addr) \
-	(writereg16(NFADDR_REG(NAND_BA),addr))
+	(writereg8(NFADDR_REG(NAND_BA),addr))
 
 #define send_nand_data(data) \
 	(writereg32(NFDATA_REG(NAND_BA),data))
@@ -285,6 +285,10 @@
 
 /************************/
 
+#define NAND_DATA_SIZE (2048u)
+#define NAND_SPARE_SIZE (64u)
+
+#define NAND_PAGE_SIZE ((NAND_DATA_SIZE) + (NAND_SPARE_SIZE))
 
 #define nand_reset() \
 	send_nand_cmd(CMD_RESET)

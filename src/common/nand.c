@@ -43,18 +43,25 @@ uint32_t read_nand_id()
 	return read_nand_data();
 }
 
+/*
+ * TODO: Write appropriate code switch for 3 page and 5 page
+ * cycle
+ */
 
-void nand_page_read(uint32_t addr)
+void nand_page_read(uint32_t addr,uint32_t page_offset)
 {
 	send_nand_cmd(CMD_READ_PAGE);
 
 	wait_until_free();
 
-	send_nand_addr(0x00);
-	send_nand_addr(0x00);
-	send_nand_addr(0x00);
-	send_nand_addr(0x00);
-	send_nand_addr(0x01);
+	send_nand_addr(0x00); //Column address 1st cycle
+	send_nand_addr(0x00); //Column address 2nd cycle.
+
+	send_nand_addr(addr); //PA0-PA5 Page address and 
+						  //BA6-BA7 Block address 3rd cycle.
+
+	send_nand_addr(addr>>8); //BA8-BA15 Block address 4th cycle.
+	send_nand_addr(addr>>16); //BA16 Block address 5th cycle.
 	
 	wait_until_free();
 
@@ -116,7 +123,7 @@ void nand_init()
 	print_hex_uart(UART0_BA,read_nand_id());
 	print_hex_uart(UART0_BA,read_nand_data());
 
-	nand_page_read(10);
+	nand_page_read(0,0);
 
 	
 	for(i = 0;i<8;i++) {
