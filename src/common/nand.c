@@ -33,11 +33,8 @@ void wait_until_free()
 uint32_t read_nand_id()
 {
 	send_nand_cmd(CMD_READ_ID);
-
 	wait_until_free();
-
 	send_nand_addr(0x00);
-
 	wait_until_free();
 
 	return read_nand_data();
@@ -48,9 +45,9 @@ uint32_t read_nand_id()
  * cycle
  */
 
-void nand_page_read(uint32_t addr,uint32_t page_offset)
+void nand_page_read1(uint32_t addr,uint32_t page_offset)
 {
-	send_nand_cmd(CMD_READ_PAGE);
+	send_nand_cmd(CMD_READ_PAGE_START);
 
 	wait_until_free();
 
@@ -65,7 +62,7 @@ void nand_page_read(uint32_t addr,uint32_t page_offset)
 	
 	wait_until_free();
 
-	send_nand_cmd(CMD_READ_START);
+	send_nand_cmd(CMD_READ_PAGE_END);
 }
 
 uint32_t read_nand_page_data()
@@ -73,6 +70,48 @@ uint32_t read_nand_page_data()
 	wait_until_free();
 	return read_nand_data();
 }
+
+/*
+ * NAND address calculation.
+ *
+ * PAGE OFFSET -> b10-b0 -> 11 bit offset
+ * PAGE -> b16-b11 -> 6 bits
+ * PAGE + BLOCK addr -> b18-b17 & b16-b11 -> 6 + 2 = 8 bits
+ * Overall PAGE + BLOCK Addr bits == 11 + 8 = 19 bits
+ * Total block size remaining b16-b8
+ * Remaining block size is b15-b8(b7 and b6 already sent).
+ * BLOCK Bit start is shift of 19 bits.
+ * Last block shift is -> 19 bits shift + 8 bits shift(b15-b8)
+ * 						->  27 bits
+ *
+ */
+
+uint8_t nand_page_read(uint32_t addr)
+{
+	uint16_t offset = get_nand_page_offset(addr);
+
+	send_nand_cmd(CMD_READ_PAGE_START);
+	wait_until_free();
+
+	send_nand_addr(0x00); //Column address 1st cycle
+	send_nand_addr(0x00); //Column address 2nd cycle.
+
+	send_nand_addr(addr>>11); //PA0-PA5 Page address and 
+						  	  //BA6-BA7 Block address 3rd cycle.
+
+	send_nand_addr(addr>>19); // Remaining block size. 4th cycle
+	send_nand_addr(addr>>27); //Final block size bit
+	
+	wait_until_free();
+	send_nand_cmd(CMD_READ_PAGE_END);
+
+	while(offset) {
+		read_nand_page_data();
+	}
+
+	return read_nand_page_data();
+}
+
 
 /*
  * NAND Init timing calculation explanation:
@@ -123,11 +162,6 @@ void nand_init()
 	print_hex_uart(UART0_BA,read_nand_id());
 	print_hex_uart(UART0_BA,read_nand_data());
 
-	nand_page_read(0,0);
-
-	
-	for(i = 0;i<8;i++) {
-		print_hex_uart(UART0_BA,read_nand_page_data());
-	}
+	print_hex_uart(UART0_BA,nand_page_read(0));
 
 }

@@ -268,8 +268,8 @@
 
 /**** NAND Commands ****/
 
-#define CMD_READ_PAGE 						0x00
-#define CMD_READ_START  					0x30
+#define CMD_READ_PAGE_START					0x00
+#define CMD_READ_PAGE_END  					0x30
 #define CMD_READ_PAGE_CACHE_SEQUENTIAL 		0x31
 #define CMD_READ_PAGE_CACHE_SEQUENTIAL_LAST 0x3F
 #define CMD_READ_FOR_INTERNAL_DATA_MOVE 	0x00
@@ -289,6 +289,10 @@
 #define NAND_SPARE_SIZE (64u)
 
 #define NAND_PAGE_SIZE ((NAND_DATA_SIZE) + (NAND_SPARE_SIZE))
+
+
+#define get_nand_page_offset(nand_addr) \
+	((nand_addr) & (NAND_DATA_SIZE-1))
 
 #define nand_reset() \
 	send_nand_cmd(CMD_RESET)
