@@ -8,6 +8,9 @@
  * NAND driver will be written for Samsung K9K8G08U0D SCB0 -> 1GB NAND Flash (New mini2440) ID 0x9551D3EC
  */
 
+
+char nand_page_cache[NAND_DATA_SIZE];
+
 void set_nand_gpio_config_pins()
 {
 	clear_reg_params(GPCON_REG(GPG_BA),NAND_GPG13_INPUT);
@@ -40,30 +43,7 @@ uint32_t read_nand_id()
 	return read_nand_data();
 }
 
-/*
- * TODO: Write appropriate code switch for 3 page and 5 page
- * cycle
- */
 
-void nand_page_read1(uint32_t addr,uint32_t page_offset)
-{
-	send_nand_cmd(CMD_READ_PAGE_START);
-
-	wait_until_free();
-
-	send_nand_addr(0x00); //Column address 1st cycle
-	send_nand_addr(0x00); //Column address 2nd cycle.
-
-	send_nand_addr(addr); //PA0-PA5 Page address and 
-						  //BA6-BA7 Block address 3rd cycle.
-
-	send_nand_addr(addr>>8); //BA8-BA15 Block address 4th cycle.
-	send_nand_addr(addr>>16); //BA16 Block address 5th cycle.
-	
-	wait_until_free();
-
-	send_nand_cmd(CMD_READ_PAGE_END);
-}
 
 uint32_t read_nand_page_data()
 {
@@ -88,6 +68,13 @@ uint32_t read_nand_page_data()
 
 uint8_t nand_page_read(uint32_t addr)
 {
+
+/*
+ * TODO: Write appropriate code switch for 3 page and 5 page
+ * cycle
+ */
+	uint16_t i = 0;
+	uint32_t *page_cache;
 	uint16_t offset = get_nand_page_offset(addr);
 
 	send_nand_cmd(CMD_READ_PAGE_START);
@@ -105,11 +92,13 @@ uint8_t nand_page_read(uint32_t addr)
 	wait_until_free();
 	send_nand_cmd(CMD_READ_PAGE_END);
 
-	while(offset) {
-		read_nand_page_data();
+	page_cache = (uint32_t *)nand_page_cache;
+
+	for(i = 0; i<NAND_DATA_SIZE; i+=4) {
+		page_cache[i] = read_nand_page_data();
 	}
 
-	return read_nand_page_data();
+	return nand_page_cache[offset];
 }
 
 
@@ -163,5 +152,7 @@ void nand_init()
 	print_hex_uart(UART0_BA,read_nand_data());
 
 	print_hex_uart(UART0_BA,nand_page_read(0));
+
+	uart_puts(UART0_BA,"\r\n");
 
 }

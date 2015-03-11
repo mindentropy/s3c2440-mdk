@@ -3,6 +3,9 @@
 #include "gpio_def.h"
 #include "clock_pm.h"
 
+const char hexchar[] = 
+	{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+
 char getc(uint32_t UART_BA)
 {
 	while(!uart_is_rx_buff_full(UART_BA))
@@ -21,9 +24,6 @@ void uart_puts(uint32_t UART_BA,const char *str)
 }
 
 
-const char hexchar[] = 
-	{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
-
 
 void print_hex_uart(uint32_t UART_BA,uint32_t num) 
 {
@@ -37,6 +37,16 @@ void print_hex_uart(uint32_t UART_BA,uint32_t num)
 	}
 
 	uart_puts(UART_BA,"\r\n");
+}
+
+
+void print_hex_uart_ch(uint32_t UART_BA, uint8_t num)
+{
+	uart_puts(UART_BA,"0x");
+
+	putc(UART_BA,hexchar[(num & 0xF0) >> 4]);
+	num <<= 4;
+	putc(UART_BA,hexchar[(num & 0xF0) >> 4]);
 }
 
 void init_uart(uint32_t UART_BA)
