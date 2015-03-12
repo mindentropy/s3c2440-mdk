@@ -8,8 +8,13 @@
  * NAND driver will be written for Samsung K9K8G08U0D SCB0 -> 1GB NAND Flash (New mini2440) ID 0x9551D3EC
  */
 
-
-char nand_page_cache[NAND_DATA_SIZE];
+struct nand_page_cache_info {
+	int8_t cache_flag;
+	uint8_t page_cache[NAND_DATA_SIZE];
+	uint32_t addr_cache;
+};
+	
+struct nand_page_cache_info nand_page_cache;
 
 void set_nand_gpio_config_pins()
 {
@@ -74,9 +79,25 @@ uint8_t nand_page_read(uint32_t addr)
  * cycle
  */
 	uint16_t i = 0;
+	uint32_t nand_val = 0;
 	uint32_t *page_cache;
 	uint16_t offset = get_nand_page_offset(addr);
 
+	if((nand_page_cache.cache_flag) == -1) { //Initial. Cache miss.
+		uart_puts(UART0_BA,"Initial Cache miss\r\n");
+		nand_page_cache.cache_flag = 0;
+		nand_page_cache.addr_cache = addr>>11;
+		page_cache = (uint32_t *)nand_page_cache.page_cache;
+	} else {
+		if((addr>>11) == nand_page_cache.addr_cache) { //Cache hit.
+			//uart_puts(UART0_BA,"Cache hit\r\n");
+			return nand_page_cache.page_cache[offset];
+		} else { //Cache miss.
+			nand_page_cache.addr_cache = addr>>11;
+			page_cache = (uint32_t *) nand_page_cache.page_cache;
+		}
+	}
+	
 	send_nand_cmd(CMD_READ_PAGE_START);
 	wait_until_free();
 
@@ -92,13 +113,19 @@ uint8_t nand_page_read(uint32_t addr)
 	wait_until_free();
 	send_nand_cmd(CMD_READ_PAGE_END);
 
-	page_cache = (uint32_t *)nand_page_cache;
+/*	for(i = 0; i<NAND_DATA_SIZE; i+=4) {
+		page_cache[i] = read_nand_page_data();
+	}*/
 
 	for(i = 0; i<NAND_DATA_SIZE; i+=4) {
-		page_cache[i] = read_nand_page_data();
+		nand_val = read_nand_page_data();
+		nand_page_cache.page_cache[i] = nand_val;
+		nand_page_cache.page_cache[i+1] = nand_val>>8;
+		nand_page_cache.page_cache[i+2] = nand_val>>16;
+		nand_page_cache.page_cache[i+3] = nand_val>>24;
 	}
 
-	return nand_page_cache[offset];
+	return nand_page_cache.page_cache[offset];
 }
 
 
@@ -131,7 +158,8 @@ uint8_t nand_page_read(uint32_t addr)
 
 void nand_init()
 {
-	int i = 0;
+	uint16_t i = 0;
+	nand_page_cache.cache_flag = -1;
 	set_nand_gpio_config_pins();
 	apb_clk_enable(CLK_BASE_ADDR,CLK_NAND_FLASH_CNTRL);
 
@@ -151,7 +179,10 @@ void nand_init()
 	print_hex_uart(UART0_BA,read_nand_id());
 	print_hex_uart(UART0_BA,read_nand_data());
 
-	print_hex_uart(UART0_BA,nand_page_read(0));
+	for(i = 0;i<2048;i++) {
+		print_hex_uart_ch(UART0_BA,nand_page_read(i));
+		uart_puts(UART0_BA," ");
+	}
 
 	uart_puts(UART0_BA,"\r\n");
 
