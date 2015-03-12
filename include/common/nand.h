@@ -297,5 +297,11 @@
 #define nand_reset() \
 	send_nand_cmd(CMD_RESET)
 
+struct nand_page_cache_info {
+	int8_t cache_flag;
+	uint8_t page_cache[NAND_DATA_SIZE];
+	uint32_t addr_cache;
+};
+
 void nand_init();
 #endif

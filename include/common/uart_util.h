@@ -23,6 +23,8 @@ char getc(uint32_t UART_BA);
 void uart_puts(uint32_t UART_BA,const char *str);
 
 void print_hex_uart(uint32_t UART_BA,uint32_t num);
+void print_hex_uart_ch(uint32_t UART_BA,uint8_t num);
+
 //Bit will be set if buffer is empty.
 uint32_t isTxBuffEmpty(uint32_t channel);
 
