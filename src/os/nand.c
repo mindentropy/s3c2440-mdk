@@ -3,6 +3,12 @@
 #include "clock_pm.h"
 #include "uart_util.h"
 
+/* 
+ * NAND Page == 2048 Bytes + 64 bytes spare area (2112 bytes).
+ * NAND Block == 64 pages.
+ */
+
+
 /*
  * NAND driver will be written for Samsung K9F2G08U0B -> 256MB NAND Flash 
  * 									(Old mini2440) 0xECDA109544 ID 0x9510DAEC
@@ -55,6 +61,7 @@ uint32_t read_nand_page_data()
 
 /*
  * NAND address calculation.
+ * -------------------------
  *
  * PAGE OFFSET -> b10-b0 -> 11 bit offset
  * PAGE -> b16-b11 -> 6 bits
@@ -123,6 +130,18 @@ uint8_t nand_page_read(uint32_t addr)
 	}
 
 	return nand_page_cache.page_cache[offset];
+}
+
+
+int nand_page_program(uint32_t addr,char data[],uint16_t len)
+{
+	return 0;
+}
+
+
+int nand_block_erase(uint32_t block_addr)
+{
+	return 0;
 }
 
 
