@@ -65,7 +65,7 @@ uint32_t read_nand_page_data()
  *
  * PAGE OFFSET -> b10-b0 -> 11 bit offset
  * PAGE -> b16-b11 -> 6 bits
- * PAGE + BLOCK addr -> b18-b17 & b16-b11 -> 6 + 2 = 8 bits
+ * BLOCK addr + PAGE -> b18-b17 & b16-b11 -> 6 + 2 = 8 bits
  * Overall PAGE + BLOCK Addr bits == 11 + 8 = 19 bits
  * Total block size remaining b16-b8
  * Remaining block size is b15-b8(b7 and b6 already sent).
