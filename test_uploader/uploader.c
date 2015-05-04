@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <errno.h>
+#include <stdint.h>
 
 //#define OS_UPLOAD_DBG 
 
@@ -31,12 +32,26 @@ int read_str_response(int serial_fd)
 	return count;
 }
 
+void print_progress(const char legend[],
+						uint32_t progress,
+						uint32_t final_progress)
+{
+	uint32_t progress_percent = ((float)(progress)/(float)(final_progress))*100;
+
+	printf("\r");
+	fflush(stdout);
+
+	printf("%s: %d%%\r",legend,progress_percent);
+	fflush(stdout);
+}
+
 int main(int argc, char **argv)
 {
 	struct termios attrib;
 	char ch,val_ch;
 	int serial_fd = 0,binary_fd,retval;
 	unsigned int size = 0,serial_index = 0;
+	unsigned progress = 0;
 
 	struct stat stat_buff;
 
@@ -121,10 +136,16 @@ int main(int argc, char **argv)
 #endif
 
 			serial_index++;
+			progress++;
+			
+			print_progress("Upload progress",
+							progress,
+							size);
+
 		}
 	}
 	
-	printf("OS uploaded\n");
+	printf("\nOS uploaded\n");
 	printf("\n");
 
 	serial_index = 0;
