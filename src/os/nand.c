@@ -16,6 +16,28 @@
  * 									(New mini2440) ID 0x9551D3EC
  */
 
+/* *************************************************************************
+ *
+ * NAND Address bits allocation
+ * ----------------------------
+ *
+ * WITHOUT ECC. i.e. SPARE AREA
+ * ----------------------------
+ * NAND PAGE OFFSET: has maximum of 2048 values (0-2047) i.e. 11 bits. (b10-b0).
+ * NAND PAGE: has maximum of 64 values (0-63) as 64 pages make a block hence
+ * 				needs 6 bits. (b16-b11).
+ * NAND BLOCK: The remaining bits are for block address.
+ *
+ *
+ * WITH ECC. i.e. SPARE AREA
+ * ----------------------------
+ * NAND PAGE OFFSET: has maximum of 2048 + 64 bytes = 2112 values (0-2011) i.e. 12 bits.(b11-b0).
+ * NAND PAGE: has maximum of 64 values (0-63) as 64 pages make a block hence
+ * 				needs 6 bits. (b17-b12).
+ * NAND BLOCK: The remaining bits are for block address.
+ *
+ * ************************************************************************/
+
 
 struct nand_page_cache_info nand_page_cache;
 
@@ -66,7 +88,8 @@ uint32_t read_nand_page_data()
  * PAGE OFFSET -> b10-b0 -> 11 bit offset
  * PAGE -> b16-b11 -> 6 bits
  * BLOCK addr + PAGE -> b18-b17 & b16-b11 -> 2 + 6 = 8 bits
- * Overall PAGE + BLOCK Addr bits == 11 + 8 = 19 bits
+ * Overall PAGE + BLOCK Addr bits (i.e PAGE_ADDR+PAGE+BLOCK) == 11 + 8 = 19 bits
+ *
  * Total block size remaining b16-b8
  * Remaining block size is b15-b8(b7 and b6 already sent).
  * BLOCK Bit start is shift of 19 bits.
@@ -75,6 +98,10 @@ uint32_t read_nand_page_data()
  *
  */
 
+/*
+ * TODO: Should the page offset be 11 or 12 bits considering the 
+ * 		64 bytes of spare area for ECC?
+ */
 uint8_t nand_page_read(uint32_t addr)
 {
 
@@ -135,12 +162,37 @@ uint8_t nand_page_read(uint32_t addr)
 
 int nand_page_program(uint32_t addr,char data[],uint16_t len)
 {
+
+	
 	return 0;
 }
 
-
-int nand_block_erase(uint32_t block_addr)
+int nand_get_status()
 {
+	send_nand_cmd(CMD_READ_STATUS);
+	
+	return read_nand_data();
+}
+
+/*
+ * NAND block erase erases and entire block of 64 pages, or 128KB
+ */
+
+int nand_block_erase(uint32_t addr)
+{
+	send_nand_cmd(CMD_ERASE_BLOCK);
+	wait_until_free();
+
+
+	send_nand_addr(addr>>11);
+	send_nand_addr(addr>>19);
+	send_nand_addr(addr>>27);
+
+	wait_until_free();
+
+	send_nand_cmd(CMD_ERASE_CONFIRM);
+
+	wait_until_free();
 	
 	return 0;
 }
@@ -197,10 +249,31 @@ void nand_init()
 	print_hex_uart(UART0_BA,read_nand_data());
 
 	for(i = 0;i<2048;i++) {
-		/*print_hex_uart_ch(UART0_BA,nand_page_read(i));
-		uart_puts(UART0_BA," ");*/
+		if(!(i&7)) {
+			uart_puts(UART0_BA,"\r\n");
+		}
+		print_hex_uart_ch(UART0_BA,nand_page_read(i));
+		uart_puts(UART0_BA," ");
 	}
 
 	uart_puts(UART0_BA,"\r\n");
 
+	nand_block_erase(0);
+
+
+	uart_puts(UART0_BA,"Status :");
+	print_hex_uart_ch(UART0_BA,nand_get_status());
+
+	uart_puts(UART0_BA,"\r\n");
+
+
+/*	for(i = 0;i<2048;i++) {
+		if(!(i&7)) {
+			uart_puts(UART0_BA,"\r\n");
+		}
+		print_hex_uart_ch(UART0_BA,nand_page_read(i));
+		uart_puts(UART0_BA," ");
+	}
+
+	uart_puts(UART0_BA,"\r\n");*/
 }

@@ -281,6 +281,7 @@
 #define CMD_PROGRAM_FOR_INTERNAL_DATA_MOVE  0x85
 #define CMD_RANDOM_DATA_INPUT 				0x85
 #define CMD_ERASE_BLOCK 					0x60
+#define CMD_ERASE_CONFIRM 					0xD0
 #define CMD_RESET 							0xFF
 
 /************************/
