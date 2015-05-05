@@ -59,7 +59,8 @@ void wait_until_free()
 {
 	while(!get_RnB_status())
 	{
-		uart_puts(UART0_BA,"NAND Busy\n");
+		;
+		//uart_puts(UART0_BA,"NAND Busy\n");
 	}
 }
 
@@ -98,6 +99,9 @@ uint32_t read_nand_page_data()
  *
  */
 
+#define NAND_READ_CACHE_ENABLE 1
+//#undef NAND_READ_CACHE_ENABLE
+
 /*
  * TODO: Should the page offset be 11 or 12 bits considering the 
  * 		64 bytes of spare area for ECC?
@@ -111,21 +115,22 @@ uint8_t nand_page_read(uint32_t addr)
  */
 	uint16_t i = 0;
 	uint32_t nand_val = 0;
-	uint32_t *page_cache;
 	uint16_t offset = get_nand_page_offset(addr);
 
 	if((nand_page_cache.cache_flag) == -1) { //Initial. Cache miss.
-		uart_puts(UART0_BA,"Initial Cache miss\r\n");
+//		uart_puts(UART0_BA,"Initial Cache miss\r\n");
+
+#ifdef NAND_READ_CACHE_ENABLE
 		nand_page_cache.cache_flag = 0;
+#endif
+
 		nand_page_cache.addr_cache = addr>>11;
-		page_cache = (uint32_t *)nand_page_cache.page_cache;
 	} else {
 		if((addr>>11) == nand_page_cache.addr_cache) { //Cache hit.
 			//uart_puts(UART0_BA,"Cache hit\r\n");
 			return nand_page_cache.page_cache[offset];
 		} else { //Cache miss.
 			nand_page_cache.addr_cache = addr>>11;
-			page_cache = (uint32_t *) nand_page_cache.page_cache;
 		}
 	}
 	
@@ -181,18 +186,20 @@ int nand_get_status()
 int nand_block_erase(uint32_t addr)
 {
 	send_nand_cmd(CMD_ERASE_BLOCK);
+
 	wait_until_free();
 
 
 	send_nand_addr(addr>>11);
 	send_nand_addr(addr>>19);
 	send_nand_addr(addr>>27);
-
 	wait_until_free();
 
 	send_nand_cmd(CMD_ERASE_CONFIRM);
 
 	wait_until_free();
+
+	nand_page_cache.cache_flag = -1;
 	
 	return 0;
 }
@@ -258,16 +265,14 @@ void nand_init()
 
 	uart_puts(UART0_BA,"\r\n");
 
-	nand_block_erase(0);
+	disable_nand_soft_lock();
 
+	nand_block_erase(0);
 
 	uart_puts(UART0_BA,"Status :");
 	print_hex_uart_ch(UART0_BA,nand_get_status());
 
-	uart_puts(UART0_BA,"\r\n");
-
-
-/*	for(i = 0;i<2048;i++) {
+	for(i = 0;i<2048;i++) {
 		if(!(i&7)) {
 			uart_puts(UART0_BA,"\r\n");
 		}
@@ -275,5 +280,5 @@ void nand_init()
 		uart_puts(UART0_BA," ");
 	}
 
-	uart_puts(UART0_BA,"\r\n");*/
+	uart_puts(UART0_BA,"\r\n");
 }

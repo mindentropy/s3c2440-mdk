@@ -236,6 +236,12 @@
 #define disable_nand_flash_mode() \
 	clear_reg_params(NFCONT_REG(NAND_BA),MODE)
 
+#define enable_nand_soft_lock() \
+	set_reg_params(NFCONT_REG(NAND_BA),SOFTLOCK)
+
+#define disable_nand_soft_lock() \
+	clear_reg_params(NFCONT_REG(NAND_BA),SOFTLOCK)
+
 #define enable_nand_flash_controller() do {\
 		set_nand_flash_mode();\
 		set_nand_nfce_low();\
@@ -306,6 +312,6 @@ struct nand_page_cache_info {
 
 void nand_init();
 int nand_page_program(uint32_t addr,char data[],uint16_t len);
-int nand_block_erase(uint32_t block_addr);
+int nand_block_erase(uint32_t addr);
 
 #endif
