@@ -59,8 +59,7 @@ void wait_until_free()
 {
 	while(!get_RnB_status())
 	{
-		;
-		//uart_puts(UART0_BA,"NAND Busy\n");
+		uart_puts(UART0_BA,"NAND Busy\n");
 	}
 }
 
@@ -99,8 +98,6 @@ uint32_t read_nand_page_data()
  *
  */
 
-#define NAND_READ_CACHE_ENABLE 1
-//#undef NAND_READ_CACHE_ENABLE
 
 /*
  * TODO: Should the page offset be 11 or 12 bits considering the 
@@ -119,11 +116,7 @@ uint8_t nand_page_read(uint32_t addr)
 
 	if((nand_page_cache.cache_flag) == -1) { //Initial. Cache miss.
 //		uart_puts(UART0_BA,"Initial Cache miss\r\n");
-
-#ifdef NAND_READ_CACHE_ENABLE
 		nand_page_cache.cache_flag = 0;
-#endif
-
 		nand_page_cache.addr_cache = addr>>11;
 	} else {
 		if((addr>>11) == nand_page_cache.addr_cache) { //Cache hit.
@@ -167,7 +160,24 @@ uint8_t nand_page_read(uint32_t addr)
 
 int nand_page_program(uint32_t addr,char data[],uint16_t len)
 {
+	disable_nand_soft_lock();
 
+	send_nand_cmd(CMD_PROGRAM_PAGE);
+
+	send_nand_addr(addr);
+	send_nand_addr((addr>>8) & 0x7);
+
+	send_nand_addr(addr>>11);
+	send_nand_addr(addr>>19);
+	send_nand_addr(addr>>27);
+
+	send_nand_data(0x11);
+
+	send_nand_cmd(CMD_PROGRAM_PAGE_CONFIRM);
+
+	wait_until_free();
+
+	enable_nand_soft_lock();
 	
 	return 0;
 }
@@ -176,7 +186,7 @@ int nand_get_status()
 {
 	send_nand_cmd(CMD_READ_STATUS);
 	
-	return read_nand_data();
+	return read_nand_data() & 0xFF;
 }
 
 /*
@@ -185,6 +195,7 @@ int nand_get_status()
 
 int nand_block_erase(uint32_t addr)
 {
+	disable_nand_soft_lock();
 	send_nand_cmd(CMD_ERASE_BLOCK);
 
 	wait_until_free();
@@ -199,8 +210,15 @@ int nand_block_erase(uint32_t addr)
 
 	wait_until_free();
 
-	nand_page_cache.cache_flag = -1;
-	
+
+	/* If the block is already cached and the block address is the same */
+	if((nand_page_cache.cache_flag) == 0 && 
+				((nand_page_cache.addr_cache) >> 16) == (addr>>16)) {
+		nand_page_cache.cache_flag = -1; //Disable cache.
+	}
+											
+	enable_nand_soft_lock();
+
 	return 0;
 }
 
@@ -255,6 +273,11 @@ void nand_init()
 	print_hex_uart(UART0_BA,read_nand_id());
 	print_hex_uart(UART0_BA,read_nand_data());
 
+	uart_puts(UART0_BA,"NAND Status :");
+	print_hex_uart(UART0_BA, nand_get_status());
+	nand_block_erase(0);
+
+
 	for(i = 0;i<2048;i++) {
 		if(!(i&7)) {
 			uart_puts(UART0_BA,"\r\n");
@@ -265,9 +288,7 @@ void nand_init()
 
 	uart_puts(UART0_BA,"\r\n");
 
-	disable_nand_soft_lock();
-
-	nand_block_erase(0);
+/*	nand_block_erase(0);
 
 	uart_puts(UART0_BA,"Status :");
 	print_hex_uart_ch(UART0_BA,nand_get_status());
@@ -279,6 +300,7 @@ void nand_init()
 		print_hex_uart_ch(UART0_BA,nand_page_read(i));
 		uart_puts(UART0_BA," ");
 	}
+*/
 
 	uart_puts(UART0_BA,"\r\n");
 }
