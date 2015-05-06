@@ -158,7 +158,7 @@ uint8_t nand_page_read(uint32_t addr)
 }
 
 
-int nand_page_program(uint32_t addr,char data[],uint16_t len)
+int nand_page_program(uint32_t addr,const char data[],uint16_t len)
 {
 	disable_nand_soft_lock();
 
@@ -171,7 +171,7 @@ int nand_page_program(uint32_t addr,char data[],uint16_t len)
 	send_nand_addr(addr>>19);
 	send_nand_addr(addr>>27);
 
-	send_nand_data(0x11);
+	send_nand_data(0xABCDEF12);
 
 	send_nand_cmd(CMD_PROGRAM_PAGE_CONFIRM);
 
@@ -252,7 +252,8 @@ int nand_block_erase(uint32_t addr)
 
 void nand_init()
 {
-	uint16_t i = 0;
+	/*uint16_t i = 0;
+	const char test_data[] = "TEST";*/
 	nand_page_cache.cache_flag = -1;
 	set_nand_gpio_config_pins();
 	apb_clk_enable(CLK_BASE_ADDR,CLK_NAND_FLASH_CNTRL);
@@ -275,8 +276,10 @@ void nand_init()
 
 	uart_puts(UART0_BA,"NAND Status :");
 	print_hex_uart(UART0_BA, nand_get_status());
-	nand_block_erase(0);
 
+	/*nand_block_erase(0);
+
+	nand_page_program(0,test_data,4);
 
 	for(i = 0;i<2048;i++) {
 		if(!(i&7)) {
@@ -284,7 +287,7 @@ void nand_init()
 		}
 		print_hex_uart_ch(UART0_BA,nand_page_read(i));
 		uart_puts(UART0_BA," ");
-	}
+	}*/
 
 	uart_puts(UART0_BA,"\r\n");
 

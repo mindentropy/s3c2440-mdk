@@ -312,7 +312,7 @@ struct nand_page_cache_info {
 };
 
 void nand_init();
-int nand_page_program(uint32_t addr,char data[],uint16_t len);
+int nand_page_program(uint32_t addr,const char data[],uint16_t len);
 int nand_block_erase(uint32_t addr);
 
 #endif
