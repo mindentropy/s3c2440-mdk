@@ -158,8 +158,30 @@ uint8_t nand_page_read(uint32_t addr)
 }
 
 
-int nand_page_program(uint32_t addr,const char data[],uint16_t len)
+/*
+ * nand_page_program design:
+ * -------------------------
+ *
+ * nand_page_program programs a page size with addr being on the page boundary and the 
+ * page being the nand_data_size.
+ *
+ * All the nand algorithms will be clubbed in a library with calls to raw functions
+ * in the present file.
+ *
+ * Algorithms include reliable page program, block erase, management of bad blocks, creation
+ * of bbt etc.
+ *
+ * TODO: Should the programming be done on nand_page_size?
+ * TODO: How should I include ECC?
+ * TODO: Testing of program and read operations on page boundaries for edge test conditions
+ * 		for verification of the addressing mode.
+ * TODO: Generation of ECC.
+ *
+ */
+int nand_page_program(uint32_t addr,const char data[])
 {
+	uint16_t i = 0;
+
 	disable_nand_soft_lock();
 
 	send_nand_cmd(CMD_PROGRAM_PAGE);
@@ -171,7 +193,10 @@ int nand_page_program(uint32_t addr,const char data[],uint16_t len)
 	send_nand_addr(addr>>19);
 	send_nand_addr(addr>>27);
 
-	send_nand_data(0xABCDEF12);
+	
+	for(i = 0; i<NAND_DATA_SIZE; i+=4) {
+		send_nand_data((data[i+3]<<24)|(data[i+2]<<16)|(data[i+1]<<8)|(data[i]));
+	}
 
 	send_nand_cmd(CMD_PROGRAM_PAGE_CONFIRM);
 
