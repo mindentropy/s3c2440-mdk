@@ -11,6 +11,7 @@
 #include "cache.h"
 #include "mmu.h"
 #include "nand.h"
+#include "sd_mmc.h"
 
 
 #include <stdint.h>
