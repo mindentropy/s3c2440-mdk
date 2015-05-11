@@ -11,15 +11,15 @@
 	HW_REG(BA,SDICON_OFF)
 
 #define SDMMC_RESET 	(BIT8)
-#define CLK_TYPE 		(BIT5)
+#define CLK_TYPE_MSK	(BIT5)
+#define CLK_TYPE_MMC	(BIT5)
 #define BYTE_ORDER 		(BIT4)
 #define RCV_IO_INT 		(BIT3)
-#define RWaitEn 		(BIT2)
-#define ENCLK 			(BIT0)
+#define READ_WAIT_EN	(BIT2)
+#define CLK_OUT_EN 		(BIT0)
 
 #define reset_sdmmc() \
 	set_reg_params(SDICON_REG(SD_MMC_BA),SDMMC_RESET)
-
 
 
 #define SDIPRE_OFF 		(0x04)
@@ -32,11 +32,15 @@
 #define SDI_CMD_ARG_REG(BA) \
 	HW_REG(BA,SDI_CMD_ARG_OFF)
 
+#define send_sd_mmc_cmd(cmd) \
+	writereg32(SDI_CMD_ARG_REG(SD_MMC_BA),cmd)
+
 #define CMD_ARG_MASK  (WORD_MASK)
 
 #define SDI_CMD_CON_OFF	(0x0C)
 #define SDI_CMD_CON_REG(BA) \
 	HW_REG(BA,SDI_CMD_CON_OFF)
+
 
 #define ABORT_CMD 		(BIT12)
 #define CMD_WITH_DATA 	(BIT11)
