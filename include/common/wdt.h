@@ -6,6 +6,7 @@
 
 
 #define WT_BA 		0x53000000
+
 #define WTCON_OFF 	0x00
 #define WTDAT_OFF 	0x04
 #define WTCNT_OFF 	0x08
@@ -20,7 +21,7 @@
 	HW_REG((BA),WTCNT_OFF)
 
 
-#define PRESCALER_VAL 		(BIT15|BIT14|BIT13|BIT12|BIT11|BIT10|BIT9|BIT8)
+#define PRESCALER_VAL 		set_bit_range(15,8)
 #define WDT_EN 				(BIT5)
 
 #define WDT_CLK_SEL         (BIT4|BIT3)

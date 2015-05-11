@@ -117,7 +117,7 @@
 
 #define SErrorDataNo 	(BIT24|BIT23|BIT22|BIT21)
 #define SErrorBitNo 	(BIT20|BIT19|BIT18)
-#define MErrorDataNo 	(BIT17|BIT16|BIT15|BIT14|BIT13|BIT12|BIT11|BIT10|BIT9|BIT8|BIT7)
+#define MErrorDataNo 	set_bit_range(17,7)
 #define MErrorBitNo 	(BIT6|BIT5|BIT4)
 #define SpareError 		(BIT3|BIT2)
 #define MainError 		(BIT1|BIT0)

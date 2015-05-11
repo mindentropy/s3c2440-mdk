@@ -12,6 +12,10 @@
 #include "mmu.h"
 #include "nand.h"
 #include "sd_mmc.h"
+#include "lcd.h"
+#include "rtc.h"
+#include "adc_ts.h"
+#include "ac97.h"
 
 
 #include <stdint.h>

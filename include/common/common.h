@@ -104,5 +104,21 @@
 	} while(0)
 
 
+/*
+ *
+ * For methods on bit range settings see:
+ * http://www.cs.umd.edu/class/sum2003/cmsc311/Notes/BitOp/bitRange.html
+ *
+ * Original code:
+ * ((1<<(high+1) - 1) - ((1<<low)-1)
+ * Reduction:
+ *
+ * ((1<<(high+1) - 1 - (1<<low) + 1
+ * i.e. (1<<(high+1)) - (1<<low)
+ */
+
+#define set_bit_range(high,low) \
+	((1<<(high+1)) - (1<<low))
+	
 
 #endif

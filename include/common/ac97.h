@@ -1,0 +1,104 @@
+#ifndef AC97_H_
+
+#define AC97_H_
+
+#include "common.h"
+
+#define AC_BA 				(0x5B000000)
+
+#define AC_GLBCTRL_OFF 		(0x00)
+
+#define AC_GLBCTRL_REG(BA) 	\
+	HW_REG(BA,AC_GLBCTRL_OFF)
+
+#define CODEC_READY_INT_EN 				(BIT22)
+#define PCM_OUT_CH_UNDERRUN_INT_EN 		(BIT21)
+#define PCM_IN_CH_OVERRUN_INT_EN 		(BIT20)
+#define MIC_IN_CH_OVERRUN_INT_EN 		(BIT19)
+#define PCM_OUT_CH_THRESHOLD_INT_EN 	(BIT18)
+#define PCM_IN_CH_THRESHOLD_INT_EN 		(BIT17)
+#define MIC_IN_CH_THRESHOLD_INT_EN 		(BIT16)
+
+
+#define PCM_OUT_CH_TRANSFER_MODE 		(BIT13|BIT12)
+#define PCM_IN_CH_TRANSFER_MODE 		(BIT11|BIT10)
+#define MIC_IN_CH_TRANSFER_MODE 		(BIT9|BIT8)
+
+#define TRANSFER_DATA_EN_USING_AC_LINK  (BIT3)
+#define AC_LINK_ON 						(BIT2)
+#define WARM_RESET 						(BIT1)
+#define COLD_RESET 						(BIT0)
+
+
+#define AC_GLBSTAT_OFF 		(0x04)
+
+#define AC_GLBSTAT_REG(BA) 	\
+	HW_REG(BA,AC_GLBSTAT_OFF)
+
+
+#define CODEC_READY_INT 			(BIT22)
+#define PCM_OUT_CH_UNDERRUN_INT 	(BIT21)
+#define PCM_IN_CH_OVERRUN_INT 		(BIT20)
+#define MIC_IN_CH_OVERRUN_INT 		(BIT19)
+#define PCM_OUT_CH_THRESHOLD_INT 	(BIT18)
+#define PCM_IN_CH_THRESHOLD_INT 	(BIT17)
+#define MIC_IN_CH_THRESHOLD_INT 	(BIT16)
+
+#define CONTROLLER_MAIN_STATE_MSK 	set_bit_range(2,0)
+
+#define CONTROLLER_IDLE 			(0)
+#define CONTROLLER_INIT 			(BIT0)
+#define CONTROLLER_READY 			(BIT1)
+#define CONTROLLER_ACTIVE 			(BIT1|BIT0)
+#define CONTROLLER_LP 				(BIT2)
+#define CONTROLLER_WARM 			(BIT2|BIT0)
+
+#define AC_CODEC_CMD_OFF 	(0x08)
+#define AC_CODEC_CMD_REG(BA) 	\
+	HW_REG(BA,AC_CODEC_CMD_OFF)
+
+#define CODEC_READ_EN 		(BIT23)
+#define CODEC_CMD_ADDR  	set_bit_range(22,16)
+#define CODEC_CMD_DATA  	BYTE_MASK
+
+#define AC_CODEC_STAT_OFF 	(0x0C)
+#define AC_CODEC_STAT_REG(BA) 	\
+	HW_REG(BA,AC_CODEC_STAT_OFF)
+
+#define CODEC_STAT_ADDR 	set_bit_range(22,16)
+#define CODEC_STAT_DATA 	BYTE_MASK
+
+#define AC_PCMADDR_OFF 		(0x10)
+#define AC_PCMADDR_REG(BA) 	\
+	HW_REG(BA,AC_PCMADDR_OFF)
+
+#define PCM_OUT_CH_FIFO_READ_ADDR 	set_bit_range(27,24)
+#define PCM_IN_CH_FIFO_READ_ADDR 	set_bit_range(19,16)
+#define PCM_OUT_CH_FIFO_WRITE_ADDR 	set_bit_range(11,8)
+#define PCM_IN_CH_FIFO_WRITE_ADDR 	set_bit_range(3,0)
+
+
+#define AC_MICADDR_OFF 		(0x14)
+#define AC_MICADDR_REG(BA) 	\
+	HW_REG(BA,AC_MICADDR_OFF)
+
+
+#define MIC_IN_CH_FIFO_READ_ADDR 	set_bit_range(19,16)
+#define MIC_IN_CH_FIFO_WRITE_ADDR 	set_bit_range(3,0)
+
+#define AC_PCMDATA_OFF 		(0x18)
+#define AC_PCMDATA_REG(BA) 	\
+	HW_REG(BA,AC_PCMDATA_OFF)
+
+
+#define AC_PCMDATA_LEFT_MSK 	set_bit_range(31,16)
+#define AC_PCMDATA_RIGHT_MSK 	set_bit_range(15,0)
+
+#define AC_MICDATA_OFF 		(0x1C)
+#define AC_MICDATA_REG(BA) 	\
+	HW_REG(BA,AC_MICDATA_OFF)
+
+#define MONO_DATA_MSK 		(BYTE_MASK)
+
+
+#endif
