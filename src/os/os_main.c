@@ -16,6 +16,7 @@
 #include "rtc.h"
 #include "adc_ts.h"
 #include "ac97.h"
+#include "usb_host_controller.h"
 
 
 #include <stdint.h>
