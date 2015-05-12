@@ -211,6 +211,8 @@ int main(void) {
 
 	last_boot_cause();
 
+	dump_clk();
+
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 		blink_leds(LED1|LED4);
