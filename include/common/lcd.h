@@ -18,6 +18,11 @@
 
 #define PNRMODE 		(BIT6|BIT5)
 
+#define PNRMODE_STN_4b_DUAL  	(0)
+#define PNRMODE_STN_4b_SINGLE  	(BIT5)
+#define PNRMODE_STN_8b_SINGLE  	(BIT6)
+#define PNRMODE_TFT_LCD  		(BIT6|BIT5)
+
 #define BPPMODE_MSK 	set_bit_range(4,1)
 #define ENVID 			BIT0
 
