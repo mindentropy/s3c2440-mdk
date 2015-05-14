@@ -4,7 +4,7 @@
 
 #include "common.h"
 
-#define LCD_BA 0x4D000000
+#define LCD_BA 0x4D000000U
 
 
 #define LCDCON1_OFF 	0x00
@@ -24,6 +24,22 @@
 #define PNRMODE_TFT_LCD  		(BIT6|BIT5)
 
 #define BPPMODE_MSK 	set_bit_range(4,1)
+
+#define STN_1BPP 			(0)
+#define STN_2BPP 			(BIT1)
+#define STN_4BPP 			(BIT2)
+#define STN_8BPP 			(BIT2|BIT1)
+#define STN_UNPACK_12BPP 	(BIT3)
+#define STN_PACK_12BPP 		(BIT3|BIT1)
+#define STN_16BPP 			(BIT3|BIT2)
+
+#define TFT_1BPP 		(BIT4)
+#define TFT_2BPP 		(BIT4|BIT1)
+#define TFT_4BPP 		(BIT4|BIT2)
+#define TFT_8BPP 		(BIT4|BIT2|BIT1)
+#define TFT_16BPP 		(BIT4|BIT3)
+#define TFT_24BPP 		(BIT4|BIT3|BIT1)
+
 #define ENVID 			BIT0
 
 #define LCDCON2_OFF 	0x04
@@ -58,9 +74,26 @@
 	HW_REG(BA,LCDCON5_OFF)
 
 #define VSTATUS_MSK 	(BIT16|BIT15)
+#define VSYNC 			(0)
+#define VBACKPORCH 		(BIT15)
+#define VACTIVE 		(BIT16)
+#define VFRONTPORCH 	(BIT16|BIT15)
+
 #define HSTATUS_MSK 	(BIT14|BIT13)
-#define BPP24BL_MSK 	(BIT12)
-#define FRM565_MSK 		(BIT11)
+#define HSYNC 			(0)
+#define HBACKPORCH 		(BIT13)
+#define HACTIVE 		(BIT14)
+#define HFRONTPORCH 	(BIT14|BIT13)
+
+
+#define BPP24BL_MSK 		(BIT12)
+#define BPP24BL_MSB_VALID 	(BIT12)
+#define BPP24BL_LSB_VALID 	(0)
+
+#define FRM565_MSK 				(BIT11)
+#define FRM565_5_5_5_1_FRMT  	(0)
+#define FRM565_5_6_5_1_FRMT  	(BIT11)
+
 #define INVVCLK 		(BIT10)
 #define INVVLINE 		(BIT9)
 #define INVVFRAME 		(BIT8)
@@ -155,4 +188,12 @@
 #define RES_SEL 		BIT1
 #define LPC_EN 			BIT0
 
+
+#define enable_lcd_controller(BA) \
+	set_reg_params(LCDCON1_REG(BA),ENVID)
+
+#define disable_lcd_controller(BA) \
+	clear_reg_params(LCDCON1_REG(BA),ENVID)
+
+void init_lcd();
 #endif
