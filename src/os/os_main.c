@@ -195,6 +195,7 @@ int main(void) {
 	init_led();
 	led_off(LED4|LED3|LED2|LED1);
 
+	init_lcd();
 	//sram_loc = 0;
 	
 	//dump_clk();
@@ -213,15 +214,14 @@ int main(void) {
 
 	dump_clk();
 
-	init_lcd();
 
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 		blink_leds(LED1|LED4);
-		//
-		__asm__ __volatile__ (
+		//Test for interrupt --> Passed as it jumps to the interrupt handler.
+	/*	__asm__ __volatile__ (
 			"swi 0x123456\n\t"
-		);
+		);*/
 	//	uart_puts(UART0_BA,"TB\r\n");
 
 	/*	putc_ch0(*sram_loc);

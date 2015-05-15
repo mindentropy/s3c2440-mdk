@@ -5,7 +5,7 @@
  * If the address of the code is setup such that the .text
  * section is put in sdram say 0x32000000. Next if the program
  * is loaded to the address 0x30000000 then we expect that the
- * program should not work properly because the address generated
+ * program to not work properly because the address generated
  * in the code is different. This is not the case as the branch
  * instruction is pc(program counter) relative. Hence the b reset
  * would be b <pc+offset>. The branch instructions create position
