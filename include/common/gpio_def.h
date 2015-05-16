@@ -84,6 +84,9 @@
 #define LED4_GPIO_OUT ((~BIT17) & (BIT16)) //GPB8
 
 #define SPKR_GPIO_OUT ((~BIT1) & (BIT0)) //GPB0
+
+#define LCD_PWRDN 	((BIT9|BIT8)) //GPG4
+
 #define SPKR_GPIO_PIN (BIT0)
 
 /* GSTATUS0 */

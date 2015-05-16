@@ -1,4 +1,5 @@
 #include "lcd.h"
+#include "gpio_def.h"
 
 
 /*
@@ -33,14 +34,18 @@ void init_lcd()
 {
 	unsigned int i = 0;
 	unsigned char *buff = (unsigned char *)LCD_START_ADDR;
+
 	disable_lcd_controller(LCD_BA);
+
+	set_reg_params(GPCON_REG(GPG_BA),LCD_PWRDN);
 
 	writereg32(LCDCON1_REG(LCD_BA),((CLKVAL<<8)|PNRMODE_TFT_LCD|TFT_16BPP));
 	writereg32(LCDCON2_REG(LCD_BA),((VBPD<<24)|(LINEVAL<<14)|(VFPD<<6)|VSPW));
 	writereg32(LCDCON3_REG(LCD_BA),((HBPD<<19)|(HOZVAL<<8)|(HFPD)));
 	writereg32(LCDCON4_REG(LCD_BA),(HSPW));
 
-	set_reg_params(LCDCON5_REG(LCD_BA),FRM565_5_6_5_1_FRMT|PWREN);
+	set_reg_params(LCDCON5_REG(LCD_BA),
+				FRM565_5_6_5_1_FRMT|PWREN|INVVLINE|INVVFRAME|INVVCLK);
 
 	writereg32(LCDSADDR1_REG(LCD_BA),LCD_START_ADDR>>1);
 	writereg32(LCDSADDR2_REG(LCD_BA),((LCD_START_ADDR+MEMBUFF_SIZE) & 0x1FFFFF)>>1);
