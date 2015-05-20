@@ -195,7 +195,6 @@ int main(void) {
 	init_led();
 	led_off(LED4|LED3|LED2|LED1);
 
-	init_lcd();
 	//sram_loc = 0;
 	
 	//dump_clk();
@@ -214,6 +213,7 @@ int main(void) {
 
 	dump_clk();
 
+	init_lcd();
 
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {

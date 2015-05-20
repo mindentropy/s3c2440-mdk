@@ -87,6 +87,8 @@
 
 #define LCD_PWRDN 	((BIT9|BIT8)) //GPG4
 
+#define LCD_GPIO_PWRDN (BIT4)
+
 #define SPKR_GPIO_PIN (BIT0)
 
 /* GSTATUS0 */

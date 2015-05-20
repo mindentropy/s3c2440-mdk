@@ -103,7 +103,14 @@ $(OS_OBJ_DIR):
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
-.PHONY: clean cleandir cleanall
+.PHONY: clean cleandir cleanall cscope_create
+
+
+cscope_create:
+	cscope -R -q -k -b
+
+cscope_clean:
+	rm -v *.out
 
 cleanall: clean cleandir
 
