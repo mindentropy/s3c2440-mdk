@@ -8,6 +8,10 @@
  * for a 320 x 240 screen size.
  */
 
+#define LCD_P35
+
+#ifdef LCD_P35
+
 #define HRES 	320
 #define VRES 	240
 
@@ -26,14 +30,27 @@
 #define CLKVAL 	(7)
 #define BPP 	(16)
 
+#endif
+
+/* Datasheet Sony ACX502BMU  */
+#ifdef LCD_X35
+
+#endif
+
 #define MEMBUFF_SIZE 		((HRES) * (VRES) * (BPP>>3))
 #define LCD_START_ADDR 		(0x32000000U)
+
+
 
 /* 
  * For testing will put the LCD memory at 0x32000000
  */
 
 
+/*
+ * First configure GPIO to enable LCD controller functions
+ * and disable the internal pull up resistors.
+ */
 void config_gpio()
 {
 	/* Disable internal pull up resistors */
@@ -44,6 +61,7 @@ void config_gpio()
 	writereg32(GPCON_REG(GPD_BA),0xAAAAAAAAU);
 	
 }
+
 void init_lcd()
 {
 	unsigned int i = 0;
