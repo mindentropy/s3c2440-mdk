@@ -295,12 +295,12 @@ void nand_init()
 	
 	nand_reset();
 	
-	uart_puts(UART0_BA,"NAND ID:");
+/*	uart_puts(UART0_BA,"NAND ID:");
 	print_hex_uart(UART0_BA,read_nand_id());
 	print_hex_uart(UART0_BA,read_nand_data());
 
 	uart_puts(UART0_BA,"NAND Status :");
-	print_hex_uart(UART0_BA, nand_get_status());
+	print_hex_uart(UART0_BA, nand_get_status());*/
 
 	/*nand_block_erase(0);
 
@@ -314,7 +314,7 @@ void nand_init()
 		uart_puts(UART0_BA," ");
 	}*/
 
-	uart_puts(UART0_BA,"\r\n");
+//	uart_puts(UART0_BA,"\r\n");
 
 /*	nand_block_erase(0);
 
@@ -330,5 +330,5 @@ void nand_init()
 	}
 */
 
-	uart_puts(UART0_BA,"\r\n");
+	//uart_puts(UART0_BA,"\r\n");
 }

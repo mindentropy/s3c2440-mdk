@@ -171,6 +171,7 @@ void last_boot_cause()
 	}
 }
 
+
 int main(void) {
 	/* Note : Do not put any operations above this */
 	/* Disable watchdog.*/
@@ -204,14 +205,12 @@ int main(void) {
 
 	nand_init();
 
-	dump_nand_dbg();
+	/*dump_nand_dbg();
 	uart_puts(UART0_BA,"chipid : ");
 	print_hex_uart(UART0_BA,get_gstatus_chipid());
 	uart_puts(UART0_BA,"\r\n");
 
-	last_boot_cause();
-
-	dump_clk();
+	last_boot_cause();*/
 
 	init_lcd();
 

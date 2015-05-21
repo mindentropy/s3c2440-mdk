@@ -1,51 +1,7 @@
 #include "lcd.h"
 #include "gpio_def.h"
 #include "uart.h"
-
-
-/*
- * Parameters for clock value of 100MHz and Framerate of around 60-70Hz
- * for a 320 x 240 screen size.
- */
-
-#define LCD_P35
-
-#ifdef LCD_P35
-
-#define HRES 	320
-#define VRES 	240
-
-//#define VSPW 	(1)
-#define VSPW 	(0)
-#define VBPD 	(2)
-#define LINEVAL (VRES-1)
-#define VFPD 	(2)
-
-//#define HSPW 	(5)
-#define HSPW 	(0)
-#define HBPD 	(8)
-#define HFPD 	(8)
-#define HOZVAL 	(HRES-1)
-
-#define CLKVAL 	(7)
-#define BPP 	(16)
-
-#endif
-
-/* Datasheet Sony ACX502BMU  */
-#ifdef LCD_X35
-
-#endif
-
-#define MEMBUFF_SIZE 		((HRES) * (VRES) * (BPP>>3))
-#define LCD_START_ADDR 		(0x32000000U)
-
-
-
-/* 
- * For testing will put the LCD memory at 0x32000000
- */
-
+#include "uart_util.h"
 
 /*
  * First configure GPIO to enable LCD controller functions
@@ -62,11 +18,12 @@ void config_gpio()
 	
 }
 
+unsigned char *lcd_frame_buff = (unsigned char *)LCD_START_ADDR;
+
 void init_lcd()
 {
 	unsigned int i = 0;
-	unsigned char *buff = (unsigned char *)LCD_START_ADDR;
-	unsigned short val = 0;
+//	unsigned char color = 0;
 
 	config_gpio();
 	disable_lcd_controller(LCD_BA);
@@ -75,9 +32,9 @@ void init_lcd()
 	set_reg_params(GPUP_REG(GPG_BA),LCD_GPIO_PWRDN);
 	clear_reg_params(GPDAT_REG(GPG_BA),LCD_GPIO_PWRDN);
 
-	print_hex_uart(UART0_BA,readreg32(GPCON_REG(GPG_BA)));
+	/*print_hex_uart(UART0_BA,readreg32(GPCON_REG(GPG_BA)));
 	print_hex_uart(UART0_BA,readreg32(GPDAT_REG(GPG_BA)));
-	print_hex_uart(UART0_BA,readreg32(LCDCON5_REG(LCD_BA)));
+	print_hex_uart(UART0_BA,readreg32(LCDCON5_REG(LCD_BA)));*/
 	
 
 	writereg32(LCDCON1_REG(LCD_BA),((CLKVAL<<8)|PNRMODE_TFT_LCD|TFT_16BPP));
@@ -95,10 +52,13 @@ void init_lcd()
 	clear_reg_params(TCONSEL_REG(LCD_BA),LCC_SEL3|LPC_EN|LCC_EN);
 
 	enable_lcd_controller(LCD_BA);
+	
+	for(i = 0; i<(MEMBUFF_SIZE-1); i++) {
+		lcd_frame_buff[i] = 0x00;
+	}
 
-	while(1) {
-		for(i = 0; i<(MEMBUFF_SIZE-1); i++) {
-			buff[i]++;
-		}
+	for(i = 0; i<(MEMBUFF_SIZE-1); i++) {
+		lcd_frame_buff[i] = getc(UART0_BA);
+		putc(UART0_BA,lcd_frame_buff[i]);
 	}
 }

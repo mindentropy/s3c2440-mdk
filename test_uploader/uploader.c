@@ -8,6 +8,7 @@
 #include <termios.h>
 #include <errno.h>
 #include <stdint.h>
+#include "sunflower.h"
 
 //#define OS_UPLOAD_DBG 
 
@@ -52,6 +53,8 @@ int main(int argc, char **argv)
 	int serial_fd = 0,binary_fd,retval;
 	unsigned int size = 0,serial_index = 0;
 	unsigned progress = 0;
+	unsigned pic_size = sizeof(sunflower)/sizeof(char);
+	unsigned pic_idx = 0;
 
 	struct stat stat_buff;
 
@@ -147,6 +150,20 @@ int main(int argc, char **argv)
 	
 	printf("\nOS uploaded\n");
 	printf("\n");
+	sleep(2);
+	for(pic_idx = 0; pic_idx<pic_size; pic_idx++)
+	{
+		write(serial_fd,sunflower+pic_idx,1);
+		read(serial_fd,&val_ch,1);
+
+		if(sunflower[pic_idx] != val_ch) {
+			printf("0x%02x 0x%02x\n",sunflower[pic_idx],(unsigned char)(val_ch));
+			printf("Match failed\n");
+			break;
+		}
+
+		//printf("%02x ",(unsigned char)(val_ch));
+	}
 
 	serial_index = 0;
 	while(1) {

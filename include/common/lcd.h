@@ -196,4 +196,46 @@
 	clear_reg_params(LCDCON1_REG(BA),ENVID)
 
 void init_lcd();
+
+/*
+ * Parameters for clock value of 100MHz and Framerate of around 60-70Hz
+ * for a 320 x 240 screen size.
+ */
+
+#define LCD_P35
+
+#ifdef LCD_P35
+
+#define HRES 	320
+#define VRES 	240
+
+#define VSPW 	(1) //VSYNC Pulse width TODO: How?
+#define VBPD 	(12) //Works
+#define LINEVAL (VRES-1)
+#define VFPD 	(2)
+
+//#define HSPW 	(5)
+//#define HSPW 	(0)
+#define HSPW 	(1) //HSYNC Pulse width TODO: How?
+#define HBPD 	(8) //Works
+#define HFPD 	(8)
+#define HOZVAL 	(HRES-1)
+
+#define CLKVAL 	(7)
+#define BPP 	(16)
+
+#endif
+
+/* Datasheet Sony ACX502BMU  */
+#ifdef LCD_X35
+
+#endif
+
+/* 
+ * For testing will put the LCD memory at 0x32000000
+ */
+#define MEMBUFF_SIZE 		((HRES) * (VRES) * (BPP>>3))
+#define LCD_START_ADDR 		(0x32000000U)
+
+
 #endif
