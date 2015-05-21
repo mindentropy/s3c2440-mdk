@@ -1,7 +1,7 @@
 /*BMP C file converted from BMP file*/
 
 
-#define	WIN32
+//#define	WIN32
 
 const unsigned char sunflower[] = {
 

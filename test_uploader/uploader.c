@@ -150,21 +150,23 @@ int main(int argc, char **argv)
 	
 	printf("\nOS uploaded\n");
 	printf("\n");
+	printf("Pic size : %u\n",pic_size);
 	sleep(2);
 	for(pic_idx = 0; pic_idx<pic_size; pic_idx++)
 	{
 		write(serial_fd,sunflower+pic_idx,1);
 		read(serial_fd,&val_ch,1);
 
-		if(sunflower[pic_idx] != val_ch) {
+		if(sunflower[pic_idx] != (unsigned char)val_ch) {
 			printf("0x%02x 0x%02x\n",sunflower[pic_idx],(unsigned char)(val_ch));
 			printf("Match failed\n");
 			break;
 		}
 
-		//printf("%02x ",(unsigned char)(val_ch));
+	//	printf("Index : %u\n",pic_idx);
 	}
 
+	printf("Done uploading picture\n");
 	serial_index = 0;
 	while(1) {
 		read_str_response(serial_fd);
