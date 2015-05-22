@@ -295,13 +295,6 @@ void nand_init()
 	
 	nand_reset();
 	
-/*	uart_puts(UART0_BA,"NAND ID:");
-	print_hex_uart(UART0_BA,read_nand_id());
-	print_hex_uart(UART0_BA,read_nand_data());
-
-	uart_puts(UART0_BA,"NAND Status :");
-	print_hex_uart(UART0_BA, nand_get_status());*/
-
 	/*nand_block_erase(0);
 
 	nand_page_program(0,test_data,4);

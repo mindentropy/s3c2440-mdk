@@ -48,9 +48,16 @@ MEMORY CONTROLLER
 
 NAND FLASH CONTROLLER
 ---------------------
-1) Add Flash controller definitions.
-2) Read data from NAND flash and dump.
-3) Copy code from NAND to RAM and jump.
+1) Add Flash controller definitions. --> Done.
+2) Read data from NAND flash and dump. --> Done.
+3) Write and erase NAND flash and dump. --> Done.
+4) Copy code from NAND to RAM and jump.
+
+Ethernet controller
+-------------------
+1) Write the register defintions.
+2) Setup the ethernet controller.
+3) Do a simple packet decode.
 
 DMA
 ---
@@ -82,6 +89,9 @@ INTERRUPT CONTROLLER
 
 LCD CONTROLLER
 --------------
+1) Setup of LCD for Sharp P35 display --> Done.
+2) Setup of configurations --> Done.
+3) Display test image --> Done.
 
 ADC AND TOUCH SCREEN INTERFACE
 ------------------------------
@@ -95,6 +105,10 @@ WATCH DOG TIMER
 
 MMC/SD/SDIO CONTROLLER
 ----------------------
+1) Write register definitions --> Done.
+2) Setup configurations
+3) Read, Write and Erase of the SD card
+4) Read a file system on the SD card
 
 IIC-BUS INTERFACE
 -----------------

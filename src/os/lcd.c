@@ -52,13 +52,15 @@ void init_lcd()
 	clear_reg_params(TCONSEL_REG(LCD_BA),LCC_SEL3|LPC_EN|LCC_EN);
 
 	for(i = 0; i<(MEMBUFF_SIZE); i++) {
-		lcd_frame_buff[i] = 0x00;
+		lcd_frame_buff[i] = 0xAA;
 	}
 
+#ifdef TEST_LCD
 	for(i = 0; i<(MEMBUFF_SIZE); i++) {
 		lcd_frame_buff[i] = getc(UART0_BA);
 		putc(UART0_BA,lcd_frame_buff[i]);
 	}
+#endif 
 
 	enable_lcd_controller(LCD_BA);
 	

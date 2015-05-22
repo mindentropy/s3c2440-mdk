@@ -1,10 +1,5 @@
 #include "sd_mmc.h"
 
-/* PCLK set to 50Mhz */
-void set_sd_mmc_clk(uint8_t prescaler_value)
-{
-	set_reg_params(SDIPRE_REG(SD_MMC_BA),prescaler_value);
-}
 
 
 void send_cmd(uint32_t cmd_arg)
@@ -19,5 +14,7 @@ void send_cmd(uint32_t cmd_arg)
 void init_sd_controller()
 {
 	set_reg_params(SDICON_REG(SD_MMC_BA),SDMMC_RESET);
-	set_sd_mmc_clk(1); //Setting the clock to max i.e. 25 Mhz.
+
+	/* PCLK set to 50Mhz */
+	set_sd_clk_prescale(1); //Setting the clock to max i.e. 25 Mhz.
 }

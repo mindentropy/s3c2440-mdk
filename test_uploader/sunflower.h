@@ -3,8 +3,7 @@
 
 //#define	WIN32
 
-const unsigned char sunflower[] = {
-
+const unsigned char image[] = {
    /* scan line 1 */
    
 #ifdef	WIN32

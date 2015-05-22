@@ -12,6 +12,9 @@
 
 //#define OS_UPLOAD_DBG 
 
+
+#undef TEST_LCD
+
 #define TERM_SPEED 115200
 
 const char *serial_dev = "/dev/ttyUSB0";
@@ -53,8 +56,11 @@ int main(int argc, char **argv)
 	int serial_fd = 0,binary_fd,retval;
 	unsigned int size = 0,serial_index = 0;
 	unsigned progress = 0;
-	unsigned pic_size = sizeof(sunflower)/sizeof(char);
+
+#ifdef TEST_LCD
+	unsigned pic_size = sizeof(image)/sizeof(char);
 	unsigned pic_idx = 0;
+#endif
 
 	struct stat stat_buff;
 
@@ -150,23 +156,27 @@ int main(int argc, char **argv)
 	
 	printf("\nOS uploaded\n");
 	printf("\n");
-	printf("Pic size : %u\n",pic_size);
+
+#ifdef TEST_LCD
+	printf("Uploading picture of size :%u\n",pic_size);
 	sleep(2);
 	for(pic_idx = 0; pic_idx<pic_size; pic_idx++)
 	{
-		write(serial_fd,sunflower+pic_idx,1);
+		write(serial_fd,image+pic_idx,1);
 		read(serial_fd,&val_ch,1);
 
-		if(sunflower[pic_idx] != (unsigned char)val_ch) {
-			printf("0x%02x 0x%02x\n",sunflower[pic_idx],(unsigned char)(val_ch));
+		if(image[pic_idx] != (unsigned char)val_ch) {
+			printf("0x%02x 0x%02x\n",image[pic_idx],(unsigned char)(val_ch));
 			printf("Match failed\n");
 			break;
 		}
 
+		print_progress("Upload progress",pic_idx,pic_size);
 	//	printf("Index : %u\n",pic_idx);
 	}
-
 	printf("Done uploading picture\n");
+#endif
+
 	serial_index = 0;
 	while(1) {
 		read_str_response(serial_fd);

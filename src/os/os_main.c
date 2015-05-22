@@ -120,6 +120,13 @@ void dump_cache_info()
 
 void dump_nand_dbg()
 {
+	uart_puts(UART0_BA,"NAND ID:");
+	print_hex_uart(UART0_BA,read_nand_id());
+	print_hex_uart(UART0_BA,read_nand_data());
+
+	uart_puts(UART0_BA,"NAND Status :");
+	print_hex_uart(UART0_BA, nand_get_status());
+
 	uart_puts(UART0_BA,"mem bus width :");
 	print_hex_uart(UART0_BA,get_nand_flash_mem_bus_width_status());
 	uart_puts(UART0_BA,"\r\n");
@@ -214,6 +221,7 @@ int main(void) {
 
 	init_lcd();
 
+	init_sd_controller();
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 		blink_leds(LED1|LED4);

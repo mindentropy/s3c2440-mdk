@@ -21,12 +21,14 @@
 #define reset_sdmmc() \
 	set_reg_params(SDICON_REG(SD_MMC_BA),SDMMC_RESET)
 
-
 #define SDIPRE_OFF 		(0x04)
 #define SDIPRE_REG(BA) \
 	HW_REG(BA,SDIPRE_OFF)
 
 #define PRESCALER_MASK (BYTE_MASK)
+
+#define set_sd_clk_prescale(prescaler_value)	\
+	set_reg_params(SDIPRE_REG(SD_MMC_BA),prescaler_value)
 
 #define SDI_CMD_ARG_OFF	(0x08)
 #define SDI_CMD_ARG_REG(BA) \
