@@ -13,7 +13,8 @@
 #define SDMMC_RESET 	(BIT8)
 #define CLK_TYPE_MSK	(BIT5)
 #define CLK_TYPE_MMC	(BIT5)
-#define BYTE_ORDER 		(BIT4)
+#define BYTE_ORDER_A 	~(BIT4)
+#define BYTE_ORDER_B 	(BIT4)
 #define RCV_IO_INT 		(BIT3)
 #define READ_WAIT_EN	(BIT2)
 #define CLK_OUT_EN 		(BIT0)
@@ -27,15 +28,17 @@
 
 #define PRESCALER_MASK (BYTE_MASK)
 
-#define set_sd_clk_prescale(prescaler_value)	\
-	set_reg_params(SDIPRE_REG(SD_MMC_BA),prescaler_value)
+#define set_sd_clk_prescale(BA,prescaler_value)	\
+	set_reg_params(SDIPRE_REG(BA),prescaler_value)
 
 #define SDI_CMD_ARG_OFF	(0x08)
 #define SDI_CMD_ARG_REG(BA) \
 	HW_REG(BA,SDI_CMD_ARG_OFF)
 
-#define send_sd_mmc_cmd(cmd) \
-	writereg32(SDI_CMD_ARG_REG(SD_MMC_BA),cmd)
+
+#define set_sd_mmc_cmd_arg(BA,arg) \
+	writereg32(SDI_CMD_ARG_REG(BA),arg)
+
 
 #define CMD_ARG_MASK  (WORD_MASK)
 
@@ -43,21 +46,30 @@
 #define SDI_CMD_CON_REG(BA) \
 	HW_REG(BA,SDI_CMD_CON_OFF)
 
+#define ABORT_CMD 			(BIT12)
+#define CMD_WITH_DATA 		(BIT11)
+#define LONG_RSP 			(BIT10)
+#define WAIT_RSP 			(BIT9)
+#define CMD_START       	(BIT8)
 
-#define ABORT_CMD 		(BIT12)
-#define CMD_WITH_DATA 	(BIT11)
-#define LONG_RSP 		(BIT10)
-#define WAIT_RSP 		(BIT9)
-#define CMD_START       (BIT8)
-#define CMD_INDEX 		(BIT7)
+#define CMD_START_BIT 		~(BIT7)
+#define CMD_TRANSMISSION 	(BIT6)
+#define CMD_INDEX_MASK 		set_bit_range(5,0)
 
-#define SDI_CMD_STATUS 	(0x10)
+#define set_sd_mmc_cmd_con(BA,cmd_con_options) \
+	writereg32(SDI_CMD_CON_REG(BA),cmd_con_options)
+
+
+#define SDI_CMD_STATUS_OFF 	(0x10)
+#define SDI_CMD_STATUS_REG(BA) \
+	HW_REG(BA,SDI_CMD_STATUS_OFF)
 
 #define RSP_CRC 		(BIT12)
 #define CMD_SENT 		(BIT11)
 #define CMD_TIMEOUT 	(BIT10)
 #define RESP_RECV_END 	(BIT9)
 #define CMD_PROGRESS_ON (BIT8)
+
 
 #define RSP_INDEX_MASK  (BYTE_MASK)
 

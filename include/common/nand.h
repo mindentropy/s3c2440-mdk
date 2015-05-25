@@ -314,5 +314,7 @@ struct nand_page_cache_info {
 void nand_init();
 int nand_page_program(uint32_t addr,const char page[]);
 int nand_block_erase(uint32_t addr);
+uint32_t read_nand_id();
+int nand_get_status();
 
 #endif
