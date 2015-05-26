@@ -26,7 +26,7 @@ void send_cmd0()
 void send_cmd8()
 {
 	set_sd_mmc_cmd_arg(SD_MMC_BA,SD_CARD_VOLTAGE_2_7|SD_CHECK_PATTERN);
-	set_sd_mmc_cmd_con(SD_MMC_BA,CMD_START|CMD_TRANSMISSION|WAIT_RSP|CMD0);
+	set_sd_mmc_cmd_con(SD_MMC_BA,CMD_START|CMD_TRANSMISSION|WAIT_RSP|CMD8);
 }
 
 void wait_for_cmd_complete()
@@ -37,6 +37,7 @@ void wait_for_cmd_complete()
 	while(!(readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)) & CMD_SENT))
 		;
 
+	print_hex_uart(UART0_BA,readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)));
 	set_reg_params(SDI_CMD_STATUS_REG(SD_MMC_BA),CMD_SENT);
 }
 
@@ -49,7 +50,7 @@ void init_sd_controller()
 
 	set_sd_clk_prescale(SD_MMC_BA,1); //Setting the clock to max i.e. 25 Mhz.
 	writereg32(SDICON_REG(SD_MMC_BA),RCV_IO_INT|BYTE_ORDER_B);
-	writereg32(SDID_TIMER_REG(SD_MMC_BA),0x100000);
+	writereg32(SDID_TIMER_REG(SD_MMC_BA),0x7FFFFF);
 
 	set_reg_params(SDIFSTA_REG(SD_MMC_BA),FIFO_RESET);
 	set_reg_params(SDICON_REG(SD_MMC_BA),CLK_OUT_EN);
@@ -62,14 +63,9 @@ void init_sd_controller()
 
 	print_hex_uart(UART0_BA,readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)));
 	send_cmd0();
-
 	wait_for_cmd_complete();
-
-	print_hex_uart(UART0_BA,readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)));
-
 	send_cmd8();
 	wait_for_cmd_complete();
 
-	print_hex_uart(UART0_BA,readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)));
 }
 
