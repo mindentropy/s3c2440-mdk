@@ -224,4 +224,6 @@
 #define SDI_DATA_BI_B_REG(BA) \
 	HW_REG(BA,SDI_DATA_BI_B_OFF)
 
+void init_sd_controller();
+
 #endif

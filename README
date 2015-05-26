@@ -1,0 +1,48 @@
+						MDK OS and Microcontroller Development Kit
+						==========================================
+
+This project has two goals:
+
+1) To provide a microcontroller development kit which provides a framework for the
+developer for creating different applications. All the internal details of initializing the system and handling
+of peripheral controllers is handled by the system. 
+2) To provide a working kernel to test the system which is extensible for further customizations.
+
+Hardware
+--------
+Presently the OS runs on a FriendlyARM mini2440 board which has an ARM based Samsung S3C2440 CPU.
+
+Building and Testing
+--------------------
+
+Environment:
+The OS development is done on a Linux machine (Distro: Ubuntu).
+
+Toolchain:
+The tool chain is the cross compiler ARM tool chain provided by Linaro and which is present in the Ubuntu repository.
+You can fetch the toolchain by doing a apt-get.
+
+Building:
+To build the OS and the loader run 'make' in the s3c2440-mdk folder. All binary files will be put in the 'bin' folder.
+To build the uploader change the directory to test_uploader and run 'make' there.
+
+Flashing:
+A loader needs to flashed into the NAND memory which later loads the OS.
+
+Flashing the loader:
+1) Toggle the switch to NOR.
+2) Boot the board to supervivi in NOR. In the menu select 'q' to go to 'vivi' shell.
+3) In the command shell type in "load flash 0 <size_of_loader> u". This waits for a USB connection from the host.
+   If a USB connection is established it loads the loader to the NAND at address 0. The size_of_loader will be the
+   size of the mdk_os.bin file in the bin folder. You can check the size by doing a ls -al mdk_os.bin
+4) To establish the connection from the host use the program 'dnw' or 'usbpush'.
+   To upload the program using dnw
+   a) unzip dnw. 
+   b) Go to src/driver and compile the linux driver. After the driver is compiled
+   	  do a sudo insmod ./secbulk.ko
+   c) Now from the s3c2440-mdk folder you can do a ../dnw/dnw-linux/src/dnw/dnw bin/mdk_loader.bin. This will start uploading
+      the loader on the the NAND flash.
+5) To verify toggle the switch to NAND. A 'ldr' message should appear on your terminal program.
+6) Now to upload the OS on to the RAM use the 'uploader' program in the 'test_uploader' folder.
+7) To use the program type in ./test_uploader/uploader bin/mdk_os.bin. This will start uploading the OS on to the RAM.
+8) After the OS upload is complete it runs the mdk_os automatically.
