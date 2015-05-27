@@ -51,8 +51,6 @@
 #define LONG_RSP 			(BIT10)
 #define WAIT_RSP 			(BIT9)
 #define CMD_START       	(BIT8)
-
-#define CMD_START_BIT 		~(BIT7)
 #define CMD_TRANSMISSION 	(BIT6)
 #define CMD_INDEX_MASK 		set_bit_range(5,0)
 
@@ -73,6 +71,11 @@
 
 #define RSP_INDEX_MASK  (BYTE_MASK)
 
+#define ack_cmd_sent(BA) \
+	set_reg_params(SDI_CMD_STATUS_REG(BA),CMD_SENT)
+
+#define chk_cmd_resp(BA) \
+	(readreg32(SDI_CMD_STATUS_REG(BA)) & CMD_TIMEOUT)
 
 #define SDIRSP0_OFF 	(0x14)
 #define SDIRSP0_REG(BA) \
