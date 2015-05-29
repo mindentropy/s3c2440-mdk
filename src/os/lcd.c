@@ -7,7 +7,7 @@
  * First configure GPIO to enable LCD controller functions
  * and disable the internal pull up resistors.
  */
-void config_gpio()
+void config_lcd_gpio()
 {
 	/* Disable internal pull up resistors */
 	writereg32(GPUP_REG(GPC_BA),0xFFFFFFFFU);
@@ -25,7 +25,7 @@ void init_lcd()
 	unsigned int i = 0;
 //	unsigned char color = 0;
 
-	config_gpio();
+	config_lcd_gpio();
 	disable_lcd_controller(LCD_BA);
 
 	set_reg_params(GPCON_REG(GPG_BA),LCD_PWRDN);

@@ -37,7 +37,7 @@
 #define GSTATUS3 	0xB8
 #define GSTATUS4 	0xBC
 
-#define GSTATUS_REG(STATUS_OFF)\
+#define GSTATUS_REG(STATUS_OFF) \
 	HW_REG(GPIO_BA,STATUS_OFF)
 
 #define GPCON_REG(BA) \
@@ -53,7 +53,7 @@
 #define MISCCR_REG() \
 		((GPIO_BA) + MISCCR_OFF)
 
-
+/***** Clock GPIO Settings *****/
 #define CLK_SEL1 		(BIT10|BIT9|BIT8)
 #define CLK_SEL1_MPLL  	(0)
 #define CLK_SEL1_UPLL  	(BIT8)
@@ -68,7 +68,10 @@
 #define CLK_SEL0_HCLK 				(BIT5|BIT4)
 #define CLK_SEL0_PCLK 				(BIT6)
 #define CLK_SEL0_DCLK0 				(BIT6|BIT4)
+/*******************************/
 
+//TODO: Suffix below with CONF.
+/***** UART0 GPIO Settings *****/
 #define nCTS0 	((BIT1) & (~BIT0))
 #define nRTS0 	((BIT3) & (~BIT2))
 #define TXD0	((BIT5) & (~BIT4))
@@ -76,20 +79,43 @@
 
 #define CLKOUT0 ((BIT19) & (~BIT18))
 #define CLKOUT1 ((BIT21) & (~BIT20))
+/*******************************/
 
-
+//TODO: Suffix below with CONF.
+/***** LED GPIO Settings *****/
 #define LED1_GPIO_OUT ((~BIT11) & (BIT10)) //GPB5
 #define LED2_GPIO_OUT ((~BIT13) & (BIT12)) //GPB6
 #define LED3_GPIO_OUT ((~BIT15) & (BIT14)) //GPB7
 #define LED4_GPIO_OUT ((~BIT17) & (BIT16)) //GPB8
+/****************************/
 
-#define SPKR_GPIO_OUT ((~BIT1) & (BIT0)) //GPB0
-
+/***** LCD GPIO Settings *****/
 #define LCD_PWRDN 	((BIT9|BIT8)) //GPG4
-
 #define LCD_GPIO_PWRDN (BIT4)
+/*****************************/
 
+
+/***** Speaker GPIO Settings *****/
+#define SPKR_GPIO_OUT ((~BIT1) & (BIT0)) //GPB0
 #define SPKR_GPIO_PIN (BIT0)
+/*********************************/
+
+/***** SDIO GPIO Settings *****/
+#define SDCLK_GPIO_CONF		((BIT11) & (~BIT10)) //GPE5
+#define SDCMD_GPIO_CONF		((BIT13) & (~BIT12)) //GPE6
+#define SDDAT0_GPIO_CONF 	((BIT15) & (~BIT14)) //GPE7
+#define SDDAT1_GPIO_CONF 	((BIT17) & (~BIT16)) //GPE8
+#define SDDAT2_GPIO_CONF 	((BIT19) & (~BIT18)) //GPE9
+#define SDDAT3_GPIO_CONF  	((BIT21) & (~BIT20)) //GPE10
+
+#define SDCLK_GPIO_PIN 		(BIT5) //GPE5
+#define SDCMD_GPIO_PIN		(BIT6) //GPE6
+#define SDDAT0_GPIO_PIN 	(BIT7) //GPE7
+#define SDDAT1_GPIO_PIN 	(BIT8) //GPE8
+#define SDDAT2_GPIO_PIN 	(BIT9) //GPE9
+#define SDDAT3_GPIO_PIN  	(BIT10) //GPE10
+/******************************/
+
 
 /* GSTATUS0 */
 #define nWAIT_PIN 		(BIT3)

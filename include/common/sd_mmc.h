@@ -77,6 +77,9 @@
 #define chk_cmd_resp(BA) \
 	(readreg32(SDI_CMD_STATUS_REG(BA)) & CMD_TIMEOUT)
 
+#define ack_cmd_resp(BA) \
+	set_reg_params(SDI_CMD_STATUS_REG(BA),RESP_RECV_END)
+
 #define SDIRSP0_OFF 	(0x14)
 #define SDIRSP0_REG(BA) \
 	HW_REG(BA,SDIRSP0_OFF)
@@ -227,6 +230,23 @@
 #define SDI_DATA_BI_B_REG(BA) \
 	HW_REG(BA,SDI_DATA_BI_B_OFF)
 
+#define R1_CARD_STATUS_MASK 		(0xFFFFFFFF)
+
+#define R7_RSP_CHK_PATTERN_MASK 	(0xFF)
+#define R7_RSP_VOLT_ACCEPTED_MASK 	((0xF)<<8)
+#define R7_RSP_RESERVED_BITS_MASK 	((0xFFFFF)<<12)
+
+#define get_R7_rsp_chk_pattern(BA) \
+	(readreg32(SDIRSP0_REG(BA)) & (R7_RSP_CHK_PATTERN_MASK))
+
+#define get_R7_rsp_volt_accepted(BA) \
+	(readreg32(SDIRSP0_REG(BA)) & (R7_RSP_VOLT_ACCEPTED_MASK))
+
+#define get_r1_rsp_card_status(BA) \
+	(readreg32(SDIRSP0_REG(BA)) & (R1_CARD_STATUS_MASK))
+
 void init_sd_controller();
+
+
 
 #endif
