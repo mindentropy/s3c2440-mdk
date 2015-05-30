@@ -15,6 +15,11 @@
 #define SD_CARD_VOLTAGE_LOW_VOLTAGE  	(2<<8)
 #define SD_CHECK_PATTERN 				(0xAA)
 
+#define SD_HCS_SDSC 					~(1<<30)
+#define SD_HCS_SDHC_SDXC 				(1<<30)
+#define SD_MAX_PERFORMANCE 		 		(1<<28)
+#define SD_VOLT_SWITCH_1_8 				(1<<24)
+
 
 /*** SD CARD error status ***/
 
@@ -76,6 +81,12 @@ void send_cmd55()
 
 void send_acmd41()
 {
+	set_sd_mmc_cmd_arg(
+						SD_MMC_BA,
+						SD_HCS_SDHC_SDXC
+						);
+
+	set_sd_mmc_cmd_con(SD_MMC_BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|ACMD41);
 }
 
 void wait_for_cmd_complete()
@@ -110,6 +121,11 @@ uint8_t parse_r7_response()
 	}
 }
 
+
+void parse_r3_response()
+{
+	
+}
 
 void config_sd_gpio()
 {
@@ -170,13 +186,24 @@ void init_sd_controller()
 	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd55 timedout\n");
 	} else {
-		if(get_r1_rsp_card_status(SD_MMC_BA) & SD_APP_CMD) {
+		if(get_R1_rsp_card_status(SD_MMC_BA) & SD_APP_CMD) {
 			uart_puts(UART0_BA, "Ready for app cmd\n");
-			print_hex_uart(UART0_BA,readreg32(SDIRSP0_REG(SD_MMC_BA)));
 		}
 		ack_cmd_resp(SD_MMC_BA);
 	}
 	ack_cmd_sent(SD_MMC_BA);
 
+	send_acmd41();
+	sd_delay();
+	wait_for_cmd_complete();
+	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"acmd41 timedout\n");
+	} else {
+		print_hex_uart(UART0_BA,readreg32(SDIRSP0_REG(SD_MMC_BA)));
+		print_hex_uart(UART0_BA,readreg32(SDIRSP1_REG(SD_MMC_BA)));
+		ack_cmd_resp(SD_MMC_BA);
+	}
+	ack_cmd_sent(SD_MMC_BA);
+	
 }
 

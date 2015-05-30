@@ -232,6 +232,11 @@
 
 #define R1_CARD_STATUS_MASK 		(0xFFFFFFFF)
 
+#define R3_CARD_BUSY 						(1<<31)
+#define R3_CARD_CAPACITY_STATUS_SDHC_SDXC 	(1<<30)
+#define R3_UHS_2_CARD 						(1<<29)
+#define R3_READY_FOR_SWITCHING 				(1<<24)
+
 #define R7_RSP_CHK_PATTERN_MASK 	(0xFF)
 #define R7_RSP_VOLT_ACCEPTED_MASK 	((0xF)<<8)
 #define R7_RSP_RESERVED_BITS_MASK 	((0xFFFFF)<<12)
@@ -242,8 +247,18 @@
 #define get_R7_rsp_volt_accepted(BA) \
 	(readreg32(SDIRSP0_REG(BA)) & (R7_RSP_VOLT_ACCEPTED_MASK))
 
-#define get_r1_rsp_card_status(BA) \
+#define get_R1_rsp_card_status(BA) \
 	(readreg32(SDIRSP0_REG(BA)) & (R1_CARD_STATUS_MASK))
+
+#define get_R3_rsp_busy_status(BA) \
+	(readreg32(SDIRSP0_REG(BA)) & (R3_CARD_BUSY))
+
+#define get_R3_rsp_card_capacity_status(BA) \
+	(readreg32(SDIRSP0_REG(BA)) & (R3_CARD_CAPACITY_STATUS_SDHC_SDXC))
+
+#define get_R3_rsp_uhs_2_card_status(BA) \
+	(readreg32(SDIRSP0_REG(BA)) & (R3_UHS_2_CARD))
+	
 
 void init_sd_controller();
 
