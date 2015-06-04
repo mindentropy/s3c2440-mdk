@@ -81,18 +81,17 @@ void send_cmd55()
 
 void send_acmd41()
 {
-	set_sd_mmc_cmd_arg(
+	/*set_sd_mmc_cmd_arg(
 						SD_MMC_BA,
 						SD_HCS_SDHC_SDXC|SD_MAX_PERFORMANCE|SD_VOLT_SWITCH_1_8
 						);
 
-/*	set_sd_mmc_cmd_arg(
-						SD_MMC_BA,
-						0
-						);*/
-	set_sd_mmc_cmd_con(SD_MMC_BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|ACMD41);
-	print_hex_uart(UART0_BA,readreg32(SD_MMC_BA));
+	uart_puts(UART0_BA,"acmd opt dmp");
+	print_hex_uart(UART0_BA,
+		SD_HCS_SDHC_SDXC|SD_MAX_PERFORMANCE|SD_VOLT_SWITCH_1_8);*/
 
+	set_sd_mmc_cmd_arg(SD_MMC_BA,0x51FF8000U);
+	set_sd_mmc_cmd_con(SD_MMC_BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|ACMD41);
 }
 
 void wait_for_cmd_complete()
@@ -105,7 +104,7 @@ void wait_for_cmd_complete()
 	while(!(readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)) & CMD_SENT))
 		;
 
-	print_hex_uart(UART0_BA,readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)));
+	//print_hex_uart(UART0_BA,readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)));
 }
 
 void sd_delay()
@@ -205,6 +204,7 @@ sd_start:
 
 		send_acmd41();
 		sd_delay();
+		sd_delay();
 		wait_for_cmd_complete();
 	
 		if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
@@ -222,6 +222,9 @@ sd_start:
 			}
 		}
 	}
+
+	print_hex_uart(UART0_BA,readreg32(SDIRSP0_REG(SD_MMC_BA)));
+	print_hex_uart(UART0_BA,readreg32(SDIRSP1_REG(SD_MMC_BA)));
 
 	ack_cmd_resp(SD_MMC_BA);
 	ack_cmd_sent(SD_MMC_BA);
