@@ -5,6 +5,7 @@
 /************ CMD_INDEX *****************/
 
 #define CMD0 	0
+#define CMD2 	2
 #define CMD8    8
 #define CMD55 	55
 #define ACMD41 	41
@@ -60,26 +61,26 @@
 
 /****************************************/
 
-
-void send_cmd0()
+void send_cmd0(uint32_t BA)
 {
-	set_sd_mmc_cmd_arg(SD_MMC_BA,0x00000000);
-	set_sd_mmc_cmd_con(SD_MMC_BA,CMD_START|CMD_TRANSMISSION|CMD0);
+	set_sd_mmc_cmd_arg(BA,0x00000000);
+	set_sd_mmc_cmd_con(BA,CMD_START|CMD_TRANSMISSION|CMD0);
 }
 
-void send_cmd8()
+void send_cmd8(uint32_t BA, uint32_t cmd_arg)
 {
-	set_sd_mmc_cmd_arg(SD_MMC_BA,SD_CARD_VOLTAGE_2_7|SD_CHECK_PATTERN);
-	set_sd_mmc_cmd_con(SD_MMC_BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD8);
+//	set_sd_mmc_cmd_arg(SD_MMC_BA,SD_CARD_VOLTAGE_2_7|SD_CHECK_PATTERN);
+	set_sd_mmc_cmd_arg(BA,cmd_arg);
+	set_sd_mmc_cmd_con(BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD8);
 }
 
-void send_cmd55()
+void send_cmd55(uint32_t BA)
 {
-	set_sd_mmc_cmd_arg(SD_MMC_BA,0x00000000);
-	set_sd_mmc_cmd_con(SD_MMC_BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD55);
+	set_sd_mmc_cmd_arg(BA,0x00000000);
+	set_sd_mmc_cmd_con(BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD55);
 }
 
-void send_acmd41()
+void send_acmd41(uint32_t BA, uint32_t cmd_arg)
 {
 	/*set_sd_mmc_cmd_arg(
 						SD_MMC_BA,
@@ -90,8 +91,15 @@ void send_acmd41()
 	print_hex_uart(UART0_BA,
 		SD_HCS_SDHC_SDXC|SD_MAX_PERFORMANCE|SD_VOLT_SWITCH_1_8);*/
 
-	set_sd_mmc_cmd_arg(SD_MMC_BA,0x51FF8000U);
-	set_sd_mmc_cmd_con(SD_MMC_BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|ACMD41);
+	//set_sd_mmc_cmd_arg(SD_MMC_BA,0x51FF8000U);
+	set_sd_mmc_cmd_arg(BA,cmd_arg);
+	set_sd_mmc_cmd_con(BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|ACMD41);
+}
+
+void send_cmd2(uint32_t BA, uint32_t cmd_arg)
+{
+	set_sd_mmc_cmd_arg(BA,cmd_arg);
+	set_sd_mmc_cmd_con(BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|LONG_RSP|CMD2);
 }
 
 void wait_for_cmd_complete()
@@ -126,8 +134,7 @@ uint8_t parse_r7_response()
 	}
 }
 
-
-void parse_r3_response()
+uint8_t parse_r2_response()
 {
 	
 }
@@ -165,15 +172,12 @@ void init_sd_controller()
 
 	sd_delay();
 
-sd_start:
-
-	send_cmd0();
+	send_cmd0(SD_MMC_BA);
 	sd_delay();
 	wait_for_cmd_complete();
 	ack_cmd_sent(SD_MMC_BA);
-	print_hex_uart(UART0_BA,readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)));
 
-	send_cmd8();
+	send_cmd8(SD_MMC_BA,SD_CARD_VOLTAGE_2_7|SD_CHECK_PATTERN);
 	sd_delay();
 	wait_for_cmd_complete();
 
@@ -189,7 +193,7 @@ sd_start:
 	ack_cmd_sent(SD_MMC_BA);
 
 	for(retry = 0; retry < 50; /*retry++*/) {
-		send_cmd55();
+		send_cmd55(SD_MMC_BA);
 		sd_delay();
 		wait_for_cmd_complete();
 		if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
@@ -202,11 +206,37 @@ sd_start:
 		}
 		ack_cmd_sent(SD_MMC_BA);
 
-		send_acmd41();
-		sd_delay();
+/*********************************************************************************
+ * According to the spec(Page 29) during initialization of the card the voltage
+ * window field(bits 23-0) in the arguement is set to non-zero at the first time,
+ * The other field (bits 31-24) in the arguement is effective i.e. should be set
+ * based on our preference.
+ *
+ * As per the OCR register definition(Page 112) bit 23-0 is the Vdd Voltage window.
+ * In it bits 14-0 are reserved and can be set to 0. Bit 23-15 should be set to 1
+ * when sending acmd41 for the first time. Hence the value would be 0x00FF8000 i.e.
+ * Bit23 to Bit15 being 1.
+ *
+ * Now I want to set HCS, XPC and S18R switching voltage bits. So the final value 
+ * would be 0x51FF8000.
+ **********************************************************************************/
+
+		send_acmd41(
+					SD_MMC_BA,
+					SD_HCS_SDHC_SDXC|
+					SD_MAX_PERFORMANCE|
+					SD_VOLT_SWITCH_1_8|
+					0xFF8000U
+					); 
 		sd_delay();
 		wait_for_cmd_complete();
-	
+
+/*
+ * In the response to ACMD41 there will be CRC error. Please note that the 
+ * CRC for the r3 response is just stuff bytes '11111111'.
+ *
+ * The CRC error can be ignored.
+ */
 		if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 			uart_puts(UART0_BA,"acmd41 timedout\n");
 		} else {
@@ -223,8 +253,21 @@ sd_start:
 		}
 	}
 
-	print_hex_uart(UART0_BA,readreg32(SDIRSP0_REG(SD_MMC_BA)));
-	print_hex_uart(UART0_BA,readreg32(SDIRSP1_REG(SD_MMC_BA)));
+
+	if(get_R3_rsp_card_capacity_status(SD_MMC_BA)) {
+		uart_puts(UART0_BA,"High capacity or extended capacity card\n");
+	} else {
+		uart_puts(UART0_BA,"Standard capacity card\n");
+	}
+
+	if(get_R3_rsp_card_ready_for_switching(SD_MMC_BA)) {
+		uart_puts(UART0_BA,"Card ready for switching\n");
+		//TODO: Send CMD11 here.
+	} else {
+		uart_puts(UART0_BA,"Card not ready for switching\n");
+	}
+
+
 
 	ack_cmd_resp(SD_MMC_BA);
 	ack_cmd_sent(SD_MMC_BA);

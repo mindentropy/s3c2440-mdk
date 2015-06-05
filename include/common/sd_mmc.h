@@ -232,6 +232,7 @@
 
 #define R1_CARD_STATUS_MASK 		(0xFFFFFFFF)
 
+
 #define R3_CARD_BUSY 						(1<<31)
 #define R3_CARD_CAPACITY_STATUS_SDHC_SDXC 	(1<<30)
 #define R3_UHS_2_CARD 						(1<<29)
@@ -240,6 +241,15 @@
 #define R7_RSP_CHK_PATTERN_MASK 	(0xFF)
 #define R7_RSP_VOLT_ACCEPTED_MASK 	((0xF)<<8)
 #define R7_RSP_RESERVED_BITS_MASK 	((0xFFFFF)<<12)
+
+#define R2_RSP_MID_MASK 	(0xFF<<24)
+#define R2_RSP_OID_MASK  	(0xFFFF<<8)
+#define R2_RSP_PNM_MASK_P1  (0xFF)
+#define R2_RSP_PNM_MASK_P2  (0xFFFFFFFF)
+#define R2_RSP_PRV_MASK 	(0xFF<<24)
+#define R2_RSP_PSN_MASK_P1 	(0xFFFFFF)
+#define R2_RSP_PSN_MASK_P2  (0xFF<<24)
+
 
 #define get_R7_rsp_chk_pattern(BA) \
 	(readreg32(SDIRSP0_REG(BA)) & (R7_RSP_CHK_PATTERN_MASK))
@@ -256,8 +266,16 @@
 #define get_R3_rsp_card_capacity_status(BA) \
 	(readreg32(SDIRSP0_REG(BA)) & (R3_CARD_CAPACITY_STATUS_SDHC_SDXC))
 
+#define get_R3_rsp_card_ready_for_switching(BA) \
+	(readreg32(SDIRSP0_REG(BA)) & (R3_READY_FOR_SWITCHING))
+	
+
 #define get_R3_rsp_uhs_2_card_status(BA) \
 	(readreg32(SDIRSP0_REG(BA)) & (R3_UHS_2_CARD))
+
+
+#define get_R2_rsp_cid_mfg_id(BA) \
+	(readreg32(SDIRSP0_REG(BA)) & )
 	
 
 void init_sd_controller();
