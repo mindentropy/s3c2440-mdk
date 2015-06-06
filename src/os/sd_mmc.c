@@ -6,6 +6,7 @@
 
 #define CMD0 	0
 #define CMD2 	2
+#define CMD3 	3
 #define CMD8    8
 #define CMD55 	55
 #define ACMD41 	41
@@ -57,9 +58,10 @@
 #define SD_APP_CMD 						(BIT5)
 #define SD_AKE_SEQ_ERR 					(BIT3)
 
-
-
 /****************************************/
+
+
+struct sd_card_info sd0_card_info;
 
 void send_cmd0(uint32_t BA)
 {
@@ -102,6 +104,12 @@ void send_cmd2(uint32_t BA, uint32_t cmd_arg)
 	set_sd_mmc_cmd_con(BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|LONG_RSP|CMD2);
 }
 
+void send_cmd3(uint32_t BA, uint32_t cmd_arg)
+{
+	set_sd_mmc_cmd_arg(BA,cmd_arg);
+	set_sd_mmc_cmd_con(BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD3);
+}
+
 void wait_for_cmd_complete()
 {
 	/* Wait until command transfer in progress */
@@ -134,9 +142,63 @@ uint8_t parse_r7_response()
 	}
 }
 
-uint8_t parse_r2_response()
+void parse_r6_response(uint16_t *rca)
 {
 	
+	*rca = get_R6_rsp_RCA(SD_MMC_BA);
+
+	/*
+	uart_puts(UART0_BA, "RCA : ");
+	print_hex_uart(UART0_BA,get_R6_rsp_RCA(SD_MMC_BA));
+
+	uart_puts(UART0_BA, "Card status : ");
+	print_hex_uart(UART0_BA,get_R6_rsp_CARD_STATUS(SD_MMC_BA));
+	*/
+}
+
+void parse_r2_response(struct cid_info *cid_info)
+{
+	
+	cid_info->MID = get_R2_rsp_CID_MID(SD_MMC_BA);
+
+	/*uart_puts(UART0_BA,"MID : ");
+	print_hex_uart(UART0_BA,get_R2_rsp_CID_MID(SD_MMC_BA));*/
+
+	cid_info->CID = get_R2_rsp_CID_OID(SD_MMC_BA);
+
+	/*uart_puts(UART0_BA,"OID : ");
+	print_hex_uart(UART0_BA,get_R2_rsp_CID_OID(SD_MMC_BA));*/
+
+	cid_info->PNM[0] = get_R2_rsp_CID_PNM_P1(SD_MMC_BA);
+	cid_info->PNM[1] = get_R2_rsp_CID_PNM_P2_pos(SD_MMC_BA,24);
+	cid_info->PNM[2] = get_R2_rsp_CID_PNM_P2_pos(SD_MMC_BA,16);
+	cid_info->PNM[3] = get_R2_rsp_CID_PNM_P2_pos(SD_MMC_BA,8);
+	cid_info->PNM[4] = get_R2_rsp_CID_PNM_P2_pos(SD_MMC_BA,0);
+	cid_info->PNM[5] = '\0';
+
+	/*uart_puts(UART0_BA,"PNM : ");
+	uart_puts(UART0_BA,cid_info->PNM);
+	uart_puts(UART0_BA,"\n");*/
+
+	cid_info->PRV = get_R2_rsp_CID_PRV(SD_MMC_BA);
+
+	/*uart_puts(UART0_BA,"PRV : ");
+	print_hex_uart(UART0_BA,get_R2_rsp_CID_PRV(SD_MMC_BA));*/
+
+	cid_info->PSN = get_R2_rsp_CID_PSN(SD_MMC_BA);
+
+	/*uart_puts(UART0_BA,"PSN : ");
+	print_hex_uart(UART0_BA,get_R2_rsp_CID_PSN(SD_MMC_BA));*/
+
+	cid_info->MDT = get_R2_rsp_CID_MDT(SD_MMC_BA);
+
+	/*uart_puts(UART0_BA,"MDT : ");
+	print_hex_uart(UART0_BA,get_R2_rsp_CID_MDT(SD_MMC_BA));*/
+
+	cid_info->CRC = get_R2_rsp_CID_CRC(SD_MMC_BA);
+
+	/*uart_puts(UART0_BA,"CRC : ");
+	print_hex_uart(UART0_BA,get_R2_rsp_CID_CRC(SD_MMC_BA));*/
 }
 
 void config_sd_gpio()
@@ -240,9 +302,8 @@ void init_sd_controller()
 		if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 			uart_puts(UART0_BA,"acmd41 timedout\n");
 		} else {
-			uart_puts(UART0_BA,"acmd41 dump\n");
-	
 			if(!(readreg32(SDIRSP0_REG(SD_MMC_BA)) & 1<<31)) {
+				uart_puts(UART0_BA,"acmd41 dump\n");
 				print_hex_uart(UART0_BA,readreg32(SDIRSP0_REG(SD_MMC_BA)));
 				print_hex_uart(UART0_BA,readreg32(SDIRSP1_REG(SD_MMC_BA)));
 				ack_cmd_resp(SD_MMC_BA);
@@ -267,10 +328,31 @@ void init_sd_controller()
 		uart_puts(UART0_BA,"Card not ready for switching\n");
 	}
 
-
-
 	ack_cmd_resp(SD_MMC_BA);
 	ack_cmd_sent(SD_MMC_BA);
+
+	send_cmd2(SD_MMC_BA,0xFFFFFFFFU);
+	sd_delay();
+	wait_for_cmd_complete();
+	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd2 timedout\n");
+	} else {
+		parse_r2_response(&sd0_card_info.cid_info);
+		ack_cmd_resp(SD_MMC_BA);
+		ack_cmd_sent(SD_MMC_BA);
+	}
+
+	send_cmd3(SD_MMC_BA,0xFFFFFFFFU);
+	sd_delay();
+	wait_for_cmd_complete();
+
+	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd3 timedout\n");
+	} else {
+		parse_r6_response(&sd0_card_info.RCA);
+		ack_cmd_resp(SD_MMC_BA);
+		ack_cmd_sent(SD_MMC_BA);
+	}
 	
 }
 

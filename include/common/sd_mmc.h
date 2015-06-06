@@ -242,14 +242,19 @@
 #define R7_RSP_VOLT_ACCEPTED_MASK 	((0xF)<<8)
 #define R7_RSP_RESERVED_BITS_MASK 	((0xFFFFF)<<12)
 
-#define R2_RSP_MID_MASK 	(0xFF<<24)
-#define R2_RSP_OID_MASK  	(0xFFFF<<8)
-#define R2_RSP_PNM_MASK_P1  (0xFF)
-#define R2_RSP_PNM_MASK_P2  (0xFFFFFFFF)
-#define R2_RSP_PRV_MASK 	(0xFF<<24)
-#define R2_RSP_PSN_MASK_P1 	(0xFFFFFF)
-#define R2_RSP_PSN_MASK_P2  (0xFF<<24)
+#define R2_RSP0_MID_MASK 		(0xFFU<<24)
+#define R2_RSP0_OID_MASK  		(0xFFFFU<<8)
+#define R2_RSP0_PNM_MASK_P1  	(0xFFU)
+#define R2_RSP1_PNM_MASK_P2  	(0xFFFFFFFFU)
+#define R2_RSP2_PRV_MASK 		(0xFFU<<24)
+#define R2_RSP2_PSN_MASK_P1 	(0xFFFFFFU)
+#define R2_RSP3_PSN_MASK_P2  	(0xFFU<<24)
+#define R2_RSP3_MDT_MASK     	(0xFFFU<<8)
+#define R2_RSP3_CRC_MASK 		(0x7FFU<<1)
+#define R2_RSP3_UNUSED_MASK  	(0x1U)
 
+#define R7_RSP_RCA_MASK 				(0xFFFFU<<16)
+#define R7_RSP_CARD_STATUS_MASK 	(0xFFFFU)
 
 #define get_R7_rsp_chk_pattern(BA) \
 	(readreg32(SDIRSP0_REG(BA)) & (R7_RSP_CHK_PATTERN_MASK))
@@ -273,10 +278,52 @@
 #define get_R3_rsp_uhs_2_card_status(BA) \
 	(readreg32(SDIRSP0_REG(BA)) & (R3_UHS_2_CARD))
 
-
-#define get_R2_rsp_cid_mfg_id(BA) \
-	(readreg32(SDIRSP0_REG(BA)) & )
+#define get_R2_rsp_CID_MID(BA) \
+	(((readreg32(SDIRSP0_REG(BA))) & R2_RSP0_MID_MASK) >> 24)
 	
+#define get_R2_rsp_CID_OID(BA) \
+	(((readreg32(SDIRSP0_REG(BA))) & R2_RSP0_OID_MASK) >> 8)
+
+#define get_R2_rsp_CID_PNM_P1(BA) \
+	((readreg32(SDIRSP0_REG(BA))) & R2_RSP0_PNM_MASK_P1)
+
+#define get_R2_rsp_CID_PNM_P2_pos(BA,pos) \
+	((((readreg32(SDIRSP1_REG(BA))) & R2_RSP1_PNM_MASK_P2) \
+		& (0xFF << pos)) >> pos)
+
+#define get_R2_rsp_CID_PRV(BA) \
+	(((readreg32(SDIRSP2_REG(BA))) & R2_RSP2_PRV_MASK) >> 24)
+	
+#define get_R2_rsp_CID_PSN(BA) \
+	((((readreg32(SDIRSP2_REG(BA))) & R2_RSP2_PSN_MASK_P1) << 8) \
+		| (((readreg32(SDIRSP3_REG(BA))) & R2_RSP3_PSN_MASK_P2) >> 24))
+
+#define get_R2_rsp_CID_MDT(BA) \
+	(((readreg32(SDIRSP3_REG(BA))) & R2_RSP3_MDT_MASK) >> 8)
+
+#define get_R2_rsp_CID_CRC(BA) \
+	(((readreg32(SDIRSP3_REG(BA))) & R2_RSP3_CRC_MASK) >> 1)
+
+#define get_R6_rsp_RCA(BA) \
+	(((readreg32(SDIRSP0_REG(BA))) & R7_RSP_RCA_MASK) >> 16)
+
+#define get_R6_rsp_CARD_STATUS(BA) \
+	(((readreg32(SDIRSP0_REG(BA)))  &  R7_RSP_CARD_STATUS_MASK))
+
+struct cid_info {
+	uint8_t MID;
+	uint16_t CID;
+	char PNM[5];
+	uint8_t PRV;
+	uint32_t PSN;
+	uint16_t MDT;
+	uint8_t CRC;
+};
+
+struct sd_card_info {
+	struct cid_info cid_info;
+	uint16_t RCA;
+};
 
 void init_sd_controller();
 
