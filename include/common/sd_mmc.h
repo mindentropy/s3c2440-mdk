@@ -72,7 +72,12 @@
 #define RSP_INDEX_MASK  (BYTE_MASK)
 
 #define ack_cmd_sent(BA) \
-	set_reg_params(SDI_CMD_STATUS_REG(BA),CMD_SENT)
+	do {\
+		set_reg_params(SDI_CMD_STATUS_REG(BA),CMD_SENT); \
+		while(readreg32(SDI_CMD_STATUS_REG(BA)) & CMD_SENT); \
+	} while(0)
+	
+
 
 #define chk_cmd_resp(BA) \
 	(readreg32(SDI_CMD_STATUS_REG(BA)) & CMD_TIMEOUT)
@@ -313,7 +318,7 @@
 struct cid_info {
 	uint8_t MID;
 	uint16_t CID;
-	char PNM[5];
+	char PNM[6];
 	uint8_t PRV;
 	uint32_t PSN;
 	uint16_t MDT;
@@ -323,6 +328,10 @@ struct cid_info {
 struct sd_card_info {
 	struct cid_info cid_info;
 	uint16_t RCA;
+
+	/* Below variable status can be a bitmap */
+	uint8_t is_high_capacity;
+	uint8_t is_ready_for_switching;
 };
 
 void init_sd_controller();

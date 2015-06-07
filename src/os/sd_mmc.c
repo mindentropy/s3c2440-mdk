@@ -23,7 +23,7 @@
 #define SD_VOLT_SWITCH_1_8 				(1<<24)
 
 
-/*** SD CARD error status ***/
+/********* SD CARD error status *********/
 
 #define SD_OUT_OF_RANGE 				(BIT31)
 #define SD_ADDR_ERR 					(BIT30)
@@ -63,51 +63,10 @@
 
 struct sd_card_info sd0_card_info;
 
-void send_cmd0(uint32_t BA)
-{
-	set_sd_mmc_cmd_arg(BA,0x00000000);
-	set_sd_mmc_cmd_con(BA,CMD_START|CMD_TRANSMISSION|CMD0);
-}
-
-void send_cmd8(uint32_t BA, uint32_t cmd_arg)
-{
-//	set_sd_mmc_cmd_arg(SD_MMC_BA,SD_CARD_VOLTAGE_2_7|SD_CHECK_PATTERN);
-	set_sd_mmc_cmd_arg(BA,cmd_arg);
-	set_sd_mmc_cmd_con(BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD8);
-}
-
-void send_cmd55(uint32_t BA)
-{
-	set_sd_mmc_cmd_arg(BA,0x00000000);
-	set_sd_mmc_cmd_con(BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD55);
-}
-
-void send_acmd41(uint32_t BA, uint32_t cmd_arg)
-{
-	/*set_sd_mmc_cmd_arg(
-						SD_MMC_BA,
-						SD_HCS_SDHC_SDXC|SD_MAX_PERFORMANCE|SD_VOLT_SWITCH_1_8
-						);
-
-	uart_puts(UART0_BA,"acmd opt dmp");
-	print_hex_uart(UART0_BA,
-		SD_HCS_SDHC_SDXC|SD_MAX_PERFORMANCE|SD_VOLT_SWITCH_1_8);*/
-
-	//set_sd_mmc_cmd_arg(SD_MMC_BA,0x51FF8000U);
-	set_sd_mmc_cmd_arg(BA,cmd_arg);
-	set_sd_mmc_cmd_con(BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|ACMD41);
-}
-
-void send_cmd2(uint32_t BA, uint32_t cmd_arg)
+void send_cmd(uint32_t BA,uint32_t cmd_con,uint32_t cmd_arg)
 {
 	set_sd_mmc_cmd_arg(BA,cmd_arg);
-	set_sd_mmc_cmd_con(BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|LONG_RSP|CMD2);
-}
-
-void send_cmd3(uint32_t BA, uint32_t cmd_arg)
-{
-	set_sd_mmc_cmd_arg(BA,cmd_arg);
-	set_sd_mmc_cmd_con(BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD3);
+	set_sd_mmc_cmd_con(BA,cmd_con);
 }
 
 void wait_for_cmd_complete()
@@ -120,6 +79,7 @@ void wait_for_cmd_complete()
 	while(!(readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)) & CMD_SENT))
 		;
 
+	ack_cmd_sent(SD_MMC_BA);
 	//print_hex_uart(UART0_BA,readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)));
 }
 
@@ -132,8 +92,24 @@ void sd_delay()
 	}
 }
 
+void sd_low_delay()
+{
+	unsigned int i =  0;
+	for(i = 0;i<100;i++) { //Wait for 74 SD clock cycles.
+		//TODO: Calculate the end condition based on the SD Clock cycles.
+		;
+	}
+}
+
 uint8_t parse_r7_response()
 {
+	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd8 timedout\n");
+		return 0;
+	} 
+
+	ack_cmd_resp(SD_MMC_BA);
+
 	if((get_R7_rsp_chk_pattern(SD_MMC_BA) == SD_CHECK_PATTERN) && 
 		(get_R7_rsp_volt_accepted(SD_MMC_BA) == SD_CARD_VOLTAGE_2_7)) {
 			return 1;
@@ -144,30 +120,16 @@ uint8_t parse_r7_response()
 
 void parse_r6_response(uint16_t *rca)
 {
-	
 	*rca = get_R6_rsp_RCA(SD_MMC_BA);
-
-	/*
-	uart_puts(UART0_BA, "RCA : ");
-	print_hex_uart(UART0_BA,get_R6_rsp_RCA(SD_MMC_BA));
-
-	uart_puts(UART0_BA, "Card status : ");
-	print_hex_uart(UART0_BA,get_R6_rsp_CARD_STATUS(SD_MMC_BA));
-	*/
+	ack_cmd_resp(SD_MMC_BA);
 }
 
 void parse_r2_response(struct cid_info *cid_info)
 {
 	
 	cid_info->MID = get_R2_rsp_CID_MID(SD_MMC_BA);
-
-	/*uart_puts(UART0_BA,"MID : ");
-	print_hex_uart(UART0_BA,get_R2_rsp_CID_MID(SD_MMC_BA));*/
-
 	cid_info->CID = get_R2_rsp_CID_OID(SD_MMC_BA);
 
-	/*uart_puts(UART0_BA,"OID : ");
-	print_hex_uart(UART0_BA,get_R2_rsp_CID_OID(SD_MMC_BA));*/
 
 	cid_info->PNM[0] = get_R2_rsp_CID_PNM_P1(SD_MMC_BA);
 	cid_info->PNM[1] = get_R2_rsp_CID_PNM_P2_pos(SD_MMC_BA,24);
@@ -176,29 +138,59 @@ void parse_r2_response(struct cid_info *cid_info)
 	cid_info->PNM[4] = get_R2_rsp_CID_PNM_P2_pos(SD_MMC_BA,0);
 	cid_info->PNM[5] = '\0';
 
-	/*uart_puts(UART0_BA,"PNM : ");
-	uart_puts(UART0_BA,cid_info->PNM);
-	uart_puts(UART0_BA,"\n");*/
 
 	cid_info->PRV = get_R2_rsp_CID_PRV(SD_MMC_BA);
-
-	/*uart_puts(UART0_BA,"PRV : ");
-	print_hex_uart(UART0_BA,get_R2_rsp_CID_PRV(SD_MMC_BA));*/
-
 	cid_info->PSN = get_R2_rsp_CID_PSN(SD_MMC_BA);
-
-	/*uart_puts(UART0_BA,"PSN : ");
-	print_hex_uart(UART0_BA,get_R2_rsp_CID_PSN(SD_MMC_BA));*/
-
 	cid_info->MDT = get_R2_rsp_CID_MDT(SD_MMC_BA);
-
-	/*uart_puts(UART0_BA,"MDT : ");
-	print_hex_uart(UART0_BA,get_R2_rsp_CID_MDT(SD_MMC_BA));*/
-
 	cid_info->CRC = get_R2_rsp_CID_CRC(SD_MMC_BA);
 
-	/*uart_puts(UART0_BA,"CRC : ");
-	print_hex_uart(UART0_BA,get_R2_rsp_CID_CRC(SD_MMC_BA));*/
+	ack_cmd_resp(SD_MMC_BA);
+}
+
+
+void dump_sd_card_info(const struct sd_card_info *sd_card_info)
+{
+
+	uart_puts(UART0_BA,"*** SD Card Info ***\n");
+	if(sd_card_info->is_high_capacity) {
+		uart_puts(UART0_BA,"High capacity or extended capacity card\n");
+	} else {
+		uart_puts(UART0_BA,"Standard capacity card\n");
+	}
+	
+	if(sd_card_info->is_ready_for_switching) {
+		uart_puts(UART0_BA,"Card ready for switching\n");
+		//TODO: Send CMD11 here.
+	} else {
+		uart_puts(UART0_BA,"Card not ready for switching\n");
+	}
+
+	uart_puts(UART0_BA,"MID : ");
+	print_hex_uart(UART0_BA,sd_card_info->cid_info.MID);
+
+	uart_puts(UART0_BA,"OID : ");
+	print_hex_uart(UART0_BA,sd_card_info->cid_info.CID);
+
+	uart_puts(UART0_BA,"PNM : ");
+	uart_puts(UART0_BA,sd_card_info->cid_info.PNM);
+	uart_puts(UART0_BA,"\n");
+
+	uart_puts(UART0_BA,"PRV : ");
+	print_hex_uart(UART0_BA,sd_card_info->cid_info.PRV);
+
+	uart_puts(UART0_BA,"PSN : ");
+	print_hex_uart(UART0_BA,sd_card_info->cid_info.PSN);
+
+	uart_puts(UART0_BA,"MDT : ");
+	print_hex_uart(UART0_BA,sd_card_info->cid_info.MDT);
+
+	uart_puts(UART0_BA,"CRC : ");
+	print_hex_uart(UART0_BA,sd_card_info->cid_info.CRC);
+
+	uart_puts(UART0_BA,"RCA : ");
+	print_hex_uart(UART0_BA,sd_card_info->RCA);
+
+	uart_puts(UART0_BA,"****************\n");
 }
 
 void config_sd_gpio()
@@ -218,6 +210,7 @@ void config_sd_gpio()
 void init_sd_controller()
 {
 	int retry = 0;
+
 	config_sd_gpio();
 	reset_sdmmc();
 
@@ -234,30 +227,29 @@ void init_sd_controller()
 
 	sd_delay();
 
-	send_cmd0(SD_MMC_BA);
-	sd_delay();
-	wait_for_cmd_complete();
-	ack_cmd_sent(SD_MMC_BA);
-
-	send_cmd8(SD_MMC_BA,SD_CARD_VOLTAGE_2_7|SD_CHECK_PATTERN);
-	sd_delay();
+	send_cmd(SD_MMC_BA,CMD_START|CMD_TRANSMISSION|CMD0,0x00000000); //Send cmd0
 	wait_for_cmd_complete();
 
-	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
-		uart_puts(UART0_BA,"cmd8 timedout\n");
-	} else {
-		if(parse_r7_response()) {
-			uart_puts(UART0_BA,"voltage and chk pattern accepted\n");
-		}
-		ack_cmd_resp(SD_MMC_BA);
+	//Delay below for atleast *some* cycles
+	sd_low_delay();
+
+	send_cmd(SD_MMC_BA,
+					WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD8,
+					SD_CARD_VOLTAGE_2_7|SD_CHECK_PATTERN); //Send cmd8
+
+	sd_low_delay();
+
+	wait_for_cmd_complete();
+
+	if(parse_r7_response()) {
+		uart_puts(UART0_BA,"voltage and chk pattern accepted\n");
 	}
 
-	ack_cmd_sent(SD_MMC_BA);
-
 	for(retry = 0; retry < 50; /*retry++*/) {
-		send_cmd55(SD_MMC_BA);
-		sd_delay();
+		send_cmd(SD_MMC_BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD55,0x00000000); //Send cmd55
+		sd_low_delay();
 		wait_for_cmd_complete();
+
 		if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 			uart_puts(UART0_BA,"cmd55 timedout\n");
 		} else {
@@ -266,7 +258,6 @@ void init_sd_controller()
 			}
 			ack_cmd_resp(SD_MMC_BA);
 		}
-		ack_cmd_sent(SD_MMC_BA);
 
 /*********************************************************************************
  * According to the spec(Page 29) during initialization of the card the voltage
@@ -283,13 +274,13 @@ void init_sd_controller()
  * would be 0x51FF8000.
  **********************************************************************************/
 
-		send_acmd41(
-					SD_MMC_BA,
+		send_cmd(SD_MMC_BA,
+					WAIT_RSP|CMD_START|CMD_TRANSMISSION|ACMD41,
 					SD_HCS_SDHC_SDXC|
 					SD_MAX_PERFORMANCE|
 					SD_VOLT_SWITCH_1_8|
-					0xFF8000U
-					); 
+					0xFF8000U);
+
 		sd_delay();
 		wait_for_cmd_complete();
 
@@ -303,56 +294,50 @@ void init_sd_controller()
 			uart_puts(UART0_BA,"acmd41 timedout\n");
 		} else {
 			if(!(readreg32(SDIRSP0_REG(SD_MMC_BA)) & 1<<31)) {
-				uart_puts(UART0_BA,"acmd41 dump\n");
-				print_hex_uart(UART0_BA,readreg32(SDIRSP0_REG(SD_MMC_BA)));
-				print_hex_uart(UART0_BA,readreg32(SDIRSP1_REG(SD_MMC_BA)));
 				ack_cmd_resp(SD_MMC_BA);
-				ack_cmd_sent(SD_MMC_BA);
 			} else {
 				break;
 			}
 		}
 	}
 
-
-	if(get_R3_rsp_card_capacity_status(SD_MMC_BA)) {
-		uart_puts(UART0_BA,"High capacity or extended capacity card\n");
-	} else {
-		uart_puts(UART0_BA,"Standard capacity card\n");
-	}
-
-	if(get_R3_rsp_card_ready_for_switching(SD_MMC_BA)) {
-		uart_puts(UART0_BA,"Card ready for switching\n");
-		//TODO: Send CMD11 here.
-	} else {
-		uart_puts(UART0_BA,"Card not ready for switching\n");
-	}
+	sd0_card_info.is_high_capacity = get_R3_rsp_card_capacity_status(SD_MMC_BA);
+	sd0_card_info.is_ready_for_switching = get_R3_rsp_card_ready_for_switching(SD_MMC_BA);
 
 	ack_cmd_resp(SD_MMC_BA);
-	ack_cmd_sent(SD_MMC_BA);
+	
+	/* Send cmd2 */
+	send_cmd(
+			SD_MMC_BA,
+			WAIT_RSP|CMD_START|CMD_TRANSMISSION|LONG_RSP|CMD2,
+			0xFFFFFFFFU
+			);
 
-	send_cmd2(SD_MMC_BA,0xFFFFFFFFU);
-	sd_delay();
+	sd_low_delay();
 	wait_for_cmd_complete();
+
 	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd2 timedout\n");
 	} else {
 		parse_r2_response(&sd0_card_info.cid_info);
-		ack_cmd_resp(SD_MMC_BA);
-		ack_cmd_sent(SD_MMC_BA);
 	}
 
-	send_cmd3(SD_MMC_BA,0xFFFFFFFFU);
-	sd_delay();
+	send_cmd(
+			SD_MMC_BA,
+			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD3,
+			0xFFFFFFFFU
+			);
+
+
+	sd_low_delay();
 	wait_for_cmd_complete();
 
 	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd3 timedout\n");
 	} else {
 		parse_r6_response(&sd0_card_info.RCA);
-		ack_cmd_resp(SD_MMC_BA);
-		ack_cmd_sent(SD_MMC_BA);
 	}
 	
+	dump_sd_card_info(&sd0_card_info);
 }
 
