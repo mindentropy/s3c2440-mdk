@@ -69,18 +69,18 @@ void send_cmd(uint32_t BA,uint32_t cmd_con,uint32_t cmd_arg)
 	set_sd_mmc_cmd_con(BA,cmd_con);
 }
 
-void wait_for_cmd_complete()
+void wait_for_cmd_complete(uint32_t BA)
 {
 	/* Wait until command transfer in progress */
-	while((readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA))) & CMD_PROGRESS_ON)
+	while((readreg32(SDI_CMD_STATUS_REG(BA))) & CMD_PROGRESS_ON)
 		;
 
 	/* Wait until command is sent */
-	while(!(readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)) & CMD_SENT))
+	while(!(readreg32(SDI_CMD_STATUS_REG(BA)) & CMD_SENT))
 		;
 
-	ack_cmd_sent(SD_MMC_BA);
-	//print_hex_uart(UART0_BA,readreg32(SDI_CMD_STATUS_REG(SD_MMC_BA)));
+	ack_cmd_sent(BA);
+	//print_hex_uart(UART0_BA,readreg32(SDI_CMD_STATUS_REG(BA)));
 }
 
 void sd_delay()
@@ -101,50 +101,50 @@ void sd_low_delay()
 	}
 }
 
-uint8_t parse_r7_response()
+uint8_t parse_r7_response(uint32_t BA)
 {
-	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
+	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd8 timedout\n");
 		return 0;
 	} 
 
-	ack_cmd_resp(SD_MMC_BA);
+	ack_cmd_resp(BA);
 
-	if((get_R7_rsp_chk_pattern(SD_MMC_BA) == SD_CHECK_PATTERN) && 
-		(get_R7_rsp_volt_accepted(SD_MMC_BA) == SD_CARD_VOLTAGE_2_7)) {
+	if((get_R7_rsp_chk_pattern(BA) == SD_CHECK_PATTERN) && 
+		(get_R7_rsp_volt_accepted(BA) == SD_CARD_VOLTAGE_2_7)) {
 			return 1;
 	} else {
 		return 0;
 	}
 }
 
-void parse_r6_response(uint16_t *rca)
+void parse_r6_response(uint32_t BA,uint16_t *rca)
 {
-	*rca = get_R6_rsp_RCA(SD_MMC_BA);
-	ack_cmd_resp(SD_MMC_BA);
+	*rca = get_R6_rsp_RCA(BA);
+	ack_cmd_resp(BA);
 }
 
-void parse_r2_response(struct cid_info *cid_info)
+void parse_r2_response(uint32_t BA, struct cid_info *cid_info)
 {
 	
-	cid_info->MID = get_R2_rsp_CID_MID(SD_MMC_BA);
-	cid_info->CID = get_R2_rsp_CID_OID(SD_MMC_BA);
+	cid_info->MID = get_R2_rsp_CID_MID(BA);
+	cid_info->CID = get_R2_rsp_CID_OID(BA);
 
 
-	cid_info->PNM[0] = get_R2_rsp_CID_PNM_P1(SD_MMC_BA);
-	cid_info->PNM[1] = get_R2_rsp_CID_PNM_P2_pos(SD_MMC_BA,24);
-	cid_info->PNM[2] = get_R2_rsp_CID_PNM_P2_pos(SD_MMC_BA,16);
-	cid_info->PNM[3] = get_R2_rsp_CID_PNM_P2_pos(SD_MMC_BA,8);
-	cid_info->PNM[4] = get_R2_rsp_CID_PNM_P2_pos(SD_MMC_BA,0);
+	cid_info->PNM[0] = get_R2_rsp_CID_PNM_P1(BA);
+	cid_info->PNM[1] = get_R2_rsp_CID_PNM_P2_pos(BA,24);
+	cid_info->PNM[2] = get_R2_rsp_CID_PNM_P2_pos(BA,16);
+	cid_info->PNM[3] = get_R2_rsp_CID_PNM_P2_pos(BA,8);
+	cid_info->PNM[4] = get_R2_rsp_CID_PNM_P2_pos(BA,0);
 	cid_info->PNM[5] = '\0';
 
 
-	cid_info->PRV = get_R2_rsp_CID_PRV(SD_MMC_BA);
-	cid_info->PSN = get_R2_rsp_CID_PSN(SD_MMC_BA);
-	cid_info->MDT = get_R2_rsp_CID_MDT(SD_MMC_BA);
-	cid_info->CRC = get_R2_rsp_CID_CRC(SD_MMC_BA);
+	cid_info->PRV = get_R2_rsp_CID_PRV(BA);
+	cid_info->PSN = get_R2_rsp_CID_PSN(BA);
+	cid_info->MDT = get_R2_rsp_CID_MDT(BA);
+	cid_info->CRC = get_R2_rsp_CID_CRC(BA);
 
-	ack_cmd_resp(SD_MMC_BA);
+	ack_cmd_resp(BA);
 }
 
 
@@ -212,7 +212,7 @@ void init_sd_controller()
 	int retry = 0;
 
 	config_sd_gpio();
-	reset_sdmmc();
+	reset_sdmmc(SD_MMC_BA);
 
 	/* PCLK set to 50MHz */
 
@@ -228,7 +228,7 @@ void init_sd_controller()
 	sd_delay();
 
 	send_cmd(SD_MMC_BA,CMD_START|CMD_TRANSMISSION|CMD0,0x00000000); //Send cmd0
-	wait_for_cmd_complete();
+	wait_for_cmd_complete(SD_MMC_BA);
 
 	//Delay below for atleast *some* cycles
 	sd_low_delay();
@@ -239,16 +239,16 @@ void init_sd_controller()
 
 	sd_low_delay();
 
-	wait_for_cmd_complete();
+	wait_for_cmd_complete(SD_MMC_BA);
 
-	if(parse_r7_response()) {
+	if(parse_r7_response(SD_MMC_BA)) {
 		uart_puts(UART0_BA,"voltage and chk pattern accepted\n");
 	}
 
 	for(retry = 0; retry < 50; /*retry++*/) {
 		send_cmd(SD_MMC_BA,WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD55,0x00000000); //Send cmd55
 		sd_low_delay();
-		wait_for_cmd_complete();
+		wait_for_cmd_complete(SD_MMC_BA);
 
 		if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 			uart_puts(UART0_BA,"cmd55 timedout\n");
@@ -282,7 +282,7 @@ void init_sd_controller()
 					0xFF8000U);
 
 		sd_delay();
-		wait_for_cmd_complete();
+		wait_for_cmd_complete(SD_MMC_BA);
 
 /*
  * In the response to ACMD41 there will be CRC error. Please note that the 
@@ -314,12 +314,12 @@ void init_sd_controller()
 			);
 
 	sd_low_delay();
-	wait_for_cmd_complete();
+	wait_for_cmd_complete(SD_MMC_BA);
 
 	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd2 timedout\n");
 	} else {
-		parse_r2_response(&sd0_card_info.cid_info);
+		parse_r2_response(SD_MMC_BA,&sd0_card_info.cid_info);
 	}
 
 	send_cmd(
@@ -330,12 +330,12 @@ void init_sd_controller()
 
 
 	sd_low_delay();
-	wait_for_cmd_complete();
+	wait_for_cmd_complete(SD_MMC_BA);
 
 	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd3 timedout\n");
 	} else {
-		parse_r6_response(&sd0_card_info.RCA);
+		parse_r6_response(SD_MMC_BA,&sd0_card_info.RCA);
 	}
 	
 	dump_sd_card_info(&sd0_card_info);

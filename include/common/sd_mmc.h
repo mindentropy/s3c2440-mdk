@@ -19,8 +19,8 @@
 #define READ_WAIT_EN	(BIT2)
 #define CLK_OUT_EN 		(BIT0)
 
-#define reset_sdmmc() \
-	set_reg_params(SDICON_REG(SD_MMC_BA),SDMMC_RESET)
+#define reset_sdmmc(BA) \
+	set_reg_params(SDICON_REG(BA),SDMMC_RESET)
 
 #define SDIPRE_OFF 		(0x04)
 #define SDIPRE_REG(BA) \
