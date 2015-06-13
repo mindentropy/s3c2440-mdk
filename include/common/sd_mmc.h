@@ -85,6 +85,12 @@
 #define ack_cmd_resp(BA) \
 	set_reg_params(SDI_CMD_STATUS_REG(BA),RESP_RECV_END)
 
+#define get_cmd_progress_status(BA) \
+	((readreg32(SDI_CMD_STATUS_REG(BA))) & CMD_PROGRESS_ON)
+
+#define get_cmd_sent_status(BA) \
+	((readreg32(SDI_CMD_STATUS_REG(BA))) & CMD_SENT)
+
 #define SDIRSP0_OFF 	(0x14)
 #define SDIRSP0_REG(BA) \
 	HW_REG(BA,SDIRSP0_OFF)
@@ -247,19 +253,145 @@
 #define R7_RSP_VOLT_ACCEPTED_MASK 	((0xF)<<8)
 #define R7_RSP_RESERVED_BITS_MASK 	((0xFFFFF)<<12)
 
-#define R2_RSP0_MID_MASK 		(0xFFU<<24)
-#define R2_RSP0_OID_MASK  		(0xFFFFU<<8)
-#define R2_RSP0_PNM_MASK_P1  	(0xFFU)
-#define R2_RSP1_PNM_MASK_P2  	(0xFFFFFFFFU)
-#define R2_RSP2_PRV_MASK 		(0xFFU<<24)
-#define R2_RSP2_PSN_MASK_P1 	(0xFFFFFFU)
-#define R2_RSP3_PSN_MASK_P2  	(0xFFU<<24)
-#define R2_RSP3_MDT_MASK     	(0xFFFU<<8)
-#define R2_RSP3_CRC_MASK 		(0x7FFU<<1)
-#define R2_RSP3_UNUSED_MASK  	(0x1U)
+#define R2_RSP0_MID_MASK 			(0xFFU<<24)
+#define R2_RSP0_OID_MASK  			(0xFFFFU<<8)
+#define R2_RSP0_PNM_MASK_P1  		(0xFFU)
+#define R2_RSP1_PNM_MASK_P2  		(0xFFFFFFFFU)
+#define R2_RSP2_PRV_MASK 			(0xFFU<<24)
+#define R2_RSP2_PSN_MASK_P1 		(0xFFFFFFU)
+#define R2_RSP3_PSN_MASK_P2  		(0xFFU<<24)
+#define R2_RSP3_MDT_MASK     		(0xFFFU<<8)
+#define R2_RSP3_CRC_MASK 			(0x7FFU<<1)
+#define R2_RSP3_UNUSED_MASK  		(0x1U)
+
+#define R2_RSP0_STRUCT_MASK  				(0x3U<<30)
+#define R2_RSP0_TAAC_MASK 					(0xFFU<<16)
+#define R2_RSP0_NSAC_MASK 					(0xFFU<<8)
+#define R2_RSP0_TRAN_MASK 					(0xFFU)
+
+#define get_R2_rsp_CSD_STRUCT(BA) \
+	((readreg32(SDIRSP0_REG(BA)) & (R2_RSP0_STRUCT_MASK)) >> 30)
+
+#define get_R2_rsp_CSD_TAAC(BA) \
+	((readreg32(SDIRSP0_REG(BA)) & (R2_RSP0_TAAC_MASK)) >> 16)
+
+#define get_R2_rsp_CSD_NSAC(BA) \
+	((readreg32(SDIRSP0_REG(BA)) & (R2_RSP0_NSAC_MASK)) >> 8)
+
+#define get_R2_rsp_CSD_TRAN(BA) \
+	(readreg32(SDIRSP0_REG(BA)) & (R2_RSP0_TRAN_MASK))
+
+#define R2_RSP1_CCC_MASK 	 				(0xFFFU<<20)
+#define R2_RSP1_READ_BLK_LEN_MASK 			(0xFFU<<16)
+#define R2_RSP1_READ_BLK_PARTIAL_MASK 		(0x1U<<15)
+#define R2_RSP1_WRITE_BLK_MISALIGN_MASK 	(0x1U<<14)
+#define R2_RSP1_READ_BLK_MISALIGN_MASK 		(0x1U<<13)
+#define R2_RSP1_DSR_IMP_MASK 				(0x1U<<12)
+/* Reserved 2 bits */
+
+#define get_R2_rsp_CSD_CCC(BA) \
+	((readreg32(SDIRSP1_REG(BA)) & (R2_RSP1_CCC_MASK)) >> 20)
+
+#define get_R2_rsp_CSD_READ_BLK_LEN(BA) \
+	((readreg32(SDIRSP1_REG(BA)) & (R2_RSP1_READ_BLK_LEN_MASK)) >> 16)
+
+#define get_R2_rsp_CSD_READ_BLK_PARTIAL(BA) \
+	((readreg32(SDIRSP1_REG(BA)) & (R2_RSP1_READ_BLK_PARTIAL_MASK)) >> 15)
+
+#define get_R2_rsp_CSD_WRITE_BLK_MISALIGN(BA) \
+	((readreg32(SDIRSP1_REG(BA)) & (R2_RSP1_WRITE_BLK_MISALIGN_MASK)) >> 14)
+
+#define get_R2_rsp_CSD_READ_BLK_MISALIGN(BA) \
+	((readreg32(SDIRSP1_REG(BA)) & (R2_RSP1_READ_BLK_MISALIGN_MASK)) >> 13)
+
+#define get_R2_rsp_CSD_DSR_IMP(BA) \
+	((readreg32(SDIRSP1_REG(BA)) & (R2_RSP1_DSR_IMP_MASK)) >> 12)
+
+
+#define R2_RSP1_C_SIZE 						(0x1FFU)
+#define R2_RSP2_C_SIZE 						(0x3U<<30)
+
+#define get_R2_rsp_CSD_C_SIZE(BA) \
+	(((readreg32(SDIRSP1_REG(BA)) & (R2_RSP1_C_SIZE)) << 2) | \
+		(readreg32(SDIRSP2_REG(BA)) & (R2_RSP2_C_SIZE)))
+
+#define R2_RSP2_VDD_R_CURR_MIN_MASK 		(0x7U<<27)
+#define R2_RSP2_VDD_R_CURR_MAX_MASK 		(0x7U<<24)
+#define R2_RSP2_VDD_W_CURR_MIN_MASK 		(0x7U<<21)
+#define R2_RSP2_VDD_W_CURR_MAX_MASK 		(0x7U<<18)
+#define R2_RSP2_C_SIZE_MULT_MASK 			(0x7U<<15)
+#define R2_RSP2_ERASE_BLK_EN_MASK 			(0x1U<<14)
+#define R2_RSP2_SECTOR_SIZE_MASK 			(0x7FU<<7)
+#define R2_RSP2_WP_GRP_SIZE_MASK 			(0x7FU)
+
+#define get_R2_rsp_CSD_VDD_R_CURR_MIN(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP2_VDD_R_CURR_MIN_MASK)) >> 27)
+	
+#define get_R2_rsp_CSD_VDD_R_CURR_MAX(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP2_VDD_R_CURR_MAX_MASK)) >> 24)
+
+#define get_R2_rsp_CSD_VDD_W_CURR_MIN(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP2_VDD_W_CURR_MIN_MASK)) >> 21)
+
+#define get_R2_rsp_CSD_VDD_W_CURR_MAX(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP2_VDD_W_CURR_MAX_MASK)) >> 18)
+
+#define get_R2_rsp_CSD_C_SIZE_MULT(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP2_C_SIZE_MULT_MASK)) >> 15)
+
+#define get_R2_rsp_CSD_ERASE_BLK_EN(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP2_ERASE_BLK_EN_MASK)) >> 14)
+
+#define get_R2_rsp_CSD_SECTOR_SIZE(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP2_SECTOR_SIZE_MASK)) >> 7)
+
+#define get_R2_rsp_CSD_WP_GRP_SIZE(BA) \
+	(readreg32(SDIRSP2_REG(BA)) & (R2_RSP2_WP_GRP_SIZE_MASK))
+
+
+#define R2_RSP3_WP_GRP_ENABLE_MASK 				(0x1U<<31)
+/* Reserverd 2 bits */
+#define R2_RSP3_R2W_FACTOR_MASK 				(0x7U<<26)
+#define R2_RSP3_WRITE_BL_LEN_MASK 				(0xFU<<22)
+#define R2_RSP3_WRITE_BL_PARTIAL_MASK 			(0x1U<<21)
+/* Reserved 5 bits */
+#define R2_RSP3_FILE_FORMAT_GRP_MASK 			(0x1U<<15)
+#define R2_RSP3_COPY_MASK 						(0x1U<<14)
+#define R2_RSP3_PERM_WRITE_PROTECT_MASK 		(0x1U<<13)
+#define R2_RSP3_TMP_WRITE_PROTECT_MASK 			(0x1U<<12)
+#define R2_RSP3_FILE_FORMAT_MASK 				(0x3U<<10)
+/* Reserved 2 bits */
+/* 7 bit CRC mask. Reuse above MACRO */
+
+#define get_R2_rsp_CSD_WP_GRP_ENABLE(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP3_WP_GRP_ENABLE_MASK)) >> 31)
+
+#define get_R2_rsp_CSD_R2W_FACTOR(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP3_R2W_FACTOR_MASK)) >> 26)
+
+#define get_R2_rsp_CSD_WRITE_BL_LEN(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP3_WRITE_BL_LEN_MASK)) >> 22)
+
+#define get_R2_rsp_CSD_WRITE_BL_PARTIAL(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP3_WRITE_BL_PARTIAL_MASK)) >> 21)
+
+#define get_R2_rsp_CSD_FILE_FORMAT_GRP(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP3_FILE_FORMAT_GRP_MASK)) >> 15)
+
+#define get_R2_rsp_CSD_COPY(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP3_COPY_MASK)) >> 14)
+
+#define get_R2_rsp_CSD_PERM_WRITE_PROTECT(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP3_PERM_WRITE_PROTECT_MASK)) >> 13)
+
+#define get_R2_rsp_CSD_TMP_WRITE_PROTECT(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP3_TMP_WRITE_PROTECT_MASK)) >> 12)
+
+#define get_R2_rsp_CSD_FILE_FORMAT(BA) \
+	((readreg32(SDIRSP2_REG(BA)) & (R2_RSP3_FILE_FORMAT_MASK)) >> 10)
 
 #define R7_RSP_RCA_MASK 				(0xFFFFU<<16)
-#define R7_RSP_CARD_STATUS_MASK 	(0xFFFFU)
+#define R7_RSP_CARD_STATUS_MASK 		(0xFFFFU)
 
 #define get_R7_rsp_chk_pattern(BA) \
 	(readreg32(SDIRSP0_REG(BA)) & (R7_RSP_CHK_PATTERN_MASK))
@@ -325,8 +457,40 @@ struct cid_info {
 	uint8_t CRC;
 };
 
+struct csd_info {
+	uint8_t csd_ver;
+	uint8_t TAAC;
+	uint8_t NSAC;
+	uint8_t TRAN;
+	uint16_t CCC; 
+	uint8_t READ_BLK_LEN;
+	uint8_t READ_BLK_PARTIAL;
+	uint8_t WRITE_BLK_MISALIGN;
+	uint8_t READ_BLK_MISALIGN;
+	uint8_t DSR_IMP;
+	uint16_t C_SIZE;
+	uint8_t VDD_R_CURR_MIN;
+	uint8_t VDD_R_CURR_MAX;
+	uint8_t VDD_W_CURR_MIN;
+	uint8_t VDD_W_CURR_MAX;
+	uint8_t C_SIZE_MULT;
+	uint8_t ERASE_BLK_EN;
+	uint8_t SECTOR_SIZE;
+	uint8_t WP_GRP_SIZE;
+	uint8_t WP_GRP_ENABLE;
+	uint8_t R2W_FACTOR;
+	uint8_t WRITE_BL_LEN;
+	uint8_t WRITE_BL_PARTIAL;
+	uint8_t FILE_FORMAT_GRP;
+	uint8_t COPY;
+	uint8_t PERM_WRITE_PROTECT;
+	uint8_t TMP_WRITE_PROTECT;
+	uint8_t FILE_FORMAT;
+};
+
 struct sd_card_info {
 	struct cid_info cid_info;
+	struct csd_info csd_info;
 	uint16_t RCA;
 
 	/* Below variable status can be a bitmap */
