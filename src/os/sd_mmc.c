@@ -150,57 +150,55 @@ void parse_CID_response(uint32_t BA, struct cid_info *cid_info)
 	ack_cmd_resp(BA);
 }
 
-
 void parse_CSD_response(uint32_t BA, struct csd_info *csd_info)
+{
+	csd_info->rsp0 = readreg32(SDIRSP0_REG(BA));
+	csd_info->rsp1 = readreg32(SDIRSP1_REG(BA));
+	csd_info->rsp2 = readreg32(SDIRSP2_REG(BA));
+	csd_info->rsp3 = readreg32(SDIRSP3_REG(BA));
+
+	ack_cmd_resp(BA);
+}
+
+#ifdef DEBUG_CSD_REG
+void parse_CSD_response_reg(uint32_t BA)
 {
 	uart_puts(UART0_BA, "CSD dump : ");
 
-	csd_info->csd_ver = get_R2_rsp_CSD_STRUCT(BA);
 	uart_puts(UART0_BA,"csd_ver ");
-	print_hex_uart(UART0_BA,csd_info->csd_ver);
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_STRUCT(BA));
 
-	csd_info->TAAC = get_R2_rsp_CSD_TAAC(BA);
 	uart_puts(UART0_BA,"TAAC ");
-	print_hex_uart(UART0_BA,csd_info->TAAC);
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_TAAC(BA));
 
-	csd_info->NSAC = get_R2_rsp_CSD_NSAC(BA);
 	uart_puts(UART0_BA,"NSAC ");
-	print_hex_uart(UART0_BA,csd_info->NSAC);
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_NSAC(BA));
 
-	csd_info->TRAN = get_R2_rsp_CSD_TRAN(BA);
 	uart_puts(UART0_BA,"TRAN ");
-	print_hex_uart(UART0_BA,csd_info->TRAN);
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_TRAN(BA));
 
-	csd_info->CCC = get_R2_rsp_CSD_CCC(BA);
 	uart_puts(UART0_BA,"CCC ");
-	print_hex_uart(UART0_BA,csd_info->CCC);
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_CCC(BA));
 
-	csd_info->READ_BLK_LEN = get_R2_rsp_CSD_READ_BLK_LEN(BA);
 	uart_puts(UART0_BA,"READ_BLK_LEN ");
-	print_hex_uart(UART0_BA,csd_info->READ_BLK_LEN);
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_READ_BLK_LEN(BA));
 
-	csd_info->READ_BLK_PARTIAL = get_R2_rsp_CSD_READ_BLK_PARTIAL(BA);
 	uart_puts(UART0_BA,"READ_BLK_PARTIAL ");
-	print_hex_uart(UART0_BA,csd_info->READ_BLK_PARTIAL);
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_READ_BLK_PARTIAL(BA));
 
-	csd_info->WRITE_BLK_MISALIGN = get_R2_rsp_CSD_WRITE_BLK_MISALIGN(BA);
 	uart_puts(UART0_BA,"WRITE_BLK_MISALIGN ");
-	print_hex_uart(UART0_BA,csd_info->WRITE_BLK_MISALIGN);
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_WRITE_BLK_MISALIGN(BA));
 
-	csd_info->READ_BLK_MISALIGN = get_R2_rsp_CSD_READ_BLK_MISALIGN(BA);
 	uart_puts(UART0_BA,"READ_BLK_MISALIGN ");
-	print_hex_uart(UART0_BA,csd_info->READ_BLK_MISALIGN);
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_READ_BLK_MISALIGN(BA));
 
-	csd_info->DSR_IMP = get_R2_rsp_CSD_DSR_IMP(BA);
 	uart_puts(UART0_BA,"DSR_IMP ");
-	print_hex_uart(UART0_BA,csd_info->DSR_IMP);
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_DSR_IMP(BA));
 
-
-	csd_info->C_SIZE = get_R2_rsp_CSD_C_SIZE(BA);
 	uart_puts(UART0_BA,"C_SIZE ");
-	print_hex_uart(UART0_BA,csd_info->C_SIZE);
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_C_SIZE(BA)); 
 
-	csd_info->VDD_R_CURR_MIN = get_R2_rsp_CSD_VDD_R_CURR_MIN(BA);
+/*	csd_info->VDD_R_CURR_MIN = get_R2_rsp_CSD_VDD_R_CURR_MIN(BA);
 	uart_puts(UART0_BA,"VDD_R_CURR_MIN ");
 	print_hex_uart(UART0_BA,csd_info->VDD_R_CURR_MIN);
 
@@ -218,64 +216,54 @@ void parse_CSD_response(uint32_t BA, struct csd_info *csd_info)
 
 	csd_info->C_SIZE_MULT = get_R2_rsp_CSD_C_SIZE_MULT(BA);
 	uart_puts(UART0_BA,"C_SIZE_MULT ");
-	print_hex_uart(UART0_BA,csd_info->C_SIZE_MULT); 
+	print_hex_uart(UART0_BA,csd_info->C_SIZE_MULT); */
 
-	csd_info->ERASE_BLK_EN = get_R2_rsp_CSD_ERASE_BLK_EN(BA);
 	uart_puts(UART0_BA,"ERASE_BLK_EN ");
-	print_hex_uart(UART0_BA,csd_info->ERASE_BLK_EN); 
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_ERASE_BLK_EN(BA)); 
 
-	csd_info->SECTOR_SIZE = get_R2_rsp_CSD_SECTOR_SIZE(BA);
 	uart_puts(UART0_BA,"SECTOR_SIZE ");
-	print_hex_uart(UART0_BA,csd_info->SECTOR_SIZE); 
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_SECTOR_SIZE(BA)); 
 
-	csd_info->WP_GRP_SIZE = get_R2_rsp_CSD_WP_GRP_SIZE(BA);
 	uart_puts(UART0_BA,"WP_GRP_SIZE ");
-	print_hex_uart(UART0_BA,csd_info->WP_GRP_SIZE); 
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_WP_GRP_SIZE(BA)); 
 
-	csd_info->WP_GRP_ENABLE = get_R2_rsp_CSD_WP_GRP_ENABLE(BA);
 	uart_puts(UART0_BA,"WP_GRP_ENABLE ");
-	print_hex_uart(UART0_BA,csd_info->WP_GRP_ENABLE); 
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_WP_GRP_ENABLE(BA)); 
 
-	csd_info->R2W_FACTOR = get_R2_rsp_CSD_R2W_FACTOR(BA);
 	uart_puts(UART0_BA,"R2W_FACTOR ");
-	print_hex_uart(UART0_BA,csd_info->R2W_FACTOR); 
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_R2W_FACTOR(BA)); 
 
-	csd_info->WRITE_BL_LEN = get_R2_rsp_CSD_WRITE_BL_LEN(BA);
 	uart_puts(UART0_BA,"WRITE_BL_LEN ");
-	print_hex_uart(UART0_BA,csd_info->WRITE_BL_LEN); 
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_WRITE_BL_LEN(BA)); 
 
-	csd_info->WRITE_BL_PARTIAL = get_R2_rsp_CSD_WRITE_BL_PARTIAL(BA);
 	uart_puts(UART0_BA,"WRITE_BL_PARTIAL ");
-	print_hex_uart(UART0_BA,csd_info->WRITE_BL_PARTIAL); 
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_WRITE_BL_PARTIAL(BA)); 
 
-	csd_info->FILE_FORMAT_GRP = get_R2_rsp_CSD_FILE_FORMAT_GRP(BA);
 	uart_puts(UART0_BA,"FILE_FORMAT_GRP ");
-	print_hex_uart(UART0_BA,csd_info->FILE_FORMAT_GRP); 
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_FILE_FORMAT_GRP(BA)); 
 
-	csd_info->COPY = get_R2_rsp_CSD_COPY(BA);
 	uart_puts(UART0_BA,"COPY ");
-	print_hex_uart(UART0_BA,csd_info->COPY); 
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_COPY(BA)); 
 
-	csd_info->PERM_WRITE_PROTECT = get_R2_rsp_CSD_PERM_WRITE_PROTECT(BA);
 	uart_puts(UART0_BA,"PERM_WRITE_PROTECT ");
-	print_hex_uart(UART0_BA,csd_info->PERM_WRITE_PROTECT); 
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_PERM_WRITE_PROTECT(BA)); 
 
-	csd_info->TMP_WRITE_PROTECT = get_R2_rsp_CSD_TMP_WRITE_PROTECT(BA);
 	uart_puts(UART0_BA,"TMP_WRITE_PROTECT ");
-	print_hex_uart(UART0_BA,csd_info->TMP_WRITE_PROTECT); 
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_TMP_WRITE_PROTECT(BA)); 
 
-	csd_info->FILE_FORMAT = get_R2_rsp_CSD_FILE_FORMAT(BA);
 	uart_puts(UART0_BA,"FILE_FORMAT ");
-	print_hex_uart(UART0_BA,csd_info->FILE_FORMAT); 
-
+	print_hex_uart(UART0_BA,get_R2_rsp_CSD_FILE_FORMAT(BA)); 
 
 	ack_cmd_resp(BA);
 }
+#endif
 
 void dump_sd_card_info(const struct sd_card_info *sd_card_info)
 {
 
 	uart_puts(UART0_BA,"*** SD Card Info ***\n");
+
+	
 	if(sd_card_info->is_high_capacity) {
 		uart_puts(UART0_BA,"High capacity or extended capacity card\n");
 	} else {
@@ -288,6 +276,8 @@ void dump_sd_card_info(const struct sd_card_info *sd_card_info)
 	} else {
 		uart_puts(UART0_BA,"Card not ready for switching\n");
 	}
+
+	uart_puts(UART0_BA,"\nCID DUMP\n");
 
 	uart_puts(UART0_BA,"MID : ");
 	print_hex_uart(UART0_BA,sd_card_info->cid_info.MID);
@@ -313,6 +303,79 @@ void dump_sd_card_info(const struct sd_card_info *sd_card_info)
 
 	uart_puts(UART0_BA,"RCA : ");
 	print_hex_uart(UART0_BA,sd_card_info->RCA);
+
+	uart_puts(UART0_BA,"\nCSD DUMP\n");
+
+	uart_puts(UART0_BA,"csd_ver : ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_STRUCT(sd_card_info->csd_info.rsp0));
+
+	uart_puts(UART0_BA,"TAAC ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_TAAC(sd_card_info->csd_info.rsp0));
+
+	uart_puts(UART0_BA,"NSAC ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_NSAC(sd_card_info->csd_info.rsp0));
+
+	uart_puts(UART0_BA,"TRAN ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_TRAN(sd_card_info->csd_info.rsp0));
+
+	uart_puts(UART0_BA,"CCC ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_CCC(sd_card_info->csd_info.rsp1));
+
+
+	uart_puts(UART0_BA,"READ_BLK_LEN ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_READ_BLK_LEN(sd_card_info->csd_info.rsp1));
+
+	uart_puts(UART0_BA,"READ_BLK_PARTIAL ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_READ_BLK_PARTIAL(sd_card_info->csd_info.rsp1));
+
+	uart_puts(UART0_BA,"WRITE_BLK_MISALIGN ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_WRITE_BLK_MISALIGN(sd_card_info->csd_info.rsp1));
+
+	uart_puts(UART0_BA,"READ_BLK_MISALIGN ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_READ_BLK_MISALIGN(sd_card_info->csd_info.rsp1));
+
+	uart_puts(UART0_BA,"DSR_IMP ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_DSR_IMP(sd_card_info->csd_info.rsp1));
+
+	uart_puts(UART0_BA,"C_SIZE ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_C_SIZE(sd_card_info->csd_info.rsp1,sd_card_info->csd_info.rsp2));
+
+	uart_puts(UART0_BA,"ERASE_BLK_EN ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_ERASE_BLK_EN(sd_card_info->csd_info.rsp2));
+
+	uart_puts(UART0_BA,"SECTOR_SIZE ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_SECTOR_SIZE(sd_card_info->csd_info.rsp2));
+
+	uart_puts(UART0_BA,"WP_GRP_SIZE ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_WP_GRP_SIZE(sd_card_info->csd_info.rsp2));
+
+	uart_puts(UART0_BA,"WP_GRP_ENABLE ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_WP_GRP_ENABLE(sd_card_info->csd_info.rsp3));
+
+	uart_puts(UART0_BA,"R2W_FACTOR ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_R2W_FACTOR(sd_card_info->csd_info.rsp3));
+
+	uart_puts(UART0_BA,"WRITE_BL_LEN ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_WRITE_BL_LEN(sd_card_info->csd_info.rsp3));
+
+	uart_puts(UART0_BA,"WRITE_BL_PARTIAL ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_WRITE_BL_PARTIAL(sd_card_info->csd_info.rsp3));
+
+	uart_puts(UART0_BA,"FILE_FORMAT_GRP ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_FILE_FORMAT_GRP(sd_card_info->csd_info.rsp3));
+
+	uart_puts(UART0_BA,"COPY ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_COPY(sd_card_info->csd_info.rsp3));
+
+	uart_puts(UART0_BA,"PERM_WRITE_PROTECT ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_PERM_WRITE_PROTECT(sd_card_info->csd_info.rsp3));
+
+	uart_puts(UART0_BA,"TMP_WRITE_PROTECT ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_TMP_WRITE_PROTECT(sd_card_info->csd_info.rsp3));
+
+	uart_puts(UART0_BA,"FILE_FORMAT ");
+	print_hex_uart(UART0_BA,get_R2_rsp_var_CSD_FILE_FORMAT(sd_card_info->csd_info.rsp3));
+
 
 	uart_puts(UART0_BA,"****************\n");
 }
@@ -479,6 +542,7 @@ void init_sd_controller()
 	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd9 timedout\n");
 	} else {
+	//	parse_CSD_response_reg(SD_MMC_BA);
 		parse_CSD_response(SD_MMC_BA,&sd0_card_info.csd_info);
 	}
 				
