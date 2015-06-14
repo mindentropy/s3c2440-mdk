@@ -525,6 +525,7 @@
 #define get_R6_rsp_CARD_STATUS(BA) \
 	(((readreg32(SDIRSP0_REG(BA)))  &  R7_RSP_CARD_STATUS_MASK))
 
+	
 struct cid_info {
 	uint8_t MID;
 	uint16_t CID;
