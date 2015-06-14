@@ -535,39 +535,6 @@ struct cid_info {
 	uint8_t CRC;
 };
 
-/*
-struct csd_info {
-	uint8_t csd_ver;
-	uint8_t TAAC;
-	uint8_t NSAC;
-	uint8_t TRAN;
-	uint16_t CCC; 
-	uint8_t READ_BLK_LEN;
-	uint8_t READ_BLK_PARTIAL;
-	uint8_t WRITE_BLK_MISALIGN;
-	uint8_t READ_BLK_MISALIGN;
-	uint8_t DSR_IMP;
-	uint16_t C_SIZE;
-	uint8_t VDD_R_CURR_MIN;
-	uint8_t VDD_R_CURR_MAX;
-	uint8_t VDD_W_CURR_MIN;
-	uint8_t VDD_W_CURR_MAX;
-	uint8_t C_SIZE_MULT;
-	uint8_t ERASE_BLK_EN;
-	uint8_t SECTOR_SIZE;
-	uint8_t WP_GRP_SIZE;
-	uint8_t WP_GRP_ENABLE;
-	uint8_t R2W_FACTOR;
-	uint8_t WRITE_BL_LEN;
-	uint8_t WRITE_BL_PARTIAL;
-	uint8_t FILE_FORMAT_GRP;
-	uint8_t COPY;
-	uint8_t PERM_WRITE_PROTECT;
-	uint8_t TMP_WRITE_PROTECT;
-	uint8_t FILE_FORMAT;
-};
-*/
-
 struct csd_info {
 	uint32_t rsp0;
 	uint32_t rsp1;
