@@ -4,12 +4,15 @@
 
 /************ CMD_INDEX *****************/
 
+#define BLK_READ_BYTE_SIZE 	512
+
 #define CMD0 	0
 #define CMD2 	2
 #define CMD3 	3
 #define CMD7 	7
 #define CMD8    8
 #define CMD9 	9
+#define CMD17 	17
 #define CMD55 	55
 #define ACMD41 	41
 
@@ -407,6 +410,27 @@ void config_sd_gpio()
 
 }
 
+
+void sd_read_single_block(uint32_t BA,uint32_t block_addr)
+{
+	
+	/* Send CMD17 i.e. READ_SINGLE_BLOCK */
+	send_cmd(
+			SD_MMC_BA,
+			CMD_WITH_DATA|WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD17,
+			block_addr
+			);
+
+	sd_low_delay();
+	wait_for_cmd_complete(SD_MMC_BA);
+
+	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd17 timedout\n");
+	} else {
+		print_hex_uart(UART0_BA,get_R1_card_state(SD_MMC_BA));
+	}
+}
+
 void init_sd_controller()
 {
 	int retry = 0;
@@ -577,5 +601,7 @@ void init_sd_controller()
 			uart_puts(UART0_BA,"Card ready for data\n");
 		}
 	}
+
+	sd_read_single_block(SD_MMC_BA,0);
 }
 
