@@ -27,14 +27,14 @@ To build the OS and the loader run 'make' in the s3c2440-mdk folder. All binary 
 To build the uploader change the directory to test_uploader and run 'make' there.
 
 Flashing:
-A loader needs to flashed into the NAND memory which later loads the OS.
+A loader needs to be flashed into the NAND memory which later loads the OS.
 
 Flashing the loader:
 1) Toggle the switch to NOR.
 2) Boot the board to supervivi in NOR. In the menu select 'q' to go to 'vivi' shell.
 3) In the command shell type in "load flash 0 <size_of_loader> u". This waits for a USB connection from the host.
    If a USB connection is established it loads the loader to the NAND at address 0. The size_of_loader will be the
-   size of the mdk_os.bin file in the bin folder. You can check the size by doing a ls -al mdk_os.bin
+   size of the mdk_loader.bin file in the bin folder. You can check the size by doing a ls -al mdk_loader.bin
 4) To establish the connection from the host use the program 'dnw' or 'usbpush'.
    To upload the program using dnw
    a) unzip dnw. 
