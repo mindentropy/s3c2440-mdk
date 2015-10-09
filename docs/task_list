@@ -1,9 +1,10 @@
 S3C2440 TODO LIST
 =================
 
-CPU Core
+CPU Core --> **Priority**
 --------
 1) Setup stacks for different processor modes.
+2) Setup stacks for interrupt, task etc.
 
 Refactoring
 -----------

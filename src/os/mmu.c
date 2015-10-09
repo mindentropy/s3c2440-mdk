@@ -102,6 +102,7 @@ static void setup_l1_section_table(unsigned int flags)
 }
 
 extern void blink_leds(unsigned int leds);
+
 void turn_mmu_on()
 {
 
