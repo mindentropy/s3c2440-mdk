@@ -12,10 +12,11 @@
 #define CMD7 	7
 #define CMD8    8
 #define CMD9 	9
+#define CMD13 	13
+#define CMD15 	15
 #define CMD17 	17
 #define CMD55 	55
 #define ACMD41 	41
-
 
 
 #define SD_CARD_VOLTAGE_2_7  			(1<<8)
@@ -47,6 +48,7 @@
 #define SD_WP_ERASE_SKIP 				(BIT15)
 #define SD_CARD_ECC_DISABLED 			(BIT14)
 #define SD_ERASE_RESET 					(BIT13)
+
 #define SD_CURRENT_STATE 				set_bit_range(12,9)
 
 #define SD_CUR_STATE_IDLE 				((0)<<9)
@@ -75,6 +77,19 @@
 
 /****************************************/
 
+/**
+ * Note on SD Card Responses in S3C2440 registers
+ * ==============================================
+ * The SD Response registers in S3C2440 is like a stream. If there is for eg
+ * more than 32b needed for the response it spills over to the next set of
+ * 32b registers.
+ *
+ * For eg for the R2 register response for the CID,CSD the total size of the
+ * response is 135-0 i.e. 136 bits. In this the start bit, transmission bit and
+ * reserved has to be ignored. The remaining 0-127 i.e. 128 bits are to be 
+ * parsed. To parse this 128b/32b i.e. 4 registers are needed.
+ *
+ */
 
 struct sd_card_info sd0_card_info;
 
@@ -140,7 +155,6 @@ void parse_r6_response(uint32_t BA,uint16_t *rca)
 	*rca = get_R6_rsp_RCA(BA);
 	ack_cmd_resp(BA);
 }
-
 
 
 void parse_CID_response(uint32_t BA, struct cid_info *cid_info)
@@ -411,6 +425,39 @@ void config_sd_gpio()
 }
 
 
+static void print_current_state(uint32_t CURRENT_STATE)
+{
+	switch(CURRENT_STATE) {
+		case SD_CUR_STATE_IDLE:
+			uart_puts(UART0_BA,"IDLE\n");
+			break;
+		case SD_CUR_STATE_READY:
+			uart_puts(UART0_BA,"READY\n");
+			break;
+		case SD_CUR_STATE_IDENT:
+			uart_puts(UART0_BA,"IDENT\n");
+			break;
+		case SD_CUR_STATE_STBY:
+			uart_puts(UART0_BA,"STBY\n");
+			break;
+		case SD_CUR_STATE_TRAN:
+			uart_puts(UART0_BA,"TRAN\n");
+			break;
+		case SD_CUR_STATE_DATA:
+			uart_puts(UART0_BA,"DATA\n");
+			break;
+		case SD_CUR_STATE_RCV:
+			uart_puts(UART0_BA,"RCV\n");
+			break;
+		case SD_CUR_STATE_PRG:
+			uart_puts(UART0_BA,"PRG\n");
+			break;
+		case SD_CUR_STATE_DIS:
+			uart_puts(UART0_BA,"DIS\n");
+			break;
+	}
+}
+
 void sd_read_single_block(uint32_t BA,uint32_t block_addr)
 {
 	
@@ -428,6 +475,12 @@ void sd_read_single_block(uint32_t BA,uint32_t block_addr)
 		uart_puts(UART0_BA,"cmd17 timedout\n");
 	} else {
 		print_hex_uart(UART0_BA,get_R1_card_state(SD_MMC_BA));
+		print_current_state(get_card_current_state(SD_MMC_BA));
+
+/*		if(is_card_ready_for_data(SD_MMC_BA)) {
+			uart_puts(UART0_BA,"Ready for data\n");
+		}*/
+
 	}
 }
 
@@ -570,7 +623,7 @@ void init_sd_controller()
 	send_cmd(
 			SD_MMC_BA,
 			WAIT_RSP|CMD_START|CMD_TRANSMISSION|LONG_RSP|CMD9,
-			((sd0_card_info.RCA)<<16|0xFFFF)
+			(((sd0_card_info.RCA)<<16)|0xFFFF)
 			);
 
 	sd_low_delay();
@@ -585,10 +638,50 @@ void init_sd_controller()
 				
 	dump_sd_card_info(&sd0_card_info);
 
+/* Make card inactive CMD15 for testing */
+
+#ifdef INACTIVE_TEST
+	send_cmd(
+			SD_MMC_BA,
+			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD15,
+			(((sd0_card_info.RCA)<<16) | 0xFFFF)
+			);
+
+	sd_low_delay();
+	wait_for_cmd_complete(SD_MMC_BA);
+
+	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd15 timedout\n");
+	} else {
+		print_hex_uart(UART0_BA,get_R1_card_state(SD_MMC_BA));
+		print_current_state(get_card_current_state(SD_MMC_BA));
+	}
+#endif
+
+/* Get card status */
+	send_cmd(
+			SD_MMC_BA,
+			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD13,
+			(((sd0_card_info.RCA)<<16) | 0xFFFF)
+			);
+
+	sd_low_delay();
+	wait_for_cmd_complete(SD_MMC_BA);
+
+	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd13 timedout\n");
+	} else {
+		print_hex_uart(UART0_BA,get_R1_card_state(SD_MMC_BA));
+		print_current_state(get_card_current_state(SD_MMC_BA));
+	}
+	
+
 	/* Send CMD7 i.e. Select Card */
+
+	/* Deselect card */
 	send_cmd(SD_MMC_BA,
 			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD7,
-			((sd0_card_info.RCA)<<16|0xFFFF)
+			0x00000000
 			);
 
 	sd_low_delay();
@@ -597,11 +690,40 @@ void init_sd_controller()
 	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd7 timedout\n");
 	} else {
-		if(is_card_ready_for_data(SD_MMC_BA)) {
+
+		print_hex_uart(UART0_BA,get_R1_card_state(SD_MMC_BA));
+		print_current_state(get_card_current_state(SD_MMC_BA));
+
+	/*  if(is_card_ready_for_data(SD_MMC_BA)) {
 			uart_puts(UART0_BA,"Card ready for data\n");
-		}
+		}*/
 	}
 
+	/* Select card */
+	send_cmd(SD_MMC_BA,
+			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD7,
+			(((sd0_card_info.RCA)<<16)|0xFFFF)
+			);
+
+	sd_low_delay();
+	wait_for_cmd_complete(SD_MMC_BA);
+
+	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd7 timedout\n");
+	} else {
+
+		print_hex_uart(UART0_BA,get_R1_card_state(SD_MMC_BA));
+		print_current_state(get_card_current_state(SD_MMC_BA));
+
+	/*  if(is_card_ready_for_data(SD_MMC_BA)) {
+			uart_puts(UART0_BA,"Card ready for data\n");
+		}*/
+	}
+
+	/* Send CMD17 to read a block */
+	sd_read_single_block(SD_MMC_BA,0);
+
+	/* Send CMD17 to read a block */
 	sd_read_single_block(SD_MMC_BA,0);
 }
 
