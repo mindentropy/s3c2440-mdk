@@ -269,14 +269,15 @@ void sd_read_single_block(uint32_t BA,uint32_t block_addr)
 void init_sd_controller()
 {
 	int retry = 0;
+	unsigned int RCA = 0;
 
 	config_sd_gpio();
 	reset_sdmmc(SD_MMC_BA);
 
 	/* PCLK set to 50MHz */
 
-	set_sd_clk_prescale(SD_MMC_BA,499); //Setting the clock to max i.e. 100kHz.
-	//set_sd_clk_prescale(SD_MMC_BA,124); //Setting the clock to max i.e. 400kHz.
+	//set_sd_clk_prescale(SD_MMC_BA,499); //Setting the clock to max i.e. 100kHz.
+	set_sd_clk_prescale(SD_MMC_BA,124); //Setting the clock to max i.e. 400kHz.
 	//set_sd_clk_prescale(SD_MMC_BA,1); //Setting the clock to max i.e. 400kHz.
 	writereg32(SDICON_REG(SD_MMC_BA),RCV_IO_INT|BYTE_ORDER_B);
 	writereg32(SDID_TIMER_REG(SD_MMC_BA),0x7FFFFF);
@@ -409,13 +410,13 @@ void init_sd_controller()
 	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd3 timedout\n");
 	} else {
+		RCA = get_R6_rsp_RAW(SD_MMC_BA);
 		parse_r6_response(SD_MMC_BA,&sd0_card_info.RCA);
 		uart_puts(UART0_BA,"CMD3:");
 		print_hex_uart(UART0_BA,sd0_card_info.RCA);
 	}
 
 /****************************************************/
-	
 
 /******************* Send CMD9 ********************/
 
@@ -492,12 +493,13 @@ void init_sd_controller()
 /******************* Send CMD13 ********************/
 /* Get card status */
 
-/*
-	uart_puts(SD_MMC_BA,"Card Status : ");
+
+	uart_puts(UART0_BA,"Card Status : ");
 	send_cmd(
 			SD_MMC_BA,
 			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD13,
-			(((sd0_card_info.RCA)<<16) | 0xFFFF)
+			//(((sd0_card_info.RCA)<<16) | 0xFFFF)
+			RCA
 			);
 
 	sd_low_delay();
@@ -511,7 +513,7 @@ void init_sd_controller()
 		print_current_state(get_card_current_state(SD_MMC_BA));
 		ack_cmd_resp(SD_MMC_BA);
 	}
-*/
+
 /****************************************************/
 	
 /******************* Send CMD7 ********************/
@@ -549,7 +551,8 @@ void init_sd_controller()
 	uart_puts(UART0_BA,"Select Card\n");
 	send_cmd(SD_MMC_BA,
 			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD7,
-			(((sd0_card_info.RCA)<<16)|0xFFFF)
+			//(((sd0_card_info.RCA)<<16)|0xFFFF)
+			RCA
 			);
 
 	sd_low_delay();

@@ -522,6 +522,9 @@
 #define get_R6_rsp_RCA(BA) \
 	(((readreg32(SDIRSP0_REG(BA))) & R7_RSP_RCA_MASK) >> 16)
 
+#define get_R6_rsp_RAW(BA) \
+	((readreg32(SDIRSP0_REG(BA))) & R7_RSP_RCA_MASK)
+
 #define get_R6_rsp_CARD_STATUS(BA) \
 	(((readreg32(SDIRSP0_REG(BA)))  &  R7_RSP_CARD_STATUS_MASK))
 
@@ -547,7 +550,7 @@ struct sd_card_info {
 	struct cid_info cid_info;
 	//struct csd_info csd_info;
 	struct csd_info csd_info;
-	uint16_t RCA;
+	uint32_t RCA;
 
 	/* Below variable status can be a bitmap */
 	uint8_t is_high_capacity;
