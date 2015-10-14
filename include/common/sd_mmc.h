@@ -493,7 +493,7 @@
 #define get_R2_rsp_var_CSD_FILE_FORMAT(rsp3) \
 	(((rsp3) & (R2_RSP3_FILE_FORMAT_MASK)) >> 10)
 
-#define R7_RSP_RCA_MASK 				(0xFFFFU<<16)
+#define R7_RSP_RCA_MASK 				(0xFFFF0000U)
 #define R7_RSP_CARD_STATUS_MASK 		(0xFFFFU)
 
 #define get_R7_rsp_chk_pattern(BA) \
