@@ -5,6 +5,10 @@
 
 /************ CMD_INDEX *****************/
 
+
+#define OPT_SEL_CARD 	1
+#define OPT_DESEL_CARD 	0
+
 #define BLK_READ_BYTE_SIZE 	512
 
 #define CMD0 	0
@@ -168,7 +172,6 @@ void parse_CID_response(uint32_t BA, struct cid_info *cid_info)
 	cid_info->MID = get_R2_rsp_CID_MID(BA);
 	cid_info->CID = get_R2_rsp_CID_OID(BA);
 
-
 	cid_info->PNM[0] = get_R2_rsp_CID_PNM_P1(BA);
 	cid_info->PNM[1] = get_R2_rsp_CID_PNM_P2_pos(BA,24);
 	cid_info->PNM[2] = get_R2_rsp_CID_PNM_P2_pos(BA,16);
@@ -176,13 +179,10 @@ void parse_CID_response(uint32_t BA, struct cid_info *cid_info)
 	cid_info->PNM[4] = get_R2_rsp_CID_PNM_P2_pos(BA,0);
 	cid_info->PNM[5] = '\0';
 
-
 	cid_info->PRV = get_R2_rsp_CID_PRV(BA);
 	cid_info->PSN = get_R2_rsp_CID_PSN(BA);
 	cid_info->MDT = get_R2_rsp_CID_MDT(BA);
 	cid_info->CRC = get_R2_rsp_CID_CRC(BA);
-
-	ack_cmd_resp(BA);
 }
 
 void parse_CSD_response(uint32_t BA, struct csd_info *csd_info)
@@ -191,8 +191,6 @@ void parse_CSD_response(uint32_t BA, struct csd_info *csd_info)
 	csd_info->rsp1 = readreg32(SDIRSP1_REG(BA));
 	csd_info->rsp2 = readreg32(SDIRSP2_REG(BA));
 	csd_info->rsp3 = readreg32(SDIRSP3_REG(BA));
-
-	ack_cmd_resp(BA);
 }
 
 void config_sd_gpio()
@@ -304,6 +302,43 @@ uint32_t get_cmd13_current_state(uint32_t BA,uint32_t RCA)
 	return current_state;
 }
 
+//TODO:Return error value if not successful.
+uint32_t select_deselect_card(uint32_t BA,uint32_t RCA,uint8_t sel_desel)
+{
+	uint32_t card_state = 0;
+	
+	/* Select card */
+	uart_puts(UART0_BA,"Select Card:");
+	print_hex_uart(UART0_BA,(RCA)<<16);
+
+	if(sel_desel == OPT_SEL_CARD) {
+		send_cmd(BA,
+				WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD7,
+				(((RCA)<<16)|0xFFFFU)
+				);
+	} else if(sel_desel == OPT_DESEL_CARD) {
+		send_cmd(BA,
+				WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD7,
+				0x00000000
+				);
+	} else {
+		return card_state;
+	}
+
+	sd_low_delay();
+	wait_for_cmd_complete(BA);
+
+	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd7 timedout\n");
+		return card_state;
+	}
+
+	card_state = get_R1_card_current_state(BA);
+	ack_cmd_resp(BA);
+
+	return card_state;
+}
+
 /*
  * Note on Card Responses:
  * -----------------------
@@ -323,7 +358,6 @@ void init_sd_controller()
 {
 	int retry = 0;
 	uint32_t current_state = 0;
-	uint32_t rca_val = 0; 
 
 	config_sd_gpio();
 	reset_sdmmc(SD_MMC_BA);
@@ -450,6 +484,7 @@ void init_sd_controller()
 	}
 
 	parse_CID_response(SD_MMC_BA,&sd0_card_info.cid_info);
+	ack_cmd_resp(SD_MMC_BA);
 	
 /****************************************************/
 
@@ -507,14 +542,14 @@ SD_CMD3:
 	}
 
 	parse_CSD_response(SD_MMC_BA,&sd0_card_info.csd_info);
+	ack_cmd_resp(SD_MMC_BA);
 				
 	dump_sd_card_info(&sd0_card_info);
-
 
 /****************************************************/
 
 
-/******************* Send CMD10 **********************/
+/******************* Send CMD10 (Send CID) **********************/
 
 /*
 	send_cmd(
@@ -535,7 +570,7 @@ SD_CMD3:
 	dump_sd_card_info(&sd0_card_info);
 */
 
-/****************************************************/
+/***************************************************************/
 
 /* Make card inactive CMD15 for testing */
 
@@ -562,31 +597,7 @@ SD_CMD3:
 /****************************************************/
 #endif
 
-/******************* Send CMD13 ********************/
-/* Get card status */
 
-/*
-	send_cmd(
-			SD_MMC_BA,
-			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD13,
-			(((sd0_card_info.RCA)<<16) | 0xFFFF)
-			);
-
-	sd_low_delay();
-	wait_for_cmd_complete(SD_MMC_BA);
-
-	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
-		uart_puts(UART0_BA,"cmd13 timedout\n");
-	} else {
-		uart_puts(UART0_BA,"CMD13 Status:");
-		print_hex_uart(UART0_BA,get_R1_card_state(SD_MMC_BA));
-		print_current_state(get_R1_card_current_state(SD_MMC_BA));
-		ack_cmd_resp(SD_MMC_BA);
-	}
-*/
-
-/****************************************************/
-	
 /******************* Send CMD7 ********************/
 	/* Send CMD7 i.e. Select Card */
 
@@ -621,10 +632,13 @@ SD_CMD3:
 /****************************************************/
 
 /********************* Send CMD7 ********************/
+	
+	select_deselect_card(SD_MMC_BA,sd0_card_info.RCA,OPT_SEL_CARD);
+
 	/* Select card */
-	rca_val = (sd0_card_info.RCA)<<16;
-	uart_puts(UART0_BA,"Select Card:");
-	print_hex_uart(UART0_BA,rca_val);
+/*	
+ 	uart_puts(UART0_BA,"Select Card:");
+	print_hex_uart(UART0_BA,(sd0_card_info.RCA)<<16);
 
 	send_cmd(SD_MMC_BA,
 			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD7,
@@ -636,13 +650,11 @@ SD_CMD3:
 
 	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd7 timedout\n");
-	} else {
-		print_hex_uart(UART0_BA,get_R1_card_state(SD_MMC_BA));
-		//print_current_state(get_R1_card_current_state(SD_MMC_BA));
-		ack_cmd_resp(SD_MMC_BA);
+		return;
 	}
 
-
+	ack_cmd_resp(SD_MMC_BA);
+*/
 
 /******************* Send CMD13 ********************/
 /* Get card status */
