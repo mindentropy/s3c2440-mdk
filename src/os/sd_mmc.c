@@ -144,16 +144,9 @@ void sd_low_delay()
 
 uint8_t parse_r7_response(uint32_t BA)
 {
-	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
-		uart_puts(UART0_BA,"cmd8 timedout\n");
-		return 0;
-	} 
-
-	ack_cmd_resp(BA);
-
 	if((get_R7_rsp_chk_pattern(BA) == SD_CHECK_PATTERN) && 
 		(get_R7_rsp_volt_accepted(BA) == SD_CARD_VOLTAGE_2_7)) {
-			return 1;
+		return 1;
 	} else {
 		return 0;
 	}
@@ -429,6 +422,36 @@ uint32_t get_sd_card_RCA(uint32_t BA,uint32_t *RCA)
 /****************************************************/
 }
 
+
+//TODO: Return values has to be modified.
+uint32_t send_if_cond(uint32_t BA)
+{
+	
+	/*** Send CMD8 ***/
+	send_cmd(BA,
+			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD8,
+			SD_CARD_VOLTAGE_2_7|SD_CHECK_PATTERN
+			); //Send cmd8
+
+	sd_low_delay();
+
+	wait_for_cmd_complete(BA);
+
+	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd8 timedout\n");
+		return 0;
+	} 
+
+	if(parse_r7_response(BA)) {
+		uart_puts(UART0_BA,"voltage and chk pattern accepted\n");
+		return 1;
+	} else {
+		return 0;
+	}
+
+	ack_cmd_resp(BA);
+}
+
 //TODO: Handle error condition response.
 uint32_t make_sd_card_inactive(
 							uint32_t BA,
@@ -456,6 +479,30 @@ uint32_t make_sd_card_inactive(
 	ack_cmd_resp(BA);
 
 	return card_response;
+}
+
+uint32_t do_all_send_CID(uint32_t BA,struct cid_info *cid_info)
+{
+
+	/**** Send CMD2 ****/
+	send_cmd(
+			BA,
+			WAIT_RSP|CMD_START|CMD_TRANSMISSION|LONG_RSP|CMD2,
+			0xFFFFFFFFU
+			);
+
+	sd_low_delay();
+	wait_for_cmd_complete(BA);
+
+	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd2 timedout\n");
+		return 0;
+	}
+
+	parse_CID_response(BA,cid_info);
+	ack_cmd_resp(BA);
+
+	return 1;
 }
 
 /*
@@ -488,10 +535,10 @@ void init_sd_controller()
 	//set_sd_clk_prescale(SD_MMC_BA,1); //Setting the clock to max i.e. 25MHz
 	
 	writereg32(SDICON_REG(SD_MMC_BA),RCV_IO_INT|BYTE_ORDER_B);
-	writereg32(SDID_TIMER_REG(SD_MMC_BA),0x7FFFFF);
 
+	set_data_timeout_period(SD_MMC_BA,0x7FFFFF);
 	set_reg_params(SDIFSTA_REG(SD_MMC_BA),FIFO_RESET);
-	set_reg_params(SDICON_REG(SD_MMC_BA),CLK_OUT_EN);
+	set_clk_out_en(SD_MMC_BA);
 
 	sd_delay();
 
@@ -506,18 +553,10 @@ void init_sd_controller()
 
 
 /****************** Send CMD8 ******************/
-	send_cmd(SD_MMC_BA,
-					WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD8,
-					SD_CARD_VOLTAGE_2_7|SD_CHECK_PATTERN
-					); //Send cmd8
 
-	sd_low_delay();
+	if(send_if_cond(SD_MMC_BA) == 0)
+		return;
 
-	wait_for_cmd_complete(SD_MMC_BA);
-
-	if(parse_r7_response(SD_MMC_BA)) {
-		uart_puts(UART0_BA,"voltage and chk pattern accepted\n");
-	}
 /***********************************************/
 
 	for(retry = 0; retry < 50; /*retry++*/) {
@@ -588,23 +627,9 @@ void init_sd_controller()
 /**************************************************/
 	
 /******************* Send CMD2 ********************/
-	send_cmd(
-			SD_MMC_BA,
-			WAIT_RSP|CMD_START|CMD_TRANSMISSION|LONG_RSP|CMD2,
-			0xFFFFFFFFU
-			);
 
-	sd_low_delay();
-	wait_for_cmd_complete(SD_MMC_BA);
+	do_all_send_CID(SD_MMC_BA,&sd0_card_info.cid_info);
 
-	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
-		uart_puts(UART0_BA,"cmd2 timedout\n");
-		return;
-	}
-
-	parse_CID_response(SD_MMC_BA,&sd0_card_info.cid_info);
-	ack_cmd_resp(SD_MMC_BA);
-	
 /****************************************************/
 
 /******************* Send CMD3 ********************/
@@ -635,26 +660,6 @@ SD_CMD3:
 
 	dump_sd_card_info(&sd0_card_info);
 
-/*	
- 	send_cmd(
-			SD_MMC_BA,
-			WAIT_RSP|CMD_START|CMD_TRANSMISSION|LONG_RSP|CMD9,
-			(((sd0_card_info.RCA)<<16)|0xFFFF)
-			);
-
-	sd_low_delay();
-	wait_for_cmd_complete(SD_MMC_BA);
-
-	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
-		uart_puts(UART0_BA,"cmd9 timedout\n");
-		return;
-	}
-
-	parse_CSD_response(SD_MMC_BA,&sd0_card_info.csd_info);
-	ack_cmd_resp(SD_MMC_BA);
-				
-	dump_sd_card_info(&sd0_card_info);
-*/
 
 /****************************************************/
 
@@ -666,24 +671,6 @@ SD_CMD3:
 	make_sd_card_inactive(
 						SD_MMC_BA,
 						sd0_card_info.RCA);
-/*	
-	send_cmd(
-			SD_MMC_BA,
-			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD15,
-			(((sd0_card_info.RCA)<<16) | 0xFFFF)
-			);
-
-	sd_low_delay();
-	wait_for_cmd_complete(SD_MMC_BA);
-
-	if(chk_cmd_resp(SD_MMC_BA) == CMD_TIMEOUT) {
-		uart_puts(UART0_BA,"cmd15 timedout\n");
-	} else {
-		print_hex_uart(UART0_BA,get_R1_card_state(SD_MMC_BA));
-		print_current_state(get_R1_card_current_state(SD_MMC_BA));
-		ack_cmd_resp(SD_MMC_BA);
-	}
-*/
 /****************************************************/
 #endif
 
@@ -704,7 +691,11 @@ SD_CMD3:
 
 /****************************************************/
 
-/****************************************************/
+
+	/* Write and Read Block size  = 2^WR_BL_LEN and 2^RD_BL_LEN */
+	set_sdi_block_size(SD_MMC_BA,
+		(1<<(get_R2_rsp_var_CSD_READ_BLK_LEN(sd0_card_info.csd_info.rsp1))) );
+
 
 	/* Send CMD17 to read a block */
 	//sd_read_single_block(SD_MMC_BA,0);

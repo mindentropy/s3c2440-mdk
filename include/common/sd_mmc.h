@@ -22,6 +22,10 @@
 #define reset_sdmmc(BA) \
 	set_reg_params(SDICON_REG(BA),SDMMC_RESET)
 
+#define set_clk_out_en(BA) \
+	set_reg_params(SDICON_REG(SD_MMC_BA),CLK_OUT_EN)
+	
+
 #define SDIPRE_OFF 		(0x04)
 #define SDIPRE_REG(BA) \
 	HW_REG(BA,SDIPRE_OFF)
@@ -120,13 +124,21 @@
 #define SDID_TIMER_REG(BA) \
 	HW_REG(BA,SDID_TIMER_OFF)
 
+
+#define set_data_timeout_period(BA,timeout_period) \
+	writereg32(SDID_TIMER_REG(BA),timeout_period)
+	
+
 #define DATA_TIMER_MASK (0xFFFFFFU)
 
 #define SDIB_SIZE_OFF 	(0x28)
 #define SDIB_SIZE_REG(BA) \
 	HW_REG(BA,SDIB_SIZE_OFF)
 
-#define BLK_SIZE_MASK (0xFFF)
+#define BLK_SIZE_MASK (0xFFFU)
+
+#define set_sdi_block_size(BA,block_size) 	\
+	writereg32(SDIB_SIZE_REG(BA),((block_size) & (BLK_SIZE_MASK)) )
 
 #define SDID_DATA_CON_OFF 	(0x2C)
 #define SDID_DATA_CON_REG(BA) \
