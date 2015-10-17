@@ -696,6 +696,10 @@ SD_CMD3:
 	set_sdi_block_size(SD_MMC_BA,
 		(1<<(get_R2_rsp_var_CSD_READ_BLK_LEN(sd0_card_info.csd_info.rsp1))) );
 
+	/* Set SDIDatCon for temporary test for read */
+	writereg32(SDID_DATA_CON_REG(SD_MMC_BA),DATA_RECEIVE_MODE);
+
+
 
 	/* Send CMD17 to read a block */
 	//sd_read_single_block(SD_MMC_BA,0);
