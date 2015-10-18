@@ -236,10 +236,14 @@ static void print_current_state(uint32_t CURRENT_STATE)
 	}
 }
 
-uint32_t sd_read_single_block(uint32_t BA,uint32_t block_addr)
+uint32_t sd_read_single_block(uint32_t BA,uint32_t block_addr, uint32_t RCA)
 {
 	uint32_t current_state = 0;
-	
+	int i = 0;
+
+	reset_fifo(BA);
+	uart_puts(UART0_BA,"Read single block\n");
+
 	/* Send CMD17 i.e. READ_SINGLE_BLOCK */
 	send_cmd(
 			BA,
@@ -255,10 +259,41 @@ uint32_t sd_read_single_block(uint32_t BA,uint32_t block_addr)
 		return current_state;
 	}
 
-	current_state = get_R1_card_state(BA);
+/*	current_state = get_R1_card_state(BA);
 
 	print_hex_uart(UART0_BA,current_state);
-	print_current_state(get_R1_card_current_state(BA));
+	print_current_state(get_R1_card_current_state(BA));*/
+
+
+	print_current_state(
+			get_card_state(
+				get_cmd13_current_state(SD_MMC_BA,
+				RCA)));
+
+	/* Set SDIDatCon for temporary test for read */
+	
+	//NOTE: SDID_DATA_CON address has a problem
+	//with address 0.
+	writereg32(
+				SDID_DATA_CON_REG(SD_MMC_BA),
+					DATA_TRANSFER_START|
+					DATA_RECEIVE_MODE|
+					BLOCK_MODE|(block_addr & BLK_NUM_MASK)
+					); //Set data receive mode.
+	
+	for(i = 0;i<100;i++) 
+		sd_low_delay();
+
+	uart_puts(UART0_BA,"SDI_FIFO_STA:");
+	print_hex_uart(UART0_BA,readreg32(SDIFSTA_REG(BA)));
+
+	uart_puts(UART0_BA,"SDIDATCnt:");
+	print_hex_uart(UART0_BA,readreg32(SDI_DAT_CNT_REG(BA)));
+
+
+	uart_puts(UART0_BA,"SDIDATSta:");
+	print_hex_uart(UART0_BA,readreg32(SDI_DATA_STATUS_REG(BA)));
+	ack_cmd_resp(BA);
 
 	return current_state;
 }
@@ -283,11 +318,13 @@ uint32_t get_cmd13_current_state(uint32_t BA,uint32_t RCA)
 	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd13 timedout\n");
 	} else {
-		uart_puts(UART0_BA,"CMD13 Status:");
+	
 		current_state = get_R1_card_state(BA);
 
-		print_hex_uart(UART0_BA,current_state);
-
+		/*
+		  uart_puts(UART0_BA,"CMD13 Status:");
+		  print_hex_uart(UART0_BA,current_state);
+		 */
 		ack_cmd_resp(BA);
 	}
 
@@ -537,7 +574,8 @@ void init_sd_controller()
 	writereg32(SDICON_REG(SD_MMC_BA),RCV_IO_INT|BYTE_ORDER_B);
 
 	set_data_timeout_period(SD_MMC_BA,0x7FFFFF);
-	set_reg_params(SDIFSTA_REG(SD_MMC_BA),FIFO_RESET);
+	//set_reg_params(SDIFSTA_REG(SD_MMC_BA),FIFO_RESET);
+	reset_fifo(SD_MMC_BA);
 	set_clk_out_en(SD_MMC_BA);
 
 	sd_delay();
@@ -696,12 +734,7 @@ SD_CMD3:
 	set_sdi_block_size(SD_MMC_BA,
 		(1<<(get_R2_rsp_var_CSD_READ_BLK_LEN(sd0_card_info.csd_info.rsp1))) );
 
-	/* Set SDIDatCon for temporary test for read */
-	writereg32(SDID_DATA_CON_REG(SD_MMC_BA),DATA_RECEIVE_MODE);
-
-
-
 	/* Send CMD17 to read a block */
-	//sd_read_single_block(SD_MMC_BA,0);
+	sd_read_single_block(SD_MMC_BA,0,sd0_card_info.RCA);
 }
 

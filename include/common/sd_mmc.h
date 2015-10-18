@@ -144,9 +144,6 @@
 #define SDID_DATA_CON_REG(BA) \
 	HW_REG(BA,SDID_DATA_CON_OFF)
 
-
-
-
 #define BURST4_EN 				(BIT24)
 
 #define DATA_SIZE_MASK 			(BIT23|BIT22)
@@ -157,7 +154,7 @@
 
 #define SDI_PRD_TYPE 			(BIT21)
 #define TRANSMIT_AFTER_RESPONSE (BIT20)
-#define RECEIVE_AFTER_CMD  	(BIT19)
+#define RECEIVE_AFTER_CMD  		(BIT19)
 #define BUSY_AFTER_CMD  		(BIT18)
 #define BLOCK_MODE 				(BIT17)
 #define WIDE_BUS_EN 			(BIT16)
@@ -213,6 +210,9 @@
 #define SD_Rx_FIFO_HALF_FULL		(BIT7)
 #define FFCNT_MASK					(BIT6|BIT5|BIT4|BIT3|BIT2|BIT1|BIT0)
 
+#define reset_fifo(BA) \
+	set_reg_params(SDIFSTA_REG(BA),FIFO_RESET)
+	
 
 #define SDI_INT_MASK_OFF 			(0x3C)
 #define SDI_INT_MASK_REG(BA) \
@@ -579,6 +579,7 @@ struct sd_card_info {
 };
 
 void init_sd_controller();
+uint32_t get_cmd13_current_state(uint32_t BA,uint32_t RCA);
 
 
 
