@@ -161,13 +161,16 @@
 #define DMA_EN 					(BIT15)
 #define DATA_TRANSFER_START 	(BIT14)
 
+#define sd_start_data_transfer(BA) \
+	set_reg_params(SDID_DATA_CON_REG(BA),DATA_TRANSFER_START)
+
 #define DATA_TRANS_MODE_MASK 		(BIT13|BIT12)
 #define DATA_NO_OPERATION 			(0)
 #define DATA_ONLY_BUSY_CHECK_MODE 	(BIT12)
 #define DATA_RECEIVE_MODE 			(BIT13)
 #define DATA_TRANSMIT_MODE 			(BIT13|BIT12)
 
-#define BLK_NUM_MASK 			(0xFFF)
+#define BLK_NUM_MASK 			(0xFFFU)
 
 #define SDI_DAT_CNT_OFF 		(0x30)
 #define SDI_DAT_CNT_REG(BA) \
@@ -191,6 +194,11 @@
 #define Tx_DATA_PROGRESS_ON 	(BIT1)
 #define Rx_DATA_PROGRESS_ON 	(BIT0)
 
+#define is_rx_data_in_progress(BA) \
+	(readreg32(SDI_DATA_STATUS_REG(BA)) & (Rx_DATA_PROGRESS_ON))
+
+#define is_data_timedout(BA) \
+	(readreg32(SDI_DATA_STATUS_REG(BA)) & (DATA_TIMEOUT))
 
 #define SDIFSTA_OFF 			(0x38)
 #define SDIFSTA_REG(BA) \
@@ -201,8 +209,8 @@
 #define FIFO_FAIL_NOT_DETECT    	(0)
 #define FIFO_FAIL 					(BIT14)
 #define FIFO_FAIL_IN_LAST_TRANSFER 	(BIT15)
-#define FIFO_FAIL_TFDET 			(BIT13)
-#define FIFO_FAIL_RFDET 			(BIT12)
+#define FIFO_TFDET 					(BIT13)
+#define FIFO_RFDET 					(BIT12)
 #define SD_Tx_FIFO_HALF_FULL 		(BIT11)
 #define SD_Tx_FIFO_EMPTY 			(BIT10)
 #define SD_Rx_FIFO_LAST_DATA_READY	(BIT9)
@@ -212,7 +220,13 @@
 
 #define reset_fifo(BA) \
 	set_reg_params(SDIFSTA_REG(BA),FIFO_RESET)
-	
+
+#define is_fifo_rx_available(BA) \
+	(readreg32(SDIFSTA_REG(BA)) & FIFO_RFDET)
+
+#define get_fifo_cnt(BA) \
+	(readreg32(SDIFSTA_REG(BA)) & FFCNT_MASK)
+
 
 #define SDI_INT_MASK_OFF 			(0x3C)
 #define SDI_INT_MASK_REG(BA) \

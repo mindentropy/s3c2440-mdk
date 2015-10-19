@@ -56,7 +56,7 @@ LDFLAGS =  -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
 
 
 #all: mdkloader mdkos
-all: mdkloader mdkos
+all: cscope_create mdkloader mdkos
 
 mdkloader: $(OBJ_DIR) $(COMMON_OBJ_DIR) $(LOADER_OBJ_DIR) $(BIN_DIR) $(EXELOADER)
 
@@ -110,9 +110,9 @@ cscope_create:
 	cscope -R -q -k -b
 
 cscope_clean:
-	rm -v *.out
+	rm -fv *.out
 
-cleanall: clean cleandir
+cleanall: clean cleandir cscope_clean
 
 clean:
 	rm -fv $(BIN_DIR)/*
@@ -122,8 +122,8 @@ clean:
 
 
 cleandir:
-	rmdir $(OS_OBJ_DIR)
-	rmdir $(LOADER_OBJ_DIR)
-	rmdir $(COMMON_OBJ_DIR)
-	rmdir $(OBJ_DIR)
-	rmdir $(BIN_DIR)
+	rm -df $(OS_OBJ_DIR)
+	rm -df $(LOADER_OBJ_DIR)
+	rm -df $(COMMON_OBJ_DIR)
+	rm -df $(OBJ_DIR)
+	rm -df $(BIN_DIR)

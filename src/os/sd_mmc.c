@@ -239,16 +239,16 @@ static void print_current_state(uint32_t CURRENT_STATE)
 uint32_t sd_read_single_block(uint32_t BA,uint32_t block_addr, uint32_t RCA)
 {
 	uint32_t current_state = 0;
-	int i = 0;
 
 	reset_fifo(BA);
 	uart_puts(UART0_BA,"Read single block\n");
 
+
 	/* Send CMD17 i.e. READ_SINGLE_BLOCK */
 	send_cmd(
-			BA,
-			CMD_WITH_DATA|WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD17,
-			block_addr
+		BA,
+		CMD_WITH_DATA|WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD17,
+		block_addr
 			);
 
 	sd_low_delay();
@@ -264,25 +264,37 @@ uint32_t sd_read_single_block(uint32_t BA,uint32_t block_addr, uint32_t RCA)
 	print_hex_uart(UART0_BA,current_state);
 	print_current_state(get_R1_card_current_state(BA));*/
 
-
 	print_current_state(
 			get_card_state(
-				get_cmd13_current_state(SD_MMC_BA,
-				RCA)));
+				current_state = get_cmd13_current_state
+					(BA,RCA))
+					);
 
 	/* Set SDIDatCon for temporary test for read */
+	
+
+	ack_cmd_resp(BA);
+
+	return current_state;
+}
+
+void sd_read_data(uint32_t BA, uint32_t block_addr)
+{
+	int i = 0, count = 0;
 	
 	//NOTE: SDID_DATA_CON address has a problem
 	//with address 0.
 	writereg32(
-				SDID_DATA_CON_REG(SD_MMC_BA),
-					DATA_TRANSFER_START|
+				SDID_DATA_CON_REG(BA),
 					DATA_RECEIVE_MODE|
-					BLOCK_MODE|(block_addr & BLK_NUM_MASK)
-					); //Set data receive mode.
-	
-	for(i = 0;i<100;i++) 
-		sd_low_delay();
+					BLOCK_MODE|
+					(1 & BLK_NUM_MASK)
+			); //Set data receive mode.
+
+	sd_start_data_transfer(BA);
+
+	uart_puts(UART0_BA,"DATA_CON:");
+	print_hex_uart(UART0_BA,readreg32(SDID_DATA_CON_REG(BA)));
 
 	uart_puts(UART0_BA,"SDI_FIFO_STA:");
 	print_hex_uart(UART0_BA,readreg32(SDIFSTA_REG(BA)));
@@ -290,12 +302,20 @@ uint32_t sd_read_single_block(uint32_t BA,uint32_t block_addr, uint32_t RCA)
 	uart_puts(UART0_BA,"SDIDATCnt:");
 	print_hex_uart(UART0_BA,readreg32(SDI_DAT_CNT_REG(BA)));
 
-
 	uart_puts(UART0_BA,"SDIDATSta:");
 	print_hex_uart(UART0_BA,readreg32(SDI_DATA_STATUS_REG(BA)));
-	ack_cmd_resp(BA);
 
-	return current_state;
+//	print_hex_uart(UART0_BA,readreg32(SDI_DATA_LI_B_REG(BA)));
+
+//	while(is_fifo_rx_available(BA)) {
+
+		count = get_fifo_cnt(BA);
+
+		for(i = 0; i<count; i++) {
+			print_hex_uart(UART0_BA,
+				readreg8(SDI_DATA_LI_B_REG(BA)));
+//		}
+	}
 }
 
 
@@ -735,6 +755,7 @@ SD_CMD3:
 		(1<<(get_R2_rsp_var_CSD_READ_BLK_LEN(sd0_card_info.csd_info.rsp1))) );
 
 	/* Send CMD17 to read a block */
-	sd_read_single_block(SD_MMC_BA,0,sd0_card_info.RCA);
+	sd_read_single_block(SD_MMC_BA,1,sd0_card_info.RCA);
+	sd_read_data(SD_MMC_BA,1);
 }
 
