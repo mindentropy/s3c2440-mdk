@@ -243,7 +243,6 @@ uint32_t sd_read_single_block(uint32_t BA,uint32_t block_addr, uint32_t RCA)
 	reset_fifo(BA);
 	uart_puts(UART0_BA,"Read single block\n");
 
-
 	/* Send CMD17 i.e. READ_SINGLE_BLOCK */
 	send_cmd(
 		BA,
@@ -259,21 +258,24 @@ uint32_t sd_read_single_block(uint32_t BA,uint32_t block_addr, uint32_t RCA)
 		return current_state;
 	}
 
-/*	current_state = get_R1_card_state(BA);
+	ack_cmd_resp(BA);
+
+/*	
+ 	current_state = get_R1_card_state(BA);
 
 	print_hex_uart(UART0_BA,current_state);
-	print_current_state(get_R1_card_current_state(BA));*/
+	print_current_state(get_R1_card_current_state(BA));
 
+*/
+
+/*
 	print_current_state(
 			get_card_state(
 				current_state = get_cmd13_current_state
 					(BA,RCA))
 					);
+*/
 
-	/* Set SDIDatCon for temporary test for read */
-	
-
-	ack_cmd_resp(BA);
 
 	return current_state;
 }
@@ -281,7 +283,7 @@ uint32_t sd_read_single_block(uint32_t BA,uint32_t block_addr, uint32_t RCA)
 void sd_read_data(uint32_t BA, uint32_t block_addr)
 {
 	int i = 0, count = 0;
-	
+
 	//NOTE: SDID_DATA_CON address has a problem
 	//with address 0.
 	writereg32(
@@ -292,6 +294,25 @@ void sd_read_data(uint32_t BA, uint32_t block_addr)
 			); //Set data receive mode.
 
 	sd_start_data_transfer(BA);
+
+/*	uart_puts(UART0_BA,"DATA_CON:");
+	print_hex_uart(UART0_BA,readreg32(SDID_DATA_CON_REG(BA)));
+
+	uart_puts(UART0_BA,"SDI_FIFO_STA:");
+	print_hex_uart(UART0_BA,readreg32(SDIFSTA_REG(BA)));
+
+	uart_puts(UART0_BA,"SDIDATCnt:");
+	print_hex_uart(UART0_BA,readreg32(SDI_DAT_CNT_REG(BA)));
+
+	uart_puts(UART0_BA,"SDIDATSta:");
+	print_hex_uart(UART0_BA,readreg32(SDI_DATA_STATUS_REG(BA)));*/
+
+	uart_puts(UART0_BA,"Waiting");
+
+	while(!is_fifo_rx_available(BA))
+		uart_puts(UART0_BA,".");
+	
+	uart_puts(UART0_BA,"\n");
 
 	uart_puts(UART0_BA,"DATA_CON:");
 	print_hex_uart(UART0_BA,readreg32(SDID_DATA_CON_REG(BA)));
@@ -305,17 +326,16 @@ void sd_read_data(uint32_t BA, uint32_t block_addr)
 	uart_puts(UART0_BA,"SDIDATSta:");
 	print_hex_uart(UART0_BA,readreg32(SDI_DATA_STATUS_REG(BA)));
 
-//	print_hex_uart(UART0_BA,readreg32(SDI_DATA_LI_B_REG(BA)));
 
-//	while(is_fifo_rx_available(BA)) {
+	count = get_fifo_cnt(BA);
 
-		count = get_fifo_cnt(BA);
+	sd_low_delay();
 
-		for(i = 0; i<count; i++) {
-			print_hex_uart(UART0_BA,
-				readreg8(SDI_DATA_LI_B_REG(BA)));
-//		}
+	for(i = 0; i<count; i++) {
+		print_hex_uart(UART0_BA,
+			readreg8(SDI_DATA_LI_B_REG(BA)));
 	}
+
 }
 
 
@@ -337,16 +357,16 @@ uint32_t get_cmd13_current_state(uint32_t BA,uint32_t RCA)
 
 	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
 		uart_puts(UART0_BA,"cmd13 timedout\n");
-	} else {
+	} 
 	
-		current_state = get_R1_card_state(BA);
+	current_state = get_R1_card_state(BA);
 
-		/*
-		  uart_puts(UART0_BA,"CMD13 Status:");
-		  print_hex_uart(UART0_BA,current_state);
-		 */
-		ack_cmd_resp(BA);
-	}
+	/*
+	  uart_puts(UART0_BA,"CMD13 Status:");
+	  print_hex_uart(UART0_BA,current_state);
+	 */
+	ack_cmd_resp(BA);
+
 
 //TODO: When returning AND with the SD_CURRENT_STATE mask 
 	return current_state;
