@@ -290,7 +290,7 @@ void sd_read_data(uint32_t BA, uint32_t block_addr)
 				SDID_DATA_CON_REG(BA),
 					DATA_RECEIVE_MODE|
 					BLOCK_MODE|
-					(1 & BLK_NUM_MASK)
+					(block_addr & BLK_NUM_MASK)
 			); //Set data receive mode.
 
 	sd_start_data_transfer(BA);
@@ -333,7 +333,7 @@ void sd_read_data(uint32_t BA, uint32_t block_addr)
 
 	for(i = 0; i<count; i++) {
 		print_hex_uart(UART0_BA,
-			readreg8(SDI_DATA_LI_B_REG(BA)));
+			readreg32(SDI_DATA_LI_B_REG(BA)));
 	}
 
 }
@@ -775,7 +775,7 @@ SD_CMD3:
 		(1<<(get_R2_rsp_var_CSD_READ_BLK_LEN(sd0_card_info.csd_info.rsp1))) );
 
 	/* Send CMD17 to read a block */
-	sd_read_single_block(SD_MMC_BA,1,sd0_card_info.RCA);
+	sd_read_single_block(SD_MMC_BA,0,sd0_card_info.RCA);
 	sd_read_data(SD_MMC_BA,1);
 }
 
