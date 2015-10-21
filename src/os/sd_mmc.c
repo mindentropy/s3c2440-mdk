@@ -3,6 +3,12 @@
 #include "gpio_def.h"
 #include "reg_dump.h"
 
+/****************************************/
+
+#define SD_BLOCK_SIZE 	512
+
+/****************************************/
+
 /************ CMD_INDEX *****************/
 
 
@@ -259,28 +265,18 @@ uint32_t sd_read_single_block(uint32_t BA,uint32_t block_addr, uint32_t RCA)
 	}
 
 	ack_cmd_resp(BA);
-
-/*	
+	
  	current_state = get_R1_card_state(BA);
-
-	print_hex_uart(UART0_BA,current_state);
-	print_current_state(get_R1_card_current_state(BA));
-
-*/
-
-/*
-	print_current_state(
-			get_card_state(
-				current_state = get_cmd13_current_state
-					(BA,RCA))
-					);
-*/
-
 
 	return current_state;
 }
 
-void sd_read_data(uint32_t BA, uint32_t block_addr)
+int sd_read_data(
+				uint32_t BA, 
+				uint32_t num_blocks,
+				char * const sd_buff,
+				int size
+				)
 {
 	int i = 0, count = 0;
 
@@ -290,23 +286,12 @@ void sd_read_data(uint32_t BA, uint32_t block_addr)
 				SDID_DATA_CON_REG(BA),
 					DATA_RECEIVE_MODE|
 					BLOCK_MODE|
-					(block_addr & BLK_NUM_MASK)
+					(num_blocks & BLK_NUM_MASK)
 			); //Set data receive mode.
 
 	sd_start_data_transfer(BA);
 
-/*	uart_puts(UART0_BA,"DATA_CON:");
-	print_hex_uart(UART0_BA,readreg32(SDID_DATA_CON_REG(BA)));
-
-	uart_puts(UART0_BA,"SDI_FIFO_STA:");
-	print_hex_uart(UART0_BA,readreg32(SDIFSTA_REG(BA)));
-
-	uart_puts(UART0_BA,"SDIDATCnt:");
-	print_hex_uart(UART0_BA,readreg32(SDI_DAT_CNT_REG(BA)));
-
-	uart_puts(UART0_BA,"SDIDATSta:");
-	print_hex_uart(UART0_BA,readreg32(SDI_DATA_STATUS_REG(BA)));*/
-
+/*
 	uart_puts(UART0_BA,"Waiting");
 
 	while(!is_fifo_rx_available(BA))
@@ -325,15 +310,20 @@ void sd_read_data(uint32_t BA, uint32_t block_addr)
 
 	uart_puts(UART0_BA,"SDIDATSta:");
 	print_hex_uart(UART0_BA,readreg32(SDI_DATA_STATUS_REG(BA)));
-
-
 	count = get_fifo_cnt(BA);
+*/
 
-	sd_low_delay();
+	for(i = 0; i<size;) {
+		if(is_fifo_rx_available(BA)) {
 
-	for(i = 0; i<count; i++) {
-		print_hex_uart(UART0_BA,
-			readreg32(SDI_DATA_LI_B_REG(BA)));
+			sd_buff[i] = readreg8(SDI_DATA_LI_B_REG(BA));
+		/*	print_hex_uart(
+				UART0_BA,
+				readreg8(SDI_DATA_LI_B_REG(BA))
+				);*/
+
+			i++;
+		}
 	}
 
 }
@@ -600,10 +590,16 @@ uint32_t do_all_send_CID(uint32_t BA,struct cid_info *cid_info)
 void init_sd_controller()
 {
 	int retry = 0;
+	uint32_t i = 0;
 	uint32_t current_state = 0;
+	char sd_buff[SD_BLOCK_SIZE];
+
+	//int dividend,divisor,tmp_val;
 
 	config_sd_gpio();
 	reset_sdmmc(SD_MMC_BA);
+
+
 
 	/* PCLK set to 50MHz */
 
@@ -774,8 +770,23 @@ SD_CMD3:
 	set_sdi_block_size(SD_MMC_BA,
 		(1<<(get_R2_rsp_var_CSD_READ_BLK_LEN(sd0_card_info.csd_info.rsp1))) );
 
+
+	
 	/* Send CMD17 to read a block */
 	sd_read_single_block(SD_MMC_BA,0,sd0_card_info.RCA);
-	sd_read_data(SD_MMC_BA,1);
+	sd_read_data(SD_MMC_BA,1,sd_buff,512);
+
+/*
+	dividend = 512;
+	divisor = 9;
+	tmp_val = dividend/divisor;
+*/
+
+	uart_puts(UART0_BA,"Data dump:\n");
+	for(i = 0; i<512; i++) {
+		print_hex_uart(UART0_BA,sd_buff[i]);
+	}
+
+	uart_puts(UART0_BA,"\n");
 }
 

@@ -83,14 +83,13 @@
 
 
 #define readreg32(addr) \
-	((*((volatile uint32_t *)(addr))) & (0xFFFFFFFF))
+	((*((volatile uint32_t *)(addr))) & (0xFFFFFFFFU))
 	
 #define readreg16(addr) \
-	((*((volatile uint32_t *)(addr))) & (0xFFFF))
+	((*((volatile uint16_t *)(addr))) & (0xFFFFU))
 
 #define readreg8(addr) \
-	((*((volatile uint32_t *)(addr))) & (0xFF))
-
+	((*((volatile uint8_t *)(addr))) & (0xFFU))
 
 #define set_reg_params(reg,regmask) \
 	do { \

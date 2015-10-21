@@ -20,6 +20,9 @@ COMMON_SRC_DIR := $(SRC_DIR)/common
 LOADER_SRC_DIR := $(SRC_DIR)/loader
 OS_SRC_DIR := $(SRC_DIR)/os
 
+UPLOADER_DIR = test_uploader
+UPLOADER := $(UPLOADER_DIR)
+
 OS_OBJS = $(OS_OBJ_DIR)/os_glue.o $(OS_OBJ_DIR)/os_main.o $(OS_OBJ_DIR)/os_vector.o $(OS_OBJ_DIR)/cpu.o $(OS_OBJ_DIR)/cache.o $(OS_OBJ_DIR)/mmu.o
 LOADER_OBJS = $(LOADER_OBJ_DIR)/loader_glue.o $(LOADER_OBJ_DIR)/loader_main.o
 
@@ -56,12 +59,16 @@ LDFLAGS =  -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
 
 
 #all: mdkloader mdkos
-all: cscope_create mdkloader mdkos
+all: cscope_create mdkloader mdkos $(UPLOADER)
+#all:  $(UPLOADER)
 
 mdkloader: $(OBJ_DIR) $(COMMON_OBJ_DIR) $(LOADER_OBJ_DIR) $(BIN_DIR) $(EXELOADER)
 
 mdkos: $(OBJ_DIR) $(COMMON_OBJ_DIR) $(OS_OBJ_DIR) $(BIN_DIR) $(EXEOS) 
 
+$(UPLOADER):
+	$(MAKE) --directory=$@
+	
 
 $(EXELOADER):  $(LOADER_AS_OBJ_FILES) $(LOADER_OBJ_FILES) $(COMMON_OBJS)
 	$(CC) -Wall -o $(EXELOADER) $(LOADER_AS_OBJ_FILES) $(LOADER_OBJ_FILES) $(COMMON_OBJS) $(LOADER_LDSCRIPT) $(LDFLAGS) 
@@ -103,16 +110,14 @@ $(OS_OBJ_DIR):
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
-.PHONY: clean cleandir cleanall cscope_create
+.PHONY: clean cleandir cleanall cscope_create test_uploader_clean $(UPLOADER)
 
 
 cscope_create:
 	cscope -R -q -k -b
 
-cscope_clean:
-	rm -fv *.out
 
-cleanall: clean cleandir cscope_clean
+cleanall: clean cleandir cscope_clean test_uploader_clean
 
 clean:
 	rm -fv $(BIN_DIR)/*
@@ -127,3 +132,9 @@ cleandir:
 	rm -df $(COMMON_OBJ_DIR)
 	rm -df $(OBJ_DIR)
 	rm -df $(BIN_DIR)
+
+cscope_clean:
+	rm -fv *.out
+
+test_uploader_clean:
+	make --directory=$(UPLOADER_DIR) clean
