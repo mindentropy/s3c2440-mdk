@@ -47,7 +47,7 @@ EXEOS = $(BIN_DIR)/mdk_os.elf
 LOADER_LDSCRIPT = -Tloader.lds
 OS_LDSCRIPT = -Tmdkos.lds
 
-TOOLCHAIN_PREFIX=arm-linux-gnueabi-
+TOOLCHAIN_PREFIX=arm-none-eabi-
 CC = $(TOOLCHAIN_PREFIX)gcc
 AS = $(TOOLCHAIN_PREFIX)as
 LD = $(TOOLCHAIN_PREFIX)ld
@@ -55,7 +55,7 @@ OBJCOPY = $(TOOLCHAIN_PREFIX)objcopy
 
 ASFLAGS = -mcpu=arm9tdmi  -gstabs
 CFLAGS = -mcpu=arm9tdmi -Wall -g -nostdlib -nodefaultlibs -O0 -ffreestanding -I$(COMMON_INC_DIR)
-LDFLAGS =  -Wl,--build-id=none -nostartfiles -Lgcc -nostdlib -nodefaultlibs -L.
+LDFLAGS =  -Wl,--build-id=none -nostartfiles -nostdlib -nodefaultlibs -lgcc -L.
 
 
 #all: mdkloader mdkos

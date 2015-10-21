@@ -278,7 +278,8 @@ int sd_read_data(
 				int size
 				)
 {
-	int i = 0, count = 0;
+	int i = 0;
+//	int count = 0;
 
 	//NOTE: SDID_DATA_CON address has a problem
 	//with address 0.
@@ -326,6 +327,7 @@ int sd_read_data(
 		}
 	}
 
+	return i;
 }
 
 
@@ -594,11 +596,10 @@ void init_sd_controller()
 	uint32_t current_state = 0;
 	char sd_buff[SD_BLOCK_SIZE];
 
-	//int dividend,divisor,tmp_val;
+//	int dividend,divisor,quotient;
 
 	config_sd_gpio();
 	reset_sdmmc(SD_MMC_BA);
-
 
 
 	/* PCLK set to 50MHz */
@@ -776,11 +777,6 @@ SD_CMD3:
 	sd_read_single_block(SD_MMC_BA,0,sd0_card_info.RCA);
 	sd_read_data(SD_MMC_BA,1,sd_buff,512);
 
-/*
-	dividend = 512;
-	divisor = 9;
-	tmp_val = dividend/divisor;
-*/
 
 	uart_puts(UART0_BA,"Data dump:\n");
 	for(i = 0; i<512; i++) {
@@ -788,5 +784,16 @@ SD_CMD3:
 	}
 
 	uart_puts(UART0_BA,"\n");
+
+/*
+	dividend = 329;
+	divisor = 5;
+	quotient = dividend/divisor;
+
+	if(quotient) {
+		uart_puts(UART0_BA,"Divided\n");
+	}
+*/
+
 }
 
