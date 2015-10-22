@@ -331,6 +331,27 @@ int sd_read_data(
 }
 
 
+int sd_read(
+			uint32_t BA,
+			struct sd_card_info * const sd_card_info,
+			const uint32_t addr,
+			char * const buff, 
+			const uint32_t size
+			)
+{
+	const uint32_t block_num = get_block_num(addr,
+				get_R2_rsp_var_CSD_READ_BLK_LEN(sd_card_info->csd_info.rsp1)
+				);
+
+	sd_read_single_block(
+						BA,
+						block_num,
+						sd_card_info->RCA
+						);
+
+	return sd_read_data(BA,1,buff,size);
+}
+
 //TODO: Need to return an error statue if not able to read state.
 uint32_t get_cmd13_current_state(uint32_t BA,uint32_t RCA)
 {
@@ -596,7 +617,6 @@ void init_sd_controller()
 	uint32_t current_state = 0;
 	char sd_buff[SD_BLOCK_SIZE];
 
-//	int dividend,divisor,quotient;
 
 	config_sd_gpio();
 	reset_sdmmc(SD_MMC_BA);
@@ -774,26 +794,18 @@ SD_CMD3:
 
 	
 	/* Send CMD17 to read a block */
-	sd_read_single_block(SD_MMC_BA,0,sd0_card_info.RCA);
-	sd_read_data(SD_MMC_BA,1,sd_buff,512);
+	/*sd_read_single_block(SD_MMC_BA,0,sd0_card_info.RCA);
+	sd_read_data(SD_MMC_BA,1,sd_buff,512);*/
+
+	sd_read(SD_MMC_BA,&sd0_card_info,0,sd_buff,512);
 
 
 	uart_puts(UART0_BA,"Data dump:\n");
 	for(i = 0; i<512; i++) {
 		print_hex_uart(UART0_BA,sd_buff[i]);
 	}
-
 	uart_puts(UART0_BA,"\n");
 
-/*
-	dividend = 329;
-	divisor = 5;
-	quotient = dividend/divisor;
-
-	if(quotient) {
-		uart_puts(UART0_BA,"Divided\n");
-	}
-*/
 
 }
 

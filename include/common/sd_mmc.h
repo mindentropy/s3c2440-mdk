@@ -596,5 +596,9 @@ void init_sd_controller();
 uint32_t get_cmd13_current_state(uint32_t BA,uint32_t RCA);
 
 
+/* SD Card Utility functions */
+
+#define get_block_num(addr,block_len) \
+	((addr) >> (block_len))
 
 #endif
