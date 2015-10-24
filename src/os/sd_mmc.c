@@ -5,40 +5,41 @@
 
 /****************************************/
 
-#define SD_BLOCK_SIZE 	512
+#define SD_BLOCK_SIZE 	512U
 
 /****************************************/
 
 /************ CMD_INDEX *****************/
 
 
-#define OPT_SEL_CARD 	1
-#define OPT_DESEL_CARD 	0
+#define OPT_SEL_CARD 	1U
+#define OPT_DESEL_CARD 	0U
 
-#define BLK_READ_BYTE_SIZE 	512
+#define BLK_READ_BYTE_SIZE 	512U
 
-#define CMD0 	0
-#define CMD2 	2
-#define CMD3 	3
-#define CMD7 	7
-#define CMD8    8
-#define CMD9 	9
-#define CMD10 	10
-#define CMD13 	13
-#define CMD15 	15
-#define CMD17 	17
-#define CMD55 	55
-#define ACMD41 	41
+#define CMD0 	0U  //Go idle state.
+#define CMD2 	2U  //All send CID.
+#define CMD3 	3U  //Send relative address i.e. RCA.
+#define CMD7 	7U  //Select/deselect card.
+#define CMD8    8U  //Send interface condition.
+#define CMD9 	9U  //Send CSD
+#define CMD10 	10U //Send CID
+#define CMD13 	13U //Send status
+#define CMD15 	15U //Go inactive.
+#define CMD17 	17U //Read single block.
+#define CMD24 	24U //Write single block.
+#define CMD55 	55U
+#define ACMD41 	41U
 
 
-#define SD_CARD_VOLTAGE_2_7  			(1<<8)
-#define SD_CARD_VOLTAGE_LOW_VOLTAGE  	(2<<8)
+#define SD_CARD_VOLTAGE_2_7  			(1U<<8)
+#define SD_CARD_VOLTAGE_LOW_VOLTAGE  	(2U<<8)
 #define SD_CHECK_PATTERN 				(0xAA)
 
-#define SD_HCS_SDSC 					~(1<<30)
-#define SD_HCS_SDHC_SDXC 				(1<<30)
-#define SD_MAX_PERFORMANCE 		 		(1<<28)
-#define SD_VOLT_SWITCH_1_8 				(1<<24)
+#define SD_HCS_SDSC 					~(1U<<30)
+#define SD_HCS_SDHC_SDXC 				(1U<<30)
+#define SD_MAX_PERFORMANCE 		 		(1U<<28)
+#define SD_VOLT_SWITCH_1_8 				(1U<<24)
 
 
 /********* SD CARD error status *********/
@@ -64,14 +65,14 @@
 #define SD_CURRENT_STATE 				set_bit_range(12,9)
 
 #define SD_CUR_STATE_IDLE 				((0)<<9)
-#define SD_CUR_STATE_READY 				((1)<<9)
-#define SD_CUR_STATE_IDENT 				((2)<<9) 
-#define SD_CUR_STATE_STBY 				((3)<<9)
-#define SD_CUR_STATE_TRAN 				((4)<<9)
-#define SD_CUR_STATE_DATA 				((5)<<9)
-#define SD_CUR_STATE_RCV 				((6)<<9)
-#define SD_CUR_STATE_PRG 				((7)<<9)
-#define SD_CUR_STATE_DIS 				((8)<<9)
+#define SD_CUR_STATE_READY 				((1U)<<9)
+#define SD_CUR_STATE_IDENT 				((2U)<<9) 
+#define SD_CUR_STATE_STBY 				((3U)<<9)
+#define SD_CUR_STATE_TRAN 				((4U)<<9)
+#define SD_CUR_STATE_DATA 				((5U)<<9)
+#define SD_CUR_STATE_RCV 				((6U)<<9)
+#define SD_CUR_STATE_PRG 				((7U)<<9)
+#define SD_CUR_STATE_DIS 				((8U)<<9)
 
 #define SD_READY_FOR_DATA 				(BIT8)
 #define SD_APP_CMD 						(BIT5)
@@ -242,7 +243,11 @@ static void print_current_state(uint32_t CURRENT_STATE)
 	}
 }
 
-uint32_t sd_read_single_block(uint32_t BA,uint32_t block_addr, uint32_t RCA)
+uint32_t sd_read_single_block(
+							uint32_t BA,
+							uint32_t block_addr,
+							uint32_t RCA
+							)
 {
 	uint32_t current_state = 0;
 
@@ -327,7 +332,10 @@ int sd_read_data(
 		}
 	}
 
-	return i;
+	/* Discard the remaining data out */
+
+
+	return size;
 }
 
 
@@ -351,6 +359,68 @@ int sd_read(
 
 	return sd_read_data(BA,1,buff,size);
 }
+
+
+int sd_write_data(
+				uint32_t BA, 
+				uint32_t num_blocks,
+				char * const sd_buff,
+				int size
+				)
+{
+	int i = 0;
+
+	writereg32(
+				SDID_DATA_CON_REG(BA),
+					DATA_TRANSMIT_MODE|
+					BLOCK_MODE|
+					(num_blocks & BLK_NUM_MASK)
+			); //Set data receive mode.
+
+	sd_start_data_transfer(BA);
+
+	for(i = 0; i<size;) {
+		if(is_fifo_tx_available(BA)) {
+			writereg8(SDI_DATA_LI_B_REG(BA),sd_buff[i]);
+			i++;
+		}
+	}
+	
+	return size;
+}
+
+uint32_t sd_write_single_block(
+						uint32_t BA,
+						uint32_t block_addr,
+						uint32_t RCA
+						)
+{
+	uint32_t current_state = 0;
+
+	reset_fifo(BA);
+
+	uart_puts(UART0_BA,"Write single block\n");
+
+	send_cmd(
+		BA,
+		CMD_WITH_DATA|WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD24, 
+		block_addr);
+
+	sd_low_delay();
+	wait_for_cmd_complete(BA);
+
+	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd24 timedout\n");
+		return current_state;
+	}
+
+	ack_cmd_resp(BA);
+
+ 	current_state = get_R1_card_state(BA);
+
+	return current_state;
+}
+
 
 //TODO: Need to return an error statue if not able to read state.
 uint32_t get_cmd13_current_state(uint32_t BA,uint32_t RCA)
@@ -797,8 +867,7 @@ SD_CMD3:
 	/*sd_read_single_block(SD_MMC_BA,0,sd0_card_info.RCA);
 	sd_read_data(SD_MMC_BA,1,sd_buff,512);*/
 
-	sd_read(SD_MMC_BA,&sd0_card_info,0,sd_buff,512);
-
+	sd_read(SD_MMC_BA,&sd0_card_info,0,sd_buff,SD_BLOCK_SIZE);
 
 	uart_puts(UART0_BA,"Data dump:\n");
 	for(i = 0; i<512; i++) {
@@ -806,6 +875,12 @@ SD_CMD3:
 	}
 	uart_puts(UART0_BA,"\n");
 
+
+	sd_write_single_block(
+						SD_MMC_BA,
+						0,
+						sd0_card_info.RCA
+						);
 
 }
 

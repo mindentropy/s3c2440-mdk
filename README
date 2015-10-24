@@ -16,15 +16,28 @@ Building and Testing
 --------------------
 
 Environment:
-The OS development is done on a Linux machine (Distro: Ubuntu).
+The OS development is done on a Linux machine (Distro: Ubuntu 15.10+).
 
 Toolchain:
 The tool chain is the cross compiler ARM tool chain provided by Linaro and which is present in the Ubuntu repository.
 You can fetch the toolchain by doing a apt-get.
+The command line for fetching the needed packages is:
+
+sudo apt-get install gcc-arm-none-eabi gdb-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib 
+
+The gnu compiler toolchain needed which is present in the repository are:
+1) gcc-arm-none-eabi
+2) gdb-arm-none-eabi
+
+Note: 
+	*-arm-linux-gnueabi tools are meant to compile the linux kernel. This toolchain was used in the previous
+versions of the code. The problem with using it is that there are problems with lgcc and hence division and multiplication 
+operations i.e. any floating point operations could not be emulated.
+
 
 Building:
 To build the OS and the loader run 'make' in the s3c2440-mdk folder. All binary files will be put in the 'bin' folder.
-To build the uploader change the directory to test_uploader and run 'make' there.
+In the test_uploader a binary called uploader will be generated which is used to upload the OS binary file to the device.
 
 Flashing:
 A loader needs to be flashed into the NAND memory which later loads the OS.

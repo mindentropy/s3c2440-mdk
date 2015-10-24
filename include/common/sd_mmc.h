@@ -224,6 +224,9 @@
 #define is_fifo_rx_available(BA) \
 	(readreg32(SDIFSTA_REG(BA)) & FIFO_RFDET)
 
+#define is_fifo_tx_available(BA) \
+	(readreg32(SDIFSTA_REG(BA)) & FIFO_TFDET)
+
 #define get_fifo_cnt(BA) \
 	(readreg32(SDIFSTA_REG(BA)) & FFCNT_MASK)
 

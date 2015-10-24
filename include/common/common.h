@@ -4,8 +4,8 @@
 
 #include <stdint.h>
 
-#define SET 0x1
-#define RESET 0x0
+#define SET 0x1U
+#define RESET 0x0U
 
 /* Set the exact bit positions rather than shifting */
 
@@ -73,13 +73,13 @@
  * http://infocenter.arm.com/help/topic/com.arm.doc.faqs/ka3750.html
  */
 #define writereg32(addr,value) \
-	*((volatile uint32_t *) (addr) ) = ((value) & (0xFFFFFFFF))
+	*((volatile uint32_t *) (addr) ) = ((value) & (0xFFFFFFFFU))
 
 #define writereg16(addr,value) \
-	*((volatile uint16_t *) (addr) ) = ((value) & (0xFFFF))
+	*((volatile uint16_t *) (addr) ) = ((value) & (0xFFFFU))
 
 #define writereg8(addr,value) \
-	*((volatile uint8_t *) (addr) ) = ((value) & (0xFF))
+	*((volatile uint8_t *) (addr) ) = ((value) & (0xFFU))
 
 
 #define readreg32(addr) \
