@@ -28,6 +28,11 @@
 #define CMD15 	15U //Go inactive.
 #define CMD17 	17U //Read single block.
 #define CMD24 	24U //Write single block.
+
+#define CMD32 	32U //Set the address of the first write block to be erased.
+#define CMD33 	33U //Set the address of the last write block to be erased.
+#define CMD38 	38U //Erase blocks
+
 #define CMD55 	55U
 #define ACMD41 	41U
 
@@ -342,9 +347,9 @@ int sd_read_data(
 int sd_read(
 			uint32_t BA,
 			struct sd_card_info * const sd_card_info,
-			const uint32_t addr,
+			uint32_t addr,
 			char * const buff, 
-			const uint32_t size
+			uint32_t size
 			)
 {
 	const uint32_t block_num = get_block_num(addr,
@@ -421,6 +426,78 @@ uint32_t sd_write_single_block(
 	return current_state;
 }
 
+
+uint32_t sd_erase_blocks(
+						uint32_t BA,
+						uint32_t RCA,
+						uint32_t start_block,
+						uint32_t end_block
+						)
+{
+	uint32_t current_state = 0;
+
+	uart_puts(UART0_BA, "Erasing blocks\n");
+
+	send_cmd(
+		BA,
+		WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD32,
+		start_block
+		);
+
+	sd_low_delay();
+
+	wait_for_cmd_complete(BA);
+
+	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd32 timedout\n");
+		return current_state;
+	}
+	ack_cmd_resp(BA);
+ 	current_state = get_R1_card_state(BA);
+
+	send_cmd(
+		BA,
+		WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD33,
+		end_block
+		);
+
+	sd_low_delay();
+
+	wait_for_cmd_complete(BA);
+
+	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd33 timedout\n");
+		return current_state;
+	}
+	ack_cmd_resp(BA);
+ 	current_state = get_R1_card_state(BA);
+
+	send_cmd(
+		BA,
+		WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD38,
+		0xFFFFFFFFU
+		);
+
+	sd_low_delay();
+
+	wait_for_cmd_complete(BA);
+
+	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd38 timedout\n");
+		return current_state;
+	}
+	ack_cmd_resp(BA);
+ 	current_state = get_R1_card_state(BA);
+
+
+	while((current_state = get_card_state(get_cmd13_current_state(BA, RCA))) 
+						!= SD_CUR_STATE_PRG) {
+		;
+	}
+
+
+	return current_state;
+}
 
 //TODO: Need to return an error statue if not able to read state.
 uint32_t get_cmd13_current_state(uint32_t BA,uint32_t RCA)
@@ -875,6 +952,10 @@ SD_CMD3:
 	}
 	uart_puts(UART0_BA,"\n");
 
+/*
+	for(i = 0; i<512; i++) {
+		sd_buff[i] = 0x55;
+	}
 
 	sd_write_single_block(
 						SD_MMC_BA,
@@ -882,5 +963,18 @@ SD_CMD3:
 						sd0_card_info.RCA
 						);
 
+	sd_write_data(
+			SD_MMC_BA,
+			1,
+			sd_buff,
+			512
+			);*/
+
+	sd_erase_blocks(SD_MMC_BA,
+					sd0_card_info.RCA,
+					0,
+					1);
+
+	uart_puts(UART0_BA,"Erase done\n");
 }
 
