@@ -38,6 +38,8 @@ CLOCK & POWER MANAGEMENT
 2) Add power definitions. -> Done.
 3) Helper macros for setting up clock -> Pending
 4) Test script for modification of clocks and verification on a DSO -> Pending
+5) Parameterize clock settings.
+6) Helper functions to provide information for other block prescalers.
 
 MEMORY CONTROLLER
 -----------------
@@ -103,12 +105,15 @@ REAL TIME CLOCK
 WATCH DOG TIMER
 ---------------
 1) Disable watchdog to prevent reset during board bringup. --> Done.
+2) Provide helper watchdog functions.
+3) Reboot using watchdog.
+4) Shutdown using watchdog.
 
 MMC/SD/SDIO CONTROLLER
 ----------------------
 1) Write register definitions --> Done.
-2) Setup configurations
-3) Read, Write and Erase of the SD card
+2) Setup configurations --> Done.
+3) Read, Write and Erase of the SD card --> Done.
 4) Read a file system on the SD card
 
 IIC-BUS INTERFACE

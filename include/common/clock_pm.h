@@ -6,15 +6,15 @@
 
 /***********************************/
 
-#define CLK_BASE_ADDR	0x4C000000
+#define CLK_BASE_ADDR	0x4C000000U
 
-#define LOCKTIME_OFF    0x00
-#define MPLLCON_OFF 	0x04
-#define UPLLCON_OFF 	0x08
-#define CLKCON_OFF 		0x0C
-#define CLKSLOW_OFF 	0x10
-#define CLKDIVN_OFF 	0x14
-#define CAMDIVN_OFF		0x18
+#define LOCKTIME_OFF    0x00U
+#define MPLLCON_OFF 	0x04U
+#define UPLLCON_OFF 	0x08U
+#define CLKCON_OFF 		0x0CU
+#define CLKSLOW_OFF 	0x10U
+#define CLKDIVN_OFF 	0x14U
+#define CAMDIVN_OFF		0x18U
 
 #define LOCKTIME_REG(BA) \
 	HW_REG(BA,LOCKTIME_OFF)
@@ -40,19 +40,13 @@
 
 /***********************************/
 
-//#define REG_LOCKTIME	0x4C000000
 
 #define U_LTIME_MASK	(SHORT_MASK_MSB)
 #define M_LTIME_MASK	(SHORT_MASK_LSB)
 
 
-#define U_LTIME_SHIFT   (16)
-#define M_LTIME_SHIFT   (0)
-
-/*
-#define MPLLCON		0x4C000004
-#define UPLLCON		0x4C000008
-*/
+#define U_LTIME_SHIFT   (16U)
+#define M_LTIME_SHIFT   (0U)
 
 #define MDIV_MASK	(BIT19|BIT18|BIT17|BIT16|BIT15|BIT14|BIT13|BIT12)
 #define PDIV_MASK	(BIT9|BIT8|BIT7|BIT6|BIT4)
@@ -62,9 +56,6 @@
 #define PDIV_SHIFT 	(4)
 #define SDIV_SHIFT 	(0)
 
-/*
-#define CLKCON	0x4C00000C
-*/
 
 #define CLK_AC97				BIT20
 #define CLK_CAMERA				BIT19
@@ -90,18 +81,12 @@
 #define apb_clk_enable(BA,CLK) \
 	set_reg_params(CLKCON_REG(BA),CLK)
 
-/*
-#define CLKSLOW	0x4C000010
-*/
 
 #define UCLK_ON		BIT7
 #define MPLL_OFF	BIT5
 #define SLOW_BIT	BIT4
 #define SLOW_VAL	(BIT2|BIT1|BIT0)
 
-/*
-#define CLKDIVN	0x4C000014
-*/
 
 #define DIVN_UPLL		BIT3
 
@@ -120,9 +105,6 @@
 #define PDIVN_HCLK_BY_1		0
 #define PDIVN_HCLK_BY_2		BIT0
 
-/*
-#define CAMDIVN	0x4C000018
-*/
 
 #define DVS_EN		BIT12
 #define HCLK4_HALF	BIT9

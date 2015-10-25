@@ -968,7 +968,8 @@ SD_CMD3:
 			1,
 			sd_buff,
 			512
-			);*/
+			);
+*/
 
 	sd_erase_blocks(SD_MMC_BA,
 					sd0_card_info.RCA,

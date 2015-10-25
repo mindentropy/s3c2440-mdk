@@ -23,7 +23,7 @@ void init_clock()
 	disable_pull_up(GPUP_REG(GPH_BA),CLKOUT0_PIN|CLKOUT1_PIN);
 
 	set_clk_lock_time(CLK_BASE_ADDR,
-						0xFFFF,0xFFFF);
+						0xFFFFU,0xFFFFU);
 
 	/* 
 	 *------
