@@ -1,6 +1,7 @@
 #include "common.h"
 #include "clock_pm.h"
 #include "gpio_def.h"
+#include "board_config.h"
 
 							
 void set_clk_dbg_port()
@@ -14,6 +15,37 @@ void set_clk_dbg_port()
 	set_reg_params(MISCCR_REG(),(BIT5|BIT4));
 	clear_reg_params(MISCCR_REG(),(BIT6));
 }
+
+uint32_t get_mpll_clk(void)
+{
+	uint32_t m,p,s;
+	
+	m = get_clk_pll_mdiv(MPLLCON_REG(CLK_BASE_ADDR)) + 8;
+	p = get_clk_pll_pdiv(MPLLCON_REG(CLK_BASE_ADDR)) + 2;
+	s = get_clk_pll_sdiv(MPLLCON_REG(CLK_BASE_ADDR));
+
+	return ((m*S3C_CLOCK_REFERENCE) * 2)/(p * (1<<s));
+}
+
+
+/*
+ * Clock Source Selection
+ * ======================
+ *
+ * Combination mode control pins OM3 and OM2 OM[3:2] provide the selection of the clock source
+ * for S3C2440. Please see pg 7-2 Table 7-1 for more details.
+ *
+ * The clock selection for the friendlyARM board is OM[3:2] = 00. This shown in the schematic 
+ * as both grounded. The setting indicates that both Main clock source and USB clock source are
+ * driven from the crystal.
+ *
+ * The main clock source comes from an external crystal XTIpll or EXTCLK. The clock generator is
+ * connected to an external crystal, and has 2 PLL's which generate high frequency clock for the
+ * S3C2440.
+ *
+ * In the schematic of friendlyARM the crystal is a 12Mhz crystal connected to XTIpll and XTOpll.
+ *
+ */
 
 void init_clock()
 {

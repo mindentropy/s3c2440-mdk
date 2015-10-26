@@ -119,6 +119,7 @@ void init_clock();
 void set_clk_dbg_port();
 void enable_gpio_clk();
 void enable_apb_clk(unsigned int peripheral_clk);
+uint32_t get_mpll_clk(void);
 
 
 #define set_clk_lock_time(BA,upll_lock_time,mpll_lock_time)\
@@ -130,6 +131,17 @@ void enable_apb_clk(unsigned int peripheral_clk);
 							(((mdiv)<<MDIV_SHIFT)| \
 							((pdiv)<<PDIV_SHIFT)| \
 							((sdiv)<<SDIV_SHIFT)))
+
+#define get_clk_pll_mdiv(PLL_REG) \
+	(((readreg32(PLL_REG)) & MDIV_MASK) >> MDIV_SHIFT)
+
+#define get_clk_pll_pdiv(PLL_REG) \
+	(((readreg32(PLL_REG)) & PDIV_MASK) >> PDIV_SHIFT)
+
+#define get_clk_pll_sdiv(PLL_REG) \
+	(((readreg32(PLL_REG)) & SDIV_MASK) >> SDIV_SHIFT)
+
+
 
 #define set_clk_upll(BA,mdiv,pdiv,sdiv) \
 	writereg32(UPLLCON_REG(BA), \

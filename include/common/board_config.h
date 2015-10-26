@@ -7,5 +7,7 @@
 
 #define SRAM_PHYS_START 0x0U
 #define MAX_SRAM_SIZE 	0x1000U
+
+#define S3C_CLOCK_REFERENCE 12000000U
  
 #endif
