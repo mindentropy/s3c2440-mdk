@@ -125,8 +125,6 @@ int main(void) {
 	uart_puts(UART0_BA,"\r\n");
 	last_boot_cause();
 
-	uart_puts(UART0_BA,"MPLL : ");
-	print_hex_uart(UART0_BA,get_mpll_clk());
 	//init_lcd();
 
 	init_sd_controller();

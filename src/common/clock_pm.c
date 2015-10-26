@@ -24,7 +24,20 @@ uint32_t get_mpll_clk(void)
 	p = get_clk_pll_pdiv(MPLLCON_REG(CLK_BASE_ADDR)) + 2;
 	s = get_clk_pll_sdiv(MPLLCON_REG(CLK_BASE_ADDR));
 
-	return ((m*S3C_CLOCK_REFERENCE) * 2)/(p * (1<<s));
+	return ((m * S3C_CLOCK_REFERENCE) * 2)/(p * (1<<s));
+}
+
+
+uint32_t get_upll_clk(void)
+{
+	
+	uint32_t m,p,s;
+	
+	m = get_clk_pll_mdiv(UPLLCON_REG(CLK_BASE_ADDR)) + 8;
+	p = get_clk_pll_pdiv(UPLLCON_REG(CLK_BASE_ADDR)) + 2;
+	s = get_clk_pll_sdiv(UPLLCON_REG(CLK_BASE_ADDR));
+
+	return (m * S3C_CLOCK_REFERENCE)/(p * (1<<s));
 }
 
 
