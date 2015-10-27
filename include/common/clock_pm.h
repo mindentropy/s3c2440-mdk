@@ -88,12 +88,12 @@
 #define SLOW_VAL	(BIT2|BIT1|BIT0)
 
 
-#define DIVN_UPLL		BIT3
+#define DIVN_UPLL_MASK	BIT3
 
 #define DIVN_UPLL_BY_1	0
 #define DIVN_UPLL_BY_2  BIT3
 
-#define HDIVN			(BIT2|BIT1)
+#define HDIVN_MASK		(BIT2|BIT1)
 
 #define HDIVN_FCLK_BY_1 0
 #define HDIVN_FCLK_BY_2 (BIT1)
@@ -101,7 +101,7 @@
 #define HDIVN_FCLK_BY_3 (BIT2|BIT1)
 
 
-#define PDIVN				BIT0
+#define PDIVN_MASK			BIT0
 #define PDIVN_HCLK_BY_1		0
 #define PDIVN_HCLK_BY_2		BIT0
 
@@ -119,7 +119,10 @@ void init_clock();
 void set_clk_dbg_port();
 void enable_gpio_clk();
 void enable_apb_clk(unsigned int peripheral_clk);
-uint32_t get_mpll_clk(void);
+uint32_t get_mpll_clk(uint32_t BA);
+uint32_t get_upll_clk(uint32_t BA);
+uint32_t get_hclk(uint32_t BA);
+uint32_t get_uclk(uint32_t BA);
 
 
 #define set_clk_lock_time(BA,upll_lock_time,mpll_lock_time)\
@@ -141,6 +144,23 @@ uint32_t get_mpll_clk(void);
 #define get_clk_pll_sdiv(PLL_REG) \
 	(((readreg32(PLL_REG)) & SDIV_MASK) >> SDIV_SHIFT)
 
+/*
+ * Note:
+ * ====
+ *
+ * FCLK -> To CPU.
+ * HCLK -> AHB Peripherals.
+ * PCLK -> USB Block.
+ *
+ */
+
+/*
+ * MPLL is fed to FCLK directly. 
+ * Hence MPLL frequency equals FCLK
+ */
+
+#define get_fclk(BA) \
+	(get_mpll_clk(BA))
 
 
 #define set_clk_upll(BA,mdiv,pdiv,sdiv) \
@@ -153,7 +173,15 @@ uint32_t get_mpll_clk(void);
 #define set_clock_divn(BA,divn_upll,hdivn,pdivn) \
 	writereg32(CLKDIVN_REG(BA), \
 					(divn_upll) | (hdivn) | (pdivn))
-				
+
+#define get_clock_hdivn(BA) \
+	(readreg32(CLKDIVN_REG(BA)) & HDIVN_MASK)
+
+#define get_clock_pdivn(BA) \
+	(readreg32(CLKDIVN_REG(BA)) & PDIVN_MASK)
+
+#define get_clock_upll_divn(BA) \
+	(readreg32(CLKDIVN_REG(BA)) & DIVN_UPLL_MASK)
 
 #define clear_slow_clock(BA) do { \
 	clear_reg_params(CLKSLOW_REG(BA),SLOW_BIT); \

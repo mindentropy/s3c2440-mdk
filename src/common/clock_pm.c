@@ -16,30 +16,88 @@ void set_clk_dbg_port()
 	clear_reg_params(MISCCR_REG(),(BIT6));
 }
 
-uint32_t get_mpll_clk(void)
+
+uint32_t get_mpll_clk(uint32_t BA)
 {
 	uint32_t m,p,s;
 	
-	m = get_clk_pll_mdiv(MPLLCON_REG(CLK_BASE_ADDR)) + 8;
-	p = get_clk_pll_pdiv(MPLLCON_REG(CLK_BASE_ADDR)) + 2;
-	s = get_clk_pll_sdiv(MPLLCON_REG(CLK_BASE_ADDR));
+	m = get_clk_pll_mdiv(MPLLCON_REG(BA)) + 8;
+	p = get_clk_pll_pdiv(MPLLCON_REG(BA)) + 2;
+	s = get_clk_pll_sdiv(MPLLCON_REG(BA));
 
 	return ((m * S3C_CLOCK_REFERENCE) * 2)/(p * (1<<s));
 }
 
 
-uint32_t get_upll_clk(void)
+uint32_t get_upll_clk(uint32_t BA)
 {
 	
 	uint32_t m,p,s;
 	
-	m = get_clk_pll_mdiv(UPLLCON_REG(CLK_BASE_ADDR)) + 8;
-	p = get_clk_pll_pdiv(UPLLCON_REG(CLK_BASE_ADDR)) + 2;
-	s = get_clk_pll_sdiv(UPLLCON_REG(CLK_BASE_ADDR));
+	m = get_clk_pll_mdiv(UPLLCON_REG(BA)) + 8;
+	p = get_clk_pll_pdiv(UPLLCON_REG(BA)) + 2;
+	s = get_clk_pll_sdiv(UPLLCON_REG(BA));
 
 	return (m * S3C_CLOCK_REFERENCE)/(p * (1<<s));
 }
 
+/*
+ * Note:
+ * ====
+ *
+ * FCLK -> To CPU.
+ * HCLK -> AHB Peripherals.
+ * PCLK -> USB Block.
+ *
+ */
+
+uint32_t get_hclk(uint32_t BA)
+{
+	uint32_t fclk = get_fclk(BA);
+
+	switch(get_clock_hdivn(BA)) {
+		case HDIVN_FCLK_BY_1:
+			return fclk;
+		case HDIVN_FCLK_BY_2:
+			return (fclk >> 1);
+		case HDIVN_FCLK_BY_4:
+			//TODO: CAMDIVN conditon check pending.
+			return (fclk >> 2);
+		case HDIVN_FCLK_BY_3:
+			//TODO: CAMDIVN conditon check pending.
+			return (fclk / 3);
+	}
+
+	return fclk;
+}
+
+uint32_t get_pclk(uint32_t BA)
+{
+	uint32_t fclk = get_fclk(BA);
+
+	switch(get_clock_pdivn(BA)) {
+		case PDIVN_HCLK_BY_1:
+			return fclk;
+		case PDIVN_HCLK_BY_2:
+			return fclk >> 1;
+	}
+
+	return fclk;
+}
+
+uint32_t get_uclk(uint32_t BA)
+{
+	uint32_t uclk = get_upll_clk(BA);
+
+	switch(get_clock_upll_divn(BA)) {
+		case DIVN_UPLL_BY_1:
+			return uclk;
+		case DIVN_UPLL_BY_2:
+			return uclk >> 2;
+	}
+
+	return uclk;
+}
 
 /*
  * Clock Source Selection

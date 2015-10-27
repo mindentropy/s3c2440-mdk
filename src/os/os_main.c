@@ -126,7 +126,6 @@ int main(void) {
 	last_boot_cause();
 
 	//init_lcd();
-
 	init_sd_controller();
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
