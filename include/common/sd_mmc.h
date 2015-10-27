@@ -597,11 +597,15 @@ struct sd_card_info {
 
 void init_sd_controller();
 uint32_t get_cmd13_current_state(uint32_t BA,uint32_t RCA);
+uint32_t get_sd_prescaler_value(uint32_t CLK_BA,uint32_t baud_rate);
 
 
 /* SD Card Utility functions */
 
 #define get_block_num(addr,block_len) \
 	((addr) >> (block_len))
+
+#define BAUD_100k 	100000U
+#define BAUD_25M 	25000000U
 
 #endif

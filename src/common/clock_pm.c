@@ -73,16 +73,16 @@ uint32_t get_hclk(uint32_t BA)
 
 uint32_t get_pclk(uint32_t BA)
 {
-	uint32_t fclk = get_fclk(BA);
+	uint32_t hclk = get_hclk(BA);
 
 	switch(get_clock_pdivn(BA)) {
 		case PDIVN_HCLK_BY_1:
-			return fclk;
+			return hclk;
 		case PDIVN_HCLK_BY_2:
-			return fclk >> 1;
+			return hclk >> 1;
 	}
 
-	return fclk;
+	return hclk;
 }
 
 uint32_t get_uclk(uint32_t BA)

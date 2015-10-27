@@ -119,10 +119,12 @@ void init_clock();
 void set_clk_dbg_port();
 void enable_gpio_clk();
 void enable_apb_clk(unsigned int peripheral_clk);
+
 uint32_t get_mpll_clk(uint32_t BA);
 uint32_t get_upll_clk(uint32_t BA);
 uint32_t get_hclk(uint32_t BA);
 uint32_t get_uclk(uint32_t BA);
+uint32_t get_pclk(uint32_t BA);
 
 
 #define set_clk_lock_time(BA,upll_lock_time,mpll_lock_time)\

@@ -49,6 +49,13 @@ void print_hex_uart_ch(uint32_t UART_BA, uint8_t num)
 	putc(UART_BA,hexchar[(num & 0xF0) >> 4]);
 }
 
+/*
+uint32_t get_brdiv(uint32_t BA,uint32_t baud_rate)
+{
+	return ((get_pclk(CLK_BASE_ADDR)/(baudrate<<4)) - 1);
+}
+*/
+
 void init_uart(uint32_t UART_BA)
 {
 
@@ -60,6 +67,7 @@ void init_uart(uint32_t UART_BA)
 			(PCLK_SELECT|Tx_INTR_TYPE_LVL|Rx_INTR_TYPE_LVL|
 			TRANSMIT_MODE_INTR_REQ|RECEIVE_MODE_INTR_REQ));
 
-	writereg32(UBRDIV_REG(UART_BA),26); //Set the baud rate.
+	/* PCLK set to 50MHz  baud rate set to 26 for 115200*/
+	writereg32(UBRDIV_REG(UART_BA),get_uart_brdiv(UART_BA,BAUD_115200));
 }
 

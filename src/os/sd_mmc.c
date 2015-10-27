@@ -2,6 +2,7 @@
 #include "uart_util.h"
 #include "gpio_def.h"
 #include "reg_dump.h"
+#include "clock_pm.h"
 
 /****************************************/
 
@@ -646,7 +647,8 @@ uint32_t get_sd_card_RCA(uint32_t BA,uint32_t *RCA)
 		return 0;
 	}
 		
-	set_sd_clk_prescale(BA,1); //Setting the clock to max i.e. 25MHz
+	//Setting the clock to max i.e. 25MHz
+	set_sd_clk_prescale(BA,get_sd_prescaler_value(CLK_BASE_ADDR,BAUD_25M)); 
 
 	parse_r6_response(BA,RCA);
 
@@ -742,6 +744,11 @@ uint32_t do_all_send_CID(uint32_t BA,struct cid_info *cid_info)
 	return 1;
 }
 
+uint32_t get_sd_prescaler_value(uint32_t CLK_BA,uint32_t baud_rate)
+{
+	return ((get_pclk(CLK_BA) - baud_rate) / baud_rate );
+}
+
 /*
  * Note on Card Responses:
  * -----------------------
@@ -755,6 +762,7 @@ uint32_t do_all_send_CID(uint32_t BA,struct cid_info *cid_info)
  * as a binary coded number between 0 and 15.
  *
  */
+
 
 
 void init_sd_controller()
@@ -771,7 +779,14 @@ void init_sd_controller()
 
 	/* PCLK set to 50MHz */
 
-	set_sd_clk_prescale(SD_MMC_BA,499); //Setting the clock to max i.e. 100kHz.
+	uart_puts(UART0_BA,"Prescaler:");
+	print_hex_uart(UART0_BA,get_sd_prescaler_value(CLK_BASE_ADDR,BAUD_25M));
+	
+	//print_hex_uart(UART0_BA,get_pclk(CLK_BASE_ADDR));
+	
+	set_sd_clk_prescale(SD_MMC_BA,
+		get_sd_prescaler_value(CLK_BASE_ADDR,BAUD_100k));
+	//set_sd_clk_prescale(SD_MMC_BA,499); //Setting the clock to 100kHz.
 	//set_sd_clk_prescale(SD_MMC_BA,124); //Setting the clock to max i.e. 400kHz.
 	//set_sd_clk_prescale(SD_MMC_BA,1); //Setting the clock to max i.e. 25MHz
 	
@@ -952,8 +967,8 @@ SD_CMD3:
 	}
 	uart_puts(UART0_BA,"\n");
 
-/*
-	for(i = 0; i<512; i++) {
+/*	
+ 	for(i = 0; i<512; i++) {
 		sd_buff[i] = 0x55;
 	}
 
@@ -971,11 +986,11 @@ SD_CMD3:
 			);
 */
 
-	sd_erase_blocks(SD_MMC_BA,
+/*	sd_erase_blocks(SD_MMC_BA,
 					sd0_card_info.RCA,
 					0,
 					1);
 
-	uart_puts(UART0_BA,"Erase done\n");
+	uart_puts(UART0_BA,"Erase done\n");*/
 }
 

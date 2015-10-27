@@ -126,6 +126,9 @@ int main(void) {
 	last_boot_cause();
 
 	//init_lcd();
+	uart_puts(UART0_BA,"BRDIV:");
+	print_hex_uart(UART0_BA,get_uart_brdiv(UART0_BA,BAUD_115200));
+
 	init_sd_controller();
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {

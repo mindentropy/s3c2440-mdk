@@ -262,4 +262,11 @@
 
 #define UBRDIVn     (SHORT_MASK)
 
+
+#define BAUD_115200 	115200U
+
+
+#define get_uart_brdiv(BA,baud_rate) \
+	((get_pclk(CLK_BASE_ADDR)/((baud_rate)<<4)) - 1)
+
 #endif
