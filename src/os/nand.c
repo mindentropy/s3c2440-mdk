@@ -277,8 +277,8 @@ int nand_block_erase(uint32_t addr)
 
 void nand_init()
 {
-	/*uint16_t i = 0;
-	const char test_data[] = "TEST";*/
+	uint16_t i = 0;
+	/*const char test_data[] = "TEST";*/
 	nand_page_cache.cache_flag = -1;
 	set_nand_gpio_config_pins();
 	apb_clk_enable(CLK_BASE_ADDR,CLK_NAND_FLASH_CNTRL);
@@ -288,8 +288,9 @@ void nand_init()
 	 * Twrph0 = 7
 	 * Twrph1 = 7
 	 */
-
-	set_tacls_twrph(3,7,7);
+	//Note: Will paramterize the calculation below. Have to 
+	//add different NAND flashes though.
+	set_tacls_twrph(2,7,7);
 
 	enable_nand_flash_controller();
 	
@@ -297,7 +298,7 @@ void nand_init()
 	
 	/*nand_block_erase(0);
 
-	nand_page_program(0,test_data,4);
+	nand_page_program(0,test_data,4); */
 
 	for(i = 0;i<2048;i++) {
 		if(!(i&7)) {
@@ -305,9 +306,9 @@ void nand_init()
 		}
 		print_hex_uart_ch(UART0_BA,nand_page_read(i));
 		uart_puts(UART0_BA," ");
-	}*/
+	}
 
-//	uart_puts(UART0_BA,"\r\n");
+	uart_puts(UART0_BA,"\r\n");
 
 /*	nand_block_erase(0);
 

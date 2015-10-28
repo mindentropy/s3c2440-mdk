@@ -36,7 +36,12 @@ void init_lcd()
 	print_hex_uart(UART0_BA,readreg32(GPDAT_REG(GPG_BA)));
 	print_hex_uart(UART0_BA,readreg32(LCDCON5_REG(LCD_BA)));*/
 	
+	/*
+	 * Note: There is a confusion between HCLK and LCD_HCLK
+	 * S3C2440A HCLK --> 101Mhz
+	 */
 
+	//TODO: Calculate CLKVAL based on a formula.
 	writereg32(LCDCON1_REG(LCD_BA),((CLKVAL<<8)|PNRMODE_TFT_LCD|TFT_16BPP));
 	writereg32(LCDCON2_REG(LCD_BA),((VBPD<<24)|(LINEVAL<<14)|(VFPD<<6)|VSPW));
 	writereg32(LCDCON3_REG(LCD_BA),((HBPD<<19)|(HOZVAL<<8)|(HFPD)));

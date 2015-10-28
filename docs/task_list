@@ -9,6 +9,9 @@ CPU Core --> **Priority**
 Refactoring
 -----------
 1) Refactoring of code to have proper design API's --> Done.
+2) Revisit different parts of the already existing code to parameterize different
+   configurations based on some root configuration. This will help in the reduction
+   of a number of constants.
 
 Generic board bring up
 ----------------------
