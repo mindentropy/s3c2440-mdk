@@ -4,7 +4,7 @@
 
 #include "common.h"
 
-#define USB_HOST_CONTROLLER_BA (0x49000000U)
+#define USB_HOST_CONTROLLER_BA 			(0x49000000U)
 
 #define HC_REVISION_OFF 				0x00
 #define HC_REVISION_REG(BA) \

@@ -4,8 +4,7 @@
 
 #include "common.h"
 
-
-#define WT_BA 		0x53000000
+#define WT_BA 		0x53000000U
 
 #define WTCON_OFF 	0x00
 #define WTDAT_OFF 	0x04
@@ -32,12 +31,6 @@
 #define WDT_CLK_SEL128       (BIT4|BIT3)
 #define WDT_CLK_INT_EN 	     (BIT2)
 #define WDT_CLK_RESET_EN     (BIT0)
-
-/*
-#define WTCON 	0x53000000
-#define WTDAT 	0x53000004
-#define WTCNT 	0x53000008
-*/
 
 #define disable_watchdog(BA) \
 	writereg32(WTCON_REG(BA),0)

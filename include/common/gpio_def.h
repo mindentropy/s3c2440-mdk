@@ -90,17 +90,24 @@
 /****************************/
 
 /***** LCD GPIO Settings *****/
-#define LCD_PWRDN 	((BIT9|BIT8)) //GPG4
-#define LCD_GPIO_PWRDN (BIT4)
+#define LCD_PWRDN 		((BIT9|BIT8)) //GPG4
+
+#ifdef MINI2440
+#define LCD_GPIO_PWRDN 	(BIT4)
+#endif //MINI2440
 /*****************************/
 
 
 /***** Speaker GPIO Settings *****/
 #define SPKR_GPIO_OUT ((~BIT1) & (BIT0)) //GPB0
+
+#ifdef MINI2440
 #define SPKR_GPIO_PIN (BIT0)
+#endif //MINI2440
 /*********************************/
 
 /***** SDIO GPIO Settings *****/
+
 #define SDCLK_GPIO_CONF		((BIT11) & (~BIT10)) //GPE5
 #define SDCMD_GPIO_CONF		((BIT13) & (~BIT12)) //GPE6
 #define SDDAT0_GPIO_CONF 	((BIT15) & (~BIT14)) //GPE7
@@ -108,14 +115,15 @@
 #define SDDAT2_GPIO_CONF 	((BIT19) & (~BIT18)) //GPE9
 #define SDDAT3_GPIO_CONF  	((BIT21) & (~BIT20)) //GPE10
 
+#ifdef MINI2440
 #define SDCLK_GPIO_PIN 		(BIT5) //GPE5
 #define SDCMD_GPIO_PIN		(BIT6) //GPE6
 #define SDDAT0_GPIO_PIN 	(BIT7) //GPE7
 #define SDDAT1_GPIO_PIN 	(BIT8) //GPE8
 #define SDDAT2_GPIO_PIN 	(BIT9) //GPE9
 #define SDDAT3_GPIO_PIN  	(BIT10) //GPE10
+#endif //MINI2440
 /******************************/
-
 
 /* GSTATUS0 */
 #define nWAIT_PIN 		(BIT3)
@@ -135,6 +143,7 @@
 #define get_gstatus_batt_flt() \
 	((readreg32(GSTATUS_REG(GSTATUS0)))&BATT_FLT_PIN)
 
+
 /* GSTATUS1 */
 #define CHIP_ID     (BIT0) //TODO: Correction needed in the datasheet.
 
@@ -142,13 +151,13 @@
 #define get_gstatus_chipid() \
 	(readreg32(GSTATUS_REG(GSTATUS1)))
 
+
 /* GSTATUS2 */
 #define WDTRST 		(BIT2)
 #define SLEEPRST 	(BIT1)
 #define PWRST 		(BIT0)
 
 #define LAST_BOOT_MASK (BIT2|BIT1|BIT0)
-
 
 #define get_last_boot_status() \
 	((readreg32(GSTATUS_REG(GSTATUS2))) & LAST_BOOT_MASK)

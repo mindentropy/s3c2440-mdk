@@ -2,6 +2,7 @@
 #include "gpio_def.h"
 #include "clock_pm.h"
 #include "uart_util.h"
+#include "board_config.h"
 
 /* 
  * NAND Page == 2048 Bytes + 64 bytes spare area (2112 bytes).
@@ -290,7 +291,8 @@ void nand_init()
 	 */
 	//Note: Will paramterize the calculation below. Have to 
 	//add different NAND flashes though.
-	set_tacls_twrph(2,7,7);
+	//set_tacls_twrph(2,7,7);
+	set_tacls_twrph(TACLS,TWRPH0,TWRPH1);
 
 	enable_nand_flash_controller();
 	
