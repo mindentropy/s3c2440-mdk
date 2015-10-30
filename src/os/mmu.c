@@ -10,6 +10,7 @@ static unsigned int *ttb; //Translation table base address.
 /* 
  * How is the MMU setup?
  * =====================
+ *
  * (Before modification on anything related to MMU please go through MMU section
  * 	please go through the ARM920T reference manual Chapter 3).
  * 
@@ -19,11 +20,12 @@ static unsigned int *ttb; //Translation table base address.
  *
  * The ttb is the translation table base. 
  * -This holds the translation table base address(TRANSLATION_TABLE_BASE_ADDR). 
- * -This is starts at 0x33000000 and ends at 0x33004096 (L1 Page table has a maximum of 4096 entries)
- * -This ttb is stored in CP15 register. The processor will know where the MMU table is
- *  by accessing this register.
+ * -This starts at 0x33000000 and ends at 0x33004096 (L1 Page table has a maximum of 4096 entries)
+ * -This ttb is stored in CP15 register. The ttb - translation table base address is a pointer 
+ *  pointer to the address of the master L1 table.
+ *  The processor will know where the MMU table is by accessing the register CP15:c2.
  *  
- *  -Now for 32bit ttb entries the top 31-20 (12 bits) contain the addresses 0-4095.
+ *  -Now for 32 bit ttb entries the top 31-20 (12 bits) contain the addresses 0-4095.
  *  -The remainings bits are used as flags. For a single level l1 table to address translation
  *  the flag is a L1_PG_TYPE (10b)
  *  -Next if the table is a section page table see Fig3-4 in page 3-9 of the reference manual.
@@ -39,7 +41,10 @@ static unsigned int *ttb; //Translation table base address.
  */
 
 /*
- * TODO: Test by putting the vector table at 0x34000000 - 0x100000 = 0x33F00000 and mapping 0 to that address.
+ * TODO: 
+ * Test by putting the vector table at 0x34000000 - 0x100000 = 0x33F00000
+ * and mapping 0 to that address.
+ *
  * Also map 0x34000000 - 0x100000 = 0x33F00000 to the same.
  * To test set up an exception to see there is jump to that location.
  *
@@ -177,6 +182,7 @@ void mmu_init()
 
 	/* 
 	 * Set translation table base address.
+	 * ==================================
 	 */
 	__asm__ __volatile__ (
 		"mcr p15,0,%[ttb],c2,c0,0\n\t"

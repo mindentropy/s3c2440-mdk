@@ -1,0 +1,46 @@
+
++-------------------------+ ----> 0x00000000
+|                         |       ^
+|   Initial bootloader    |       |---> Stepping stone buffer.
+|  		(mdk_loader)      |       v
++-------------------------+ ----> 0x00001000
+|                         |
+|                         |
+|  Peripheral memory map  |
+|          hole           |
+.                         .
+.                         .
+.                         .
++-------------------------+ ----> 0x30000000
+|   mdk_os (.text)        |
+|         .               |
+|         .               |
+|   mdk_os (.data)        |
+|         .               |
+|         .               |
+|   mdk_os (.rodata)      |
+|         .               |
+|         .               |
+|   mdk_os (.bss)         |
+|         .               |
+|         .               |
+|   mdk_os (.stack)       |
+.                         .
+.                         .
+.                         .
+.                         .
++-------------------------+
++-------------------------+ ----> 0x33F00000
+|                         |
+| Interrupt Vector table  |
+| (section .vector_reloc) |
+|                         |
++-------------------------+ ----> 0x33F00020
+|                         |
+|                         |
+| Interrupt handlers      |
+| (section .isrhandler)   |
+|                         |
+|                         |
++-------------------------+ ----> 0x34000000
+

@@ -28,9 +28,9 @@ void init_lcd()
 	config_lcd_gpio();
 	disable_lcd_controller(LCD_BA);
 
-	set_reg_params(GPCON_REG(GPG_BA),LCD_PWRDN);
-	set_reg_params(GPUP_REG(GPG_BA),LCD_GPIO_PWRDN);
-	clear_reg_params(GPDAT_REG(GPG_BA),LCD_GPIO_PWRDN);
+	set_reg_params(GPCON_REG(GPG_BA),LCD_PWR);
+	set_reg_params(GPUP_REG(GPG_BA),LCD_GPIO_PWR_PIN);
+	clear_reg_params(GPDAT_REG(GPG_BA),LCD_GPIO_PWR_PIN);
 
 	/*print_hex_uart(UART0_BA,readreg32(GPCON_REG(GPG_BA)));
 	print_hex_uart(UART0_BA,readreg32(GPDAT_REG(GPG_BA)));

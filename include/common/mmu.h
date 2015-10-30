@@ -30,6 +30,7 @@ void mmu_init();
 #define L1_PG_TYPE 				(0x2)
 
 #define L1_PG_CACHEABLE         (BIT3)
+
 /* 
  * There is a small write buffer FIFO between the cache
  * and RAM. This is present to manage the speed difference
@@ -40,8 +41,6 @@ void mmu_init();
  * guide.
  */
 #define L1_PG_BUFFERABLE        (BIT2)
-
-
 
 #define L1_AP_RW_RW 	(BIT11|BIT10)
 #define L1_AP_RW_RO 	(BIT11)
@@ -89,57 +88,6 @@ void mmu_init();
 #define SYNCH_BUS_MODE  	(BIT30)
 #define RESERVED_BUS_MODE  	(BIT31)
 #define ASYNCH_BUS_MODE 	(BIT31|BIT30)
-
-/************* Memory Partition *****************************
- *
- *
- *
- *          +-------------------------+ ----> 0x00000000
- *          |                         |       ^
- *          |   Initial bootloader    |       |---> Stepping stone buffer.
- *          |  		(mdk_loader)      |       v
- *          +-------------------------+ ----> 0x00001000
- *          |                         |
- *          |                         |
- *          |  Peripheral memory map  |
- *          |          hole           |
- *          .                         .
- *          .                         .
- *          .                         .
- *          +-------------------------+ ----> 0x30000000
- *          |   mdk_os (.text)        |
- *          |         .               |
- *          |         .               |
- *          |   mdk_os (.data)        |
- *          |         .               |
- *          |         .               |
- *          |   mdk_os (.rodata)      |
- *          |         .               |
- *          |         .               |
- *          |   mdk_os (.bss)         |
- *          |         .               |
- *          |         .               |
- *          |   mdk_os (.stack)       |
- *          .                         .
- *          .                         .
- *          .                         .
- *          .                         .
- *          +-------------------------+
- *          +-------------------------+ ----> 0x33F00000
- *          |                         |
- *          | Interrupt Vector table  |
- *          | (section .vector_reloc) |
- *          |                         |
- *          +-------------------------+ ----> 0x33F00020
- *          |                         |
- *          |                         |
- *          | Interrupt handlers      |
- *          | (section .isrhandler)   |
- *          |                         |
- *          |                         |
- *          +-------------------------+ ----> 0x34000000
- *
- * **********************************************************/
 
 
 /*  Memory partitions */

@@ -90,10 +90,10 @@
 /****************************/
 
 /***** LCD GPIO Settings *****/
-#define LCD_PWRDN 		((BIT9|BIT8)) //GPG4
+#define LCD_PWR 		((BIT9|BIT8)) //GPG4
 
 #ifdef MINI2440
-#define LCD_GPIO_PWRDN 	(BIT4)
+#define LCD_GPIO_PWR_PIN 	(BIT4)
 #endif //MINI2440
 /*****************************/
 
