@@ -4,16 +4,16 @@
 
 #include "common.h"
 
-#define INT_BA 			0x4A000000
+#define INT_BA 					0x4A000000
 
-#define SRCPND_OFF 		0x00
-#define INTMOD_OFF  	0x04
-#define INTMSK_OFF  	0x08
-#define INTPRIORITY_OFF 0x0C
-#define INTPND_OFF 		0x10
-#define INTOFFSET_OFF   0x14
-#define SUBSRCPND_OFF 	0x18
-#define INTSUBMSK_OFF 	0x1C
+#define SRCPND_OFF 				0x00
+#define INTMOD_OFF  			0x04
+#define INTMSK_OFF  			0x08
+#define INTPRIORITY_OFF 		0x0C
+#define INTPND_OFF 				0x10
+#define INTOFFSET_OFF   		0x14
+#define SUBSRCPND_OFF 			0x18
+#define INTSUBMSK_OFF 			0x1C
 
 #define SRCPND_REG(BA) \
 		HW_REG(BA,SRCPND_OFF)
@@ -39,14 +39,6 @@
 #define INTSUBMSK_REG(BA) \
 		HW_REG(BA,INTSUBMSK_OFF)
 
-/*
-#define SRCPND 		0x4A000000
-#define INTMOD 		0x4A000004
-#define INTMSK 		0x4A000008
-#define INTPRIORITY 0x4A00000C
-#define INTPND 		0x4A000010
-#define INTOFFSET 	0x4A000014
-*/
 
 #define EINT0 			BIT0
 #define EINT1   		BIT1
@@ -81,10 +73,6 @@
 #define INT_RTC         BIT30
 #define INT_ADC 		BIT31
 
-/*
-#define SUBSRCPND 	0x4A000018
-#define INTSUBMSK 	0x4A00001C
-*/
 
 #define INT_AC97 	BIT14
 #define INT_WDT 	BIT13
