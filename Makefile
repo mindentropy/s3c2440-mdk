@@ -23,8 +23,8 @@ OS_SRC_DIR := $(SRC_DIR)/os
 UPLOADER_DIR = test_uploader
 UPLOADER := $(UPLOADER_DIR)
 
-OS_OBJS = $(OS_OBJ_DIR)/os_glue.o $(OS_OBJ_DIR)/os_main.o $(OS_OBJ_DIR)/os_vector.o $(OS_OBJ_DIR)/cpu.o $(OS_OBJ_DIR)/cache.o $(OS_OBJ_DIR)/mmu.o
-LOADER_OBJS = $(LOADER_OBJ_DIR)/loader_glue.o $(LOADER_OBJ_DIR)/loader_main.o
+#OS_OBJS = $(OS_OBJ_DIR)/os_glue.o $(OS_OBJ_DIR)/os_main.o $(OS_OBJ_DIR)/os_vector.o $(OS_OBJ_DIR)/cpu.o $(OS_OBJ_DIR)/cache.o $(OS_OBJ_DIR)/mmu.o
+#LOADER_OBJS = $(LOADER_OBJ_DIR)/loader_glue.o $(LOADER_OBJ_DIR)/loader_main.o
 
 COMMON_SRC_FILES := $(foreach dir,$(COMMON_SRC_DIR),$(wildcard $(dir)/*.c))
 COMMON_OBJS := $(patsubst $(COMMON_SRC_DIR)/%.c, $(COMMON_OBJ_DIR)/%.o,$(COMMON_SRC_FILES))

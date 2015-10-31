@@ -33,28 +33,6 @@
 .code 32
 .globl start_os
 
-/*
-os_vector_jmp:
-	b start_os
-	b .
-	b os_software_intr
-	b .
-	b .
-	b .
-	b .
-	b .
-*/
-
-/*	b start_os
-	b os_undef_instr
-	b os_software_intr
-	b os_abrt_prefetch
-	b os_abrt_data
-	b os_reserved
-	b os_irq
-	b os_fiq
-*/
-
 start_os:
 	ldr r3,WTCON
 	ldr r6,=0x00

@@ -79,8 +79,10 @@ SECTIONS
 		*(.vector_reloc);
 	/*	. = ALIGN(4);*/
 		__exception_vector_reloc_end__ = .;
-	} >vectors AT>sdram /* SDRAM is where it will be stored in the file but address
-	                     * references will be in the addresses of the isr handler section */
+	} >vectors AT>sdram 
+
+	/* Above SDRAM is where it will be stored in the file but address
+     * references will be in the addresses of the isr handler section */
 
 	.isrhandler :
 	{

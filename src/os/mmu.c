@@ -65,23 +65,38 @@ static void setup_interrupt_vector_table()
  */
 
 	char *vector_table = (char *)VECTOR_TABLE_START;
-	char *src = (char *)__svc_stack_top__; /* Need to get the lma of the code.
-										* The __svc_stack_top__ is the lma i.e. the address in the file.
-										* I need to use this as the start address for the later vectors
-										* and handlers.
-										*/
 
+	/* 
+	 * Need to get the lma of the code.
+	 * The __svc_stack_top__ is the lma i.e. the generated address in the file.
+	 * I need to use this as the start address for the later vectors
+	 * and handlers.
+	 * 
+	 */
+
+	char *src = (char *)__svc_stack_top__; 
+						
 	uint32_t i = 0;
 
-	for(i = (uint32_t)__exception_vector_reloc_start__; i<(uint32_t)__exception_vector_reloc_end__; i++) {
+	for(i = (uint32_t)__exception_vector_reloc_start__; 
+					i<(uint32_t)__exception_vector_reloc_end__; 
+					i++) {
 		*vector_table = *src;
 		vector_table++;
 		src++;
 	//	print_hex_uart(UART0_BA,vector_table[j]);
 	}
 
+	uart_puts(UART0_BA,"svc stack top");
+	print_hex_uart(UART0_BA,(uint32_t)__svc_stack_top__);
+
+	uart_puts(UART0_BA,"vector reloc start");
+	print_hex_uart(UART0_BA,(uint32_t)__exception_vector_reloc_start__);
+
 	/* Continue with the same place for handler source  */
-	for(i = (uint32_t)__exception_handler_start__; i<(uint32_t)__exception_handler_end__;i++) {
+	for(i = (uint32_t)__exception_handler_start__; 
+					i<(uint32_t)__exception_handler_end__;
+					i++) {
 		*vector_table = *src;
 		vector_table++;
 		src++;
@@ -101,8 +116,10 @@ static void setup_l1_section_table(unsigned int flags)
 		ttb[i] = ((base + i)<<20) | flags;
 	}
 	
-	ttb[0] = (0x33F00000) | flags; /* Make the first 0-1MB point to 0x33F00000 i.e. 
-									  location of the IVT.*/
+	ttb[0] = (0x33F00000) | flags; /* Make the first 0-1MB point 
+									  to 0x33F00000 i.e. location of 
+									  the IVT.
+									  */
 	setup_interrupt_vector_table();
 }
 

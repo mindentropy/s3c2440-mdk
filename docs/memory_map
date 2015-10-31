@@ -1,3 +1,6 @@
+Memory Map Documentation:
+=========================
+
 
 +-------------------------+ ----> 0x00000000
 |                         |       ^
@@ -44,3 +47,187 @@
 |                         |
 +-------------------------+ ----> 0x34000000
 
+Fig 1: Memory map documentation Diagram.
+
+Explanation of MMU and the memory map:
+-------------------------------------
+
+Presently the MDK OS uses only L1 page table.
+L1 page table accepts 4 entries:
+1) A 1MB section translation entry.
+2) Directory entry that points to a fine L2 page table.
+3) Directory entry that points to a coarse L2 page table.
+4) A fault entry that generates an abort exception.
+
+In the code only (1) is being used i.e the 1MB section translation entry.
+
+The structure of this entry is below (bit positions may vary):
+
+31               20 19              12 11 10 9 8     5 4 3 2 1 0
+ _______________________________________________________________
+| Base Address    |     SBZ          |  AP  |0|Domain |1|C|B|1|0|
+|_________________|__________________|______|_|_______|_|_|_|_|_|
+
+Fig 2: Section Entry. SBZ -> Should be 0.
+
+How is the MMU setup in the MDK OS
+==================================
+ 
+(Before modification on anything related to MMU please go through MMU section
+	please go through the ARM920T reference manual Chapter 3).
+
+In the code setup_l1_section_table sets up level-1 page tables. This has 4096 entries.
+This means that each page size is equal to 1MB. So totally the memory space 
+covered is 4096 entries x 1048576 Bytes = 4GB.
+
+The ttb is the translation table base. 
+ -The CP15:c2 register holds the translation table base address(TRANSLATION_TABLE_BASE_ADDR) which is the 
+ location of the master L1 table in virtual memory.
+ -This starts at 0x33000000 and ends at 0x33004096 (L1 Page table has a maximum of 4096 entries)
+ -This ttb is stored in CP15:c2 register. The ttb - translation table base address is a pointer 
+  pointer to the address of the master L1 table.
+  The processor will know where the MMU table is by accessing the register CP15:c2.
+ 
+ -Now for 32 bit ttb entries the top 31-20 (12 bits) contain the addresses 0-4095.
+ -The remainings bits are used as flags. For a single level l1 table to address translation
+ the flag is a L1_PG_TYPE (10b)
+ -Next if the table is a section page table see Fig3-4 in page 3-9 of the reference manual.
+ -In this there is always a Bit4 set bit present. The global domain access is the 
+ domain manager.
+ -The access permissions AP is the L1_AP_RW_RW.
+ -The section pages are set to (00b) non-cached and non-buffered.
+
+When an MMU wants to fetch the data for a virtual address it walks the translation table 
+and dereferences the array to find the starting base address[e.g. ttb[i] ]. Next it uses the
+remaining address bit [19-0] as an offset into the section [Section size being 1MB].
+
+In the MDK OS the memory is mapped as 1:1. Only the interrupt vector table is relocated where 
+the first 0-1MB is translated to 0x33F00000 in the L1 page translation table.
+
+Testing the setup.
+-----------------
+
+Test by putting the vector table at 0x34000000 - 0x100000 = 0x33F00000
+and mapping 0 to that address.
+
+Also map 0x34000000 - 0x100000 = 0x33F00000 to the same.
+To test set up an exception to see there is jump to that location.
+
+Vector table reference:
+======================
+---------------------------------- 
+|   Interrupts   |    Address    |
+----------------------------------
+|RESET           |   0x00000000  |
+|UNDEF           |   0x00000004  |
+|SWI             |   0x00000008  |
+|PABT            |   0x0000000C  |
+|DABT            |   0x00000010  |
+|---- Reserved   |   0x00000014  |
+|IRQ             |   0x00000018  |
+|FIQ             |   0x0000001C  |
+----------------------------------
+
+Stacks in the memory map:
+=========================
+MDK OS will be setting up 3 stacks for interrupt handling.
+
+USR_STACK
+IRQ_STACK
+SVC_STACK
+
+Interrupt handling and memory mapping
+=====================================
+Since the interrupts are relocated an interrupt generated will jump to address 0x00000018. 
+The function should check the interrupt number and jump according to the interrupt handler.
+
+
+Linker script modifications to accomodate the memory mappings
+=============================================================
+In the MEMORY section we have
+MEMORY
+{
+	sram : org = 0x00000000 , len = 0x1000
+	sdram : org = 0x30000000 , len = 0x3F00000 /* 63MB RAM */
+	vectors : org = 0x33F00000 , len = 0x100000 /* Last 1MB for the isr handlers */
+}
+
+As can be seen the vectors occupy 0x33F00000. This is the symbol name VECTOR_TABLE_START.
+
+The stacks for the USR, IRQ, FIQ and SVC are setup after the "bss" section.
+The script fragment is as below:
+
+.bss  :
+{
+	__bss_start__ = .;
+	*(.bss); *(COMMON)
+	__bss_end__ = .;
+
+	__usr_sys_stack_bottom__ = .;
+	. += 0x1000;
+	__usr_sys_stack_top__ = .;
+
+	__irq_stack_bottom__ = .;
+	. += 0x1000;
+	__irq_stack_top__ = .;
+
+	__fiq_stack_bottom__ = .;
+	. += 0x1000;
+	__fiq_stack_top__ = .;
+
+	__svc_stack_bottom__ = .;
+	. += 0x1000;
+	__svc_stack_top__ = .;
+} > sdram
+
+Notice that the stack grows from top to bottom upwards.
+
+The interrupt vectors should be present at address 0x33F00000. The following
+linker script demonstrates it.
+
+.vector_reloc :
+{
+	__exception_vector_reloc_start__ = .;
+	*(.vector_reloc);
+/*	. = ALIGN(4);*/
+	__exception_vector_reloc_end__ = .;
+} >vectors AT>sdram 
+
+/* 
+ * Above SDRAM is where it will be stored in the file but address
+ * references will be in the addresses of the isr handler section 
+ */
+
+All interrupt service routines are setup in the vectors address.
+.isrhandler :
+{
+	__exception_handler_start__ = .;
+	*(.isrhandler);
+/*	. = ALIGN(4);*/
+	__exception_handler_end__ = .;
+} >vectors AT>sdram
+
+-------------------------------------------------------------------------------
+
+Interrupt Service Routines:
+==========================
+Interrupt Service routines are present in the os_vector.s
+
+The interrupt service routines have to be put in the "vector_reloc" section.
+What this means is that the address generated will be with respect to vectors 
+component in MEMORY section i.e. 0x33F00000.
+
+In the setup_interrupt_vector_table routine I copy the vectors from the 
+vector_reloc section which is just next to the __svc_stack_top__ section.The LMA
+is equal to the LMA of the vector_reloc.
+
+The src pointer points to the __svc_stack_top. Next I loop the size from 
+__exception_vector_reloc_start__ and __exception_vector_reloc_end__ and fill the
+vector binaries in the address 0x33F00000.
+
+I continue filling in the same place the isr handler. The ISR handler is the 
+blink_led_test for testing which blinks the leds. Again the ISR handler is 
+right next to the vector_reloc section. Hence the data is filled the size from
+__exception_handler_start__ to __exception_handler_end__.
+
+TODO: Position of os_vector.s in the compilation procedure.
