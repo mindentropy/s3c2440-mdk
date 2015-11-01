@@ -278,7 +278,7 @@ int nand_block_erase(uint32_t addr)
 
 void nand_init()
 {
-	uint16_t i = 0;
+//	uint16_t i = 0;
 	/*const char test_data[] = "TEST";*/
 	nand_page_cache.cache_flag = -1;
 	set_nand_gpio_config_pins();
@@ -301,7 +301,7 @@ void nand_init()
 	/*nand_block_erase(0);
 
 	nand_page_program(0,test_data,4); */
-
+/*
 	for(i = 0;i<2048;i++) {
 		if(!(i&7)) {
 			uart_puts(UART0_BA,"\r\n");
@@ -311,6 +311,7 @@ void nand_init()
 	}
 
 	uart_puts(UART0_BA,"\r\n");
+*/
 
 /*	nand_block_erase(0);
 

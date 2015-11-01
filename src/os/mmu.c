@@ -87,10 +87,10 @@ static void setup_interrupt_vector_table()
 	//	print_hex_uart(UART0_BA,vector_table[j]);
 	}
 
-	uart_puts(UART0_BA,"svc stack top");
+	uart_puts(UART0_BA,"svc stack top:");
 	print_hex_uart(UART0_BA,(uint32_t)__svc_stack_top__);
 
-	uart_puts(UART0_BA,"vector reloc start");
+	uart_puts(UART0_BA,"vector reloc start:");
 	print_hex_uart(UART0_BA,(uint32_t)__exception_vector_reloc_start__);
 
 	/* Continue with the same place for handler source  */
@@ -104,6 +104,7 @@ static void setup_interrupt_vector_table()
 	}
 
 }
+
 static void setup_l1_section_table(unsigned int flags)
 {
 	unsigned int i = 0;

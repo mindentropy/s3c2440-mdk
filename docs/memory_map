@@ -194,8 +194,8 @@ linker script demonstrates it.
 } >vectors AT>sdram 
 
 /* 
- * Above SDRAM is where it will be stored in the file but address
- * references will be in the addresses of the isr handler section 
+ * Above SDRAM is where it will be stored in the file i.e. LMA but address
+ * references will be in the addresses of the isr handler section i.e. VMA
  */
 
 All interrupt service routines are setup in the vectors address.
