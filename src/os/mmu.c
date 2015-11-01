@@ -57,6 +57,8 @@ extern char __exception_handler_start__[];
 extern char __exception_handler_end__[];
 extern char __svc_stack_top__[];
 
+extern char __exception_vector_reloc_loadaddr__[];
+
 static void setup_interrupt_vector_table()
 {
 /*
@@ -90,8 +92,8 @@ static void setup_interrupt_vector_table()
 	uart_puts(UART0_BA,"svc stack top:");
 	print_hex_uart(UART0_BA,(uint32_t)__svc_stack_top__);
 
-	uart_puts(UART0_BA,"vector reloc start:");
-	print_hex_uart(UART0_BA,(uint32_t)__exception_vector_reloc_start__);
+	uart_puts(UART0_BA,"vector reloc loadaddr:");
+	print_hex_uart(UART0_BA,(uint32_t)__exception_vector_reloc_loadaddr__);
 
 	/* Continue with the same place for handler source  */
 	for(i = (uint32_t)__exception_handler_start__; 
@@ -104,6 +106,7 @@ static void setup_interrupt_vector_table()
 	}
 
 }
+
 
 static void setup_l1_section_table(unsigned int flags)
 {

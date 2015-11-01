@@ -73,18 +73,22 @@ SECTIONS
 		__svc_stack_top__ = .;
 	} > sdram
 
+	
 	.vector_reloc :
 	{
 		__exception_vector_reloc_start__ = .;
-		*(.vector_reloc);
-	/*	. = ALIGN(4);*/
+		*(.vector_reloc);*/
 		__exception_vector_reloc_end__ = .;
 	} >vectors AT>sdram 
+
+	/* Get the lma address for the particular section */
+	__exception_vector_reloc_loadaddr__ = LOADADDR(.vector_reloc);
 
 	/* 
      * Above SDRAM is where it will be stored in the file but address
      * references will be in the addresses of the isr handler section
 	 */
+
 
 	.isrhandler :
 	{
@@ -93,6 +97,7 @@ SECTIONS
 	/*	. = ALIGN(4);*/
 		__exception_handler_end__ = .;
 	} >vectors AT>sdram
+
 
 	/* 
 	 * >vma region AT > lma region 
