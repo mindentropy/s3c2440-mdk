@@ -48,6 +48,8 @@ clear_bss:
 	str r3,[r1],#4
 	bne clear_bss
 
+/*********************** Stack Setup ***********************/
+
 stack_setup:
 	/* We are in the supervisor (svc) mode. Setup up the stack */
 	/* load r13 i.e. svc stack pointer with svc_stack_pointer */
@@ -107,7 +109,6 @@ stack_setup:
 	bl main
 
 	b start_os
-
 
 
 svc_stack_pointer: .word __svc_stack_top__

@@ -125,6 +125,23 @@
 #endif //MINI2440
 /******************************/
 
+
+/******** GPIO Button **********/
+#ifdef MINI2440
+
+#define K1_GPIO_BTN 		(BIT0)
+#define K2_GPIO_BTN 		(BIT3)
+#define K3_GPIO_BTN 		(BIT5)
+#define K4_GPIO_BTN 		(BIT6)
+#define K5_GPIO_BTN 		(BIT7)
+#define K6_GPIO_BTN 		(BIT11)
+
+#endif //MINI2440
+
+
+/*******************************/
+
+
 /* GSTATUS0 */
 #define nWAIT_PIN 		(BIT3)
 #define NCON_PIN		(BIT2)
