@@ -3,6 +3,7 @@
 #include "board_config.h"
 #include "uart_util.h"
 #include "led.h"
+#include "exception_interrupt.h"
 
 static unsigned int *ttb; //Translation table base address.
 
@@ -50,14 +51,12 @@ static unsigned int *ttb; //Translation table base address.
  *
  */
 
-extern char __exception_vector_reloc_start__[];
-extern char __exception_vector_reloc_end__[];
 
-extern char __exception_handler_start__[];
-extern char __exception_handler_end__[];
-extern char __svc_stack_top__[];
+extern char __exception_handler_start_addr__[];
+extern char __exception_handler_end_addr__[];
 
-extern char __exception_vector_reloc_loadaddr__[];
+extern char __exception_vector_reloc_startaddr__[];
+extern char __exception_vector_reloc_endaddr__[];
 
 static void setup_interrupt_vector_table()
 {
@@ -66,43 +65,39 @@ static void setup_interrupt_vector_table()
  *
  */
 
-	char *vector_table = (char *)VECTOR_TABLE_START;
+	char *vector_table = (char *)EXCEPTION_INTERRUPT_VECTOR_TABLE_START;
 
 	/* 
 	 * Need to get the lma of the code.
-	 * The __svc_stack_top__ is the lma i.e. the generated address in the file.
-	 * I need to use this as the start address for the later vectors
-	 * and handlers.
-	 * 
+	 * The __exception_vector_reloc_startaddr__ is the lma i.e. the generated 
+	 * address in the file. I need to use this as the start address for the 
+	 * later vectors and handlers.
 	 */
 
-	char *src = (char *)__svc_stack_top__; 
+	char *src = (char *)__exception_vector_reloc_startaddr__; 
 						
 	uint32_t i = 0;
 
-	for(i = (uint32_t)__exception_vector_reloc_start__; 
-					i<(uint32_t)__exception_vector_reloc_end__; 
-					i++) {
+	for(i = (uint32_t)__exception_vector_reloc_startaddr__; 
+			i<(uint32_t)__exception_vector_reloc_endaddr__; 
+				i++) {
 		*vector_table = *src;
+
+		print_hex_uart_ch(UART0_BA,*vector_table);
+		uart_puts(UART0_BA," ");
+
 		vector_table++;
 		src++;
-	//	print_hex_uart(UART0_BA,vector_table[j]);
 	}
 
-	uart_puts(UART0_BA,"svc stack top:");
-	print_hex_uart(UART0_BA,(uint32_t)__svc_stack_top__);
-
-	uart_puts(UART0_BA,"vector reloc loadaddr:");
-	print_hex_uart(UART0_BA,(uint32_t)__exception_vector_reloc_loadaddr__);
 
 	/* Continue with the same place for handler source  */
-	for(i = (uint32_t)__exception_handler_start__; 
-					i<(uint32_t)__exception_handler_end__;
+	for(i = (uint32_t)__exception_handler_start_addr__; 
+					i<(uint32_t)__exception_handler_end_addr__;
 					i++) {
 		*vector_table = *src;
 		vector_table++;
 		src++;
-	//	print_hex_uart(UART0_BA,vector_table[j]);
 	}
 
 }
@@ -127,7 +122,6 @@ static void setup_l1_section_table(unsigned int flags)
 	setup_interrupt_vector_table();
 }
 
-extern void blink_leds(unsigned int leds);
 
 void turn_mmu_on()
 {
@@ -153,11 +147,7 @@ void turn_mmu_on()
 
 }
 
-void blink_led_test()
-{
-	while(1)
-		blink_leds(LED2|LED3);
-}
+
 
 #if 0
 static void turn_mmu_on()
@@ -234,7 +224,5 @@ void mmu_init()
 		: /* No clobbers */
 	);
 
-
 	turn_mmu_on();
-
 }

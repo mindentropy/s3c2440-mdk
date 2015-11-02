@@ -76,13 +76,12 @@ SECTIONS
 	
 	.vector_reloc :
 	{
-		__exception_vector_reloc_start__ = .;
-		*(.vector_reloc);*/
-		__exception_vector_reloc_end__ = .;
+		*(.vector_reloc);
 	} >vectors AT>sdram 
 
 	/* Get the lma address for the particular section */
-	__exception_vector_reloc_loadaddr__ = LOADADDR(.vector_reloc);
+	__exception_vector_reloc_startaddr__ = LOADADDR(.vector_reloc);
+	__exception_vector_reloc_endaddr__ = LOADADDR(.vector_reloc) + SIZEOF(.vector_reloc);
 
 	/* 
      * Above SDRAM is where it will be stored in the file but address
@@ -92,11 +91,11 @@ SECTIONS
 
 	.isrhandler :
 	{
-		__exception_handler_start__ = .;
 		*(.isrhandler);
-	/*	. = ALIGN(4);*/
-		__exception_handler_end__ = .;
 	} >vectors AT>sdram
+
+	__exception_handler_start_addr__ = LOADADDR(.isrhandler);
+	__exception_handler_end_addr__ = LOADADDR(.isrhandler) +  SIZEOF(.isrhandler);
 
 
 	/* 

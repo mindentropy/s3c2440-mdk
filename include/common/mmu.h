@@ -90,11 +90,7 @@ void mmu_init();
 #define ASYNCH_BUS_MODE 	(BIT31|BIT30)
 
 
-/*  Memory partitions */
 
-#define VECTOR_TABLE_START 0x33F00000
-
-void blink_led_test() __attribute__((section(".isrhandler")));
 
 #endif
 

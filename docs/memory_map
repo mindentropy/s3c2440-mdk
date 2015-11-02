@@ -218,16 +218,23 @@ What this means is that the address generated will be with respect to vectors
 component in MEMORY section i.e. 0x33F00000.
 
 In the setup_interrupt_vector_table routine I copy the vectors from the 
-vector_reloc section which is just next to the __svc_stack_top__ section.The LMA
-is equal to the LMA of the vector_reloc.
+vector_reloc section. The LMA i.e. the address present in the file is got in
+the linker script as __exception_vector_reloc_startaddr__ = LOADADDR(.vector_reloc).
 
-The src pointer points to the __svc_stack_top. Next I loop the size from 
-__exception_vector_reloc_start__ and __exception_vector_reloc_end__ and fill the
-vector binaries in the address 0x33F00000.
+The size of the section got using __exception_vector_reloc_endaddr__ = 
+LOADADDR(.vector_reloc) + SIZEOF(.vector_reloc)
 
-I continue filling in the same place the isr handler. The ISR handler is the 
-blink_led_test for testing which blinks the leds. Again the ISR handler is 
-right next to the vector_reloc section. Hence the data is filled the size from
-__exception_handler_start__ to __exception_handler_end__.
 
-TODO: Position of os_vector.s in the compilation procedure.
+The src pointer points to __exception_vector_reloc_startaddr__ . 
+Next I loop the size from __exception_vector_reloc_startaddr__ 
+and __exception_vector_reloc_endaddr__ and fill the vector binaries 
+in the address VECTOR_TABLE_START.
+
+I continue filling in the same place the ISR handler. The ISR handler is the 
+blink_led_test for testing which blinks the leds. Again for the ISR handler 
+the address and size is taken as above and filled right next to the handlers.
+
+In this way the code file os_vector.s need not be compiled in order. I can get
+the LMA address i.e the address present in the file by the above method whereever
+it is placed.
+

@@ -115,13 +115,19 @@
 
 struct sd_card_info sd0_card_info;
 
-void send_cmd(uint32_t BA,uint32_t cmd_con,uint32_t cmd_arg)
+static uint32_t get_sd_prescaler_value(uint32_t CLK_BA,
+										uint32_t baud_rate)
+{
+	return ((get_pclk(CLK_BA) - baud_rate) / baud_rate );
+}
+
+static void send_cmd(uint32_t BA,uint32_t cmd_con,uint32_t cmd_arg)
 {
 	set_sd_mmc_cmd_arg(BA,cmd_arg);
 	set_sd_mmc_cmd_con(BA,cmd_con);
 }
 
-void wait_for_cmd_complete(uint32_t BA)
+static void wait_for_cmd_complete(uint32_t BA)
 {
 	/* Wait until command transfer in progress */
 	while(get_cmd_progress_status(BA))
@@ -137,7 +143,7 @@ void wait_for_cmd_complete(uint32_t BA)
 	//print_hex_uart(UART0_BA,readreg32(SDI_CMD_STATUS_REG(BA)));
 }
 
-void sd_delay()
+static void sd_delay()
 {
 	unsigned int i =  0;
 	for(i = 0;i<0x100000;i++) { //Wait for 74 SD clock cycles.
@@ -146,7 +152,7 @@ void sd_delay()
 	}
 }
 
-void sd_low_delay()
+static void sd_low_delay()
 {
 	unsigned int i =  0;
 	for(i = 0;i<100;i++) { //Wait for 74 SD clock cycles.
@@ -155,7 +161,7 @@ void sd_low_delay()
 	}
 }
 
-uint8_t parse_r7_response(uint32_t BA)
+static uint8_t parse_r7_response(uint32_t BA)
 {
 	if((get_R7_rsp_chk_pattern(BA) == SD_CHECK_PATTERN) && 
 		(get_R7_rsp_volt_accepted(BA) == SD_CARD_VOLTAGE_2_7)) {
@@ -165,13 +171,13 @@ uint8_t parse_r7_response(uint32_t BA)
 	}
 }
 
-void parse_r6_response(uint32_t BA,uint32_t *rca)
+static void parse_r6_response(uint32_t BA,uint32_t *rca)
 {
 	*rca = get_R6_rsp_RCA(BA);
 }
 
 
-void parse_CID_response(uint32_t BA, struct cid_info *cid_info)
+static void parse_CID_response(uint32_t BA, struct cid_info *cid_info)
 {
 	
 	cid_info->MID = get_R2_rsp_CID_MID(BA);
@@ -190,7 +196,7 @@ void parse_CID_response(uint32_t BA, struct cid_info *cid_info)
 	cid_info->CRC = get_R2_rsp_CID_CRC(BA);
 }
 
-void parse_CSD_response(uint32_t BA, struct csd_info *csd_info)
+static void parse_CSD_response(uint32_t BA, struct csd_info *csd_info)
 {
 	csd_info->rsp0 = readreg32(SDIRSP0_REG(BA));
 	csd_info->rsp1 = readreg32(SDIRSP1_REG(BA));
@@ -198,7 +204,7 @@ void parse_CSD_response(uint32_t BA, struct csd_info *csd_info)
 	csd_info->rsp3 = readreg32(SDIRSP3_REG(BA));
 }
 
-void config_sd_gpio()
+static void config_sd_gpio()
 {
 	//Enable SD Card controller block.
 	set_reg_params(GPCON_REG(GPE_BA),
@@ -427,6 +433,38 @@ uint32_t sd_write_single_block(
 	return current_state;
 }
 
+//TODO: Need to return an error statue if not able to read state.
+static uint32_t get_cmd13_current_state(uint32_t BA,uint32_t RCA)
+{
+	
+	/* Get card status */
+	uint32_t current_state = 0;
+
+	send_cmd(
+			BA,
+			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD13,
+			(((RCA)<<16) | 0xFFFF)
+			);
+
+	sd_low_delay();
+	wait_for_cmd_complete(BA);
+
+	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
+		uart_puts(UART0_BA,"cmd13 timedout\n");
+	} 
+	
+	current_state = get_R1_card_state(BA);
+
+	/*
+	  uart_puts(UART0_BA,"CMD13 Status:");
+	  print_hex_uart(UART0_BA,current_state);
+	 */
+	ack_cmd_resp(BA);
+
+
+//TODO: When returning AND with the SD_CURRENT_STATE mask 
+	return current_state;
+}
 
 uint32_t sd_erase_blocks(
 						uint32_t BA,
@@ -500,41 +538,9 @@ uint32_t sd_erase_blocks(
 	return current_state;
 }
 
-//TODO: Need to return an error statue if not able to read state.
-uint32_t get_cmd13_current_state(uint32_t BA,uint32_t RCA)
-{
-	
-	/* Get card status */
-	uint32_t current_state = 0;
-
-	send_cmd(
-			BA,
-			WAIT_RSP|CMD_START|CMD_TRANSMISSION|CMD13,
-			(((RCA)<<16) | 0xFFFF)
-			);
-
-	sd_low_delay();
-	wait_for_cmd_complete(BA);
-
-	if(chk_cmd_resp(BA) == CMD_TIMEOUT) {
-		uart_puts(UART0_BA,"cmd13 timedout\n");
-	} 
-	
-	current_state = get_R1_card_state(BA);
-
-	/*
-	  uart_puts(UART0_BA,"CMD13 Status:");
-	  print_hex_uart(UART0_BA,current_state);
-	 */
-	ack_cmd_resp(BA);
-
-
-//TODO: When returning AND with the SD_CURRENT_STATE mask 
-	return current_state;
-}
 
 //TODO:Return error value if not successful.
-uint32_t select_deselect_card(uint32_t BA,uint32_t RCA,uint8_t sel_desel)
+static uint32_t select_deselect_card(uint32_t BA,uint32_t RCA,uint8_t sel_desel)
 {
 	uint32_t card_state = 0;
 	
@@ -570,7 +576,7 @@ uint32_t select_deselect_card(uint32_t BA,uint32_t RCA,uint8_t sel_desel)
 	return card_state;
 }
 
-uint32_t get_sd_card_CSD_info(
+static uint32_t get_sd_card_CSD_info(
 			uint32_t BA,
 			uint32_t RCA,
 			struct csd_info *sd_csd_info) 
@@ -597,7 +603,7 @@ uint32_t get_sd_card_CSD_info(
 	return 0;
 }
 
-uint32_t get_sd_card_CID_info(
+static uint32_t get_sd_card_CID_info(
 						uint32_t BA,
 						uint32_t RCA,
 						struct cid_info *sd_cid_info
@@ -627,7 +633,7 @@ uint32_t get_sd_card_CID_info(
 }
 
 
-uint32_t get_sd_card_RCA(uint32_t BA,uint32_t *RCA)
+static uint32_t get_sd_card_RCA(uint32_t BA,uint32_t *RCA)
 {
 
 /**** Send CMD3 ****/
@@ -663,7 +669,7 @@ uint32_t get_sd_card_RCA(uint32_t BA,uint32_t *RCA)
 
 
 //TODO: Return values has to be modified.
-uint32_t send_if_cond(uint32_t BA)
+static uint32_t send_if_cond(uint32_t BA)
 {
 	
 	/*** Send CMD8 ***/
@@ -692,7 +698,7 @@ uint32_t send_if_cond(uint32_t BA)
 }
 
 //TODO: Handle error condition response.
-uint32_t make_sd_card_inactive(
+static uint32_t make_sd_card_inactive(
 							uint32_t BA,
 							uint32_t RCA
 							)
@@ -720,7 +726,7 @@ uint32_t make_sd_card_inactive(
 	return card_response;
 }
 
-uint32_t do_all_send_CID(uint32_t BA,struct cid_info *cid_info)
+static uint32_t do_all_send_CID(uint32_t BA,struct cid_info *cid_info)
 {
 
 	/**** Send CMD2 ****/
@@ -744,10 +750,6 @@ uint32_t do_all_send_CID(uint32_t BA,struct cid_info *cid_info)
 	return 1;
 }
 
-uint32_t get_sd_prescaler_value(uint32_t CLK_BA,uint32_t baud_rate)
-{
-	return ((get_pclk(CLK_BA) - baud_rate) / baud_rate );
-}
 
 /*
  * Note on Card Responses:
