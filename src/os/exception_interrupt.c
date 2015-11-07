@@ -7,6 +7,7 @@
 
 extern void blink_leds(unsigned int leds);
 
+
 void blink_led_test()
 {
 	while(1)
@@ -16,27 +17,12 @@ void blink_led_test()
 
 void do_handle_undef()
 {
-	
+
 }
 
 void do_handle_swi()
 {
-	
-}
 
-void do_handle_irq()
-{
-	
-}
-
-void do_handle_fiq()
-{
-	
-}
-
-void do_handle_dabt()
-{
-	
 }
 
 void do_handle_pabt()
@@ -44,4 +30,20 @@ void do_handle_pabt()
 	
 }
 
+void do_handle_dabt()
+{
 
+}
+
+
+void do_handle_irq()
+{
+	while(1) {
+		blink_leds(LED2|LED3);
+	}
+}
+
+void do_handle_fiq()
+{
+	
+}

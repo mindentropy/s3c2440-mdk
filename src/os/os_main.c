@@ -88,6 +88,7 @@ void last_boot_cause()
 
 
 int main(void) {
+
 	/* Note : Do not put any operations above this */
 	/* Disable watchdog.*/
 //	unsigned char *sram_loc;
@@ -137,9 +138,9 @@ int main(void) {
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 
-		if(is_btn_K1_pressed(GPG_BA)) {
+		/*if(is_btn_K1_pressed(GPG_BA)) {
 			blink_leds(LED1|LED4);
-		}
+		}*/
 //
 		//Test for interrupt --> Passed as it jumps to the interrupt handler.
 /*		

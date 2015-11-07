@@ -126,6 +126,28 @@
 /******************************/
 
 
+#define EINT4 				(BIT4)
+#define EINT5 				(BIT5)
+#define EINT6 				(BIT6)
+#define EINT7 				(BIT7)
+#define EINT8 				(BIT8)
+#define EINT9 				(BIT9)
+#define EINT10 				(BIT10)
+#define EINT11 				(BIT11)
+#define EINT12 				(BIT12)
+#define EINT13 				(BIT13)
+#define EINT14 				(BIT14)
+#define EINT15 				(BIT15)
+#define EINT16 				(BIT16)
+#define EINT17 				(BIT17)
+#define EINT18 				(BIT18)
+#define EINT19 				(BIT19)
+#define EINT20 				(BIT20)
+#define EINT21 				(BIT21)
+#define EINT22 				(BIT22)
+#define EINT23 				(BIT23)
+
+
 /******** GPIO Button **********/
 #ifdef MINI2440
 
@@ -135,6 +157,13 @@
 #define K4_GPIO_BTN 		(BIT6)
 #define K5_GPIO_BTN 		(BIT7)
 #define K6_GPIO_BTN 		(BIT11)
+
+#define K1_GPIO_EINT 		(EINT8)
+#define K2_GPIO_EINT 		(EINT11)
+#define K3_GPIO_EINT 		(EINT13)
+#define K4_GPIO_EINT 		(EINT14)
+#define K5_GPIO_EINT 		(EINT15)
+#define K6_GPIO_EINT 		(EINT19)
 
 #endif //MINI2440
 
@@ -198,61 +227,66 @@
 	set_reg_params(GPCON_REG(BA),param)
 
 
-#define EXTINT0_OFF 	0x88U
-#define EXTINT1_OFF 	0x8CU
-#define EXTINT2_OFF 	0x90U
+#define EXTINT0_OFF 	(0x88)
+#define EXTINT1_OFF 	(0x8C)
+#define EXTINT2_OFF 	(0x90)
 
 #define EXTINT0_REG(BA) 	\
-	HW_REG(BA,EXTINT0_OFF)
+		HW_REG((BA),EXTINT0_OFF)
 
 #define EXTINT1_REG(BA) 	\
-	HW_REG(BA,EXTINT1_OFF)
+		HW_REG((BA),EXTINT1_OFF)
 
 #define EXTINT2_REG(BA) 	\
-	HW_REG(BA,EXTINT2_OFF)
+		HW_REG((BA),EXTINT2_OFF)
+
+#define TRIGGER_MASK  			(0x7)
+#define TRIGGER_LOW_LEVEL 		(0x0)
+#define TRIGGER_HIGH_LEVEL 		(0x1)
+#define TRIGGER_FALLING_EDGE 	(0x2)
+#define TRIGGER_RISING_EDGE 	(0x4)
+#define TRIGGER_BOTH_EDGE 		(0x6)
+
+#define FILTER_ENABLE 			(0x1)
+#define FILTER_DISABLE 			(0x0)
+#define FILTER_MASK 	 		(0x1)
+
+#define EINTFLT0_OFF  	(0x94)
+#define EINTFLT1_OFF  	(0x98)
+#define EINTFLT2_OFF  	(0x9C)
+#define EINTFLT3_OFF  	(0xA0)
+
+#define EINTFLT0_REG(BA) \
+		HW_REG((BA),EINTFLT0_OFF)
+	
+#define EINTFLT1_REG(BA) \
+		HW_REG((BA),EINTFLT1_OFF)
+
+#define EINTFLT2_REG(BA) \
+		HW_REG((BA),EINTFLT2_OFF)
+
+#define EINTFLT3_REG(BA) \
+		HW_REG((BA),EINTFLT3_OFF)
+
+#define EINTMASK_OFF 	(0xA4)
+#define EINTMASK_REG(BA) \
+	HW_REG((BA),EINTMASK_OFF)
+
+#define EINTPEND_OFF 	(0xA8)
+#define EINTPEND_REG(BA) \
+	HW_REG((BA),EINTPEND_OFF)
 
 
-#define SIGNAL_LOW_LEVEL 			0x000 //000
-#define SIGNAL_HIGH_LEVEL 			0x001 //001
-#define SIGNAL_FALL_EDGE_TRIGGERED  0x002 //01x
-#define SIGNAL_RISE_EDGE_TRIGGERED  0x004 //10x
-#define SIGNAL_BOTH_EDGE_TRIGGERED  0x006 //11x
+#define enable_external_interrupt(BA,mask) \
+	clear_reg_params((EINTMASK_REG(BA)),mask)
 
+#define clear_external_interrupts(BA,mask) \
+	set_reg_params((EINTMASK_REG(BA)),mask)
 
-#define EINTFLT0_OFF 			0x94
-#define EINTFLT1_OFF 			0x98
-#define EINTFLT2_OFF 			0x9C
-#define EINTFLT3_OFF 			0xA0
+#define clear_pending_interrupts(BA,mask) \
+	set_reg_params((EINTPEND_REG(BA)),mask)
 
-
-#define EINTFLT0_REG(BA) 	\
-	HW_REG(BA,EINTFLT0_OFF)
-
-#define EINTFLT1_REG(BA) 	\
-	HW_REG(BA,EINTFLT1_OFF)
-
-#define EINTFLT2_REG(BA) 	\
-	HW_REG(BA,EINTFLT2_OFF)
-
-#define EINTFLT3_REG(BA) 	\
-	HW_REG(BA,EINTFLT3_OFF)
-
-
-#define FILTER_ENABLE 				0x0001
-
-#define EINTMASK_OFF 				0xA4
-
-#define EINTMASK_REG(BA) 	\
-	HW_REG(BA,EINTMASK_OFF)
-
-#define enable_interrupt(BA,mask) \
-	clear_reg_params(EINTMASK_REG(BA),mask)
-
-#define EINTPND_OFF 				0xA8
-#define EINTPND_REG(BA) \
-	HW_REG(BA,EINTPND_OFF)
-
-
-
+#define get_pending_interrupts(BA,mask) \
+	((readreg32(EINTPEND_REG(BA))) & mask)
 
 #endif
