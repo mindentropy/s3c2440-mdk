@@ -22,7 +22,9 @@ void do_handle_undef()
 
 void do_handle_swi()
 {
-
+	while(1) {
+		blink_leds(LED2|LED3);
+	}
 }
 
 void do_handle_pabt()

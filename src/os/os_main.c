@@ -133,21 +133,23 @@ int main(void) {
 */
 
 	//init_sd_controller();
+	init_interrupt_controller();
 	init_gpio_button();
 
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
 
-		/*if(is_btn_K1_pressed(GPG_BA)) {
-			blink_leds(LED1|LED4);
+/*		if(is_btn_K1_pressed(GPG_BA)) {
+			print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
+			//blink_leds(LED1|LED4);
 		}*/
 //
 		//Test for interrupt --> Passed as it jumps to the interrupt handler.
-/*		
- 		__asm__ __volatile__ (
+		
+ 		/*__asm__ __volatile__ (
 			"swi 0x123456\n\t"
-		);
-*/
+		);*/
+
 
 	//	uart_puts(UART0_BA,"TB\r\n");
 

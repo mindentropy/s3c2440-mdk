@@ -151,12 +151,19 @@
 /******** GPIO Button **********/
 #ifdef MINI2440
 
-#define K1_GPIO_BTN 		(BIT0)
-#define K2_GPIO_BTN 		(BIT3)
-#define K3_GPIO_BTN 		(BIT5)
-#define K4_GPIO_BTN 		(BIT6)
-#define K5_GPIO_BTN 		(BIT7)
-#define K6_GPIO_BTN 		(BIT11)
+#define K1_GPIO_PIN_POS		0
+#define K2_GPIO_PIN_POS		3
+#define K3_GPIO_PIN_POS		5
+#define K4_GPIO_PIN_POS		6
+#define K5_GPIO_PIN_POS		7
+#define K6_GPIO_PIN_POS		11
+
+#define K1_GPIO_BTN_PIN 		BIT(K1_GPIO_PIN_POS)
+#define K2_GPIO_BTN_PIN 		BIT(K2_GPIO_PIN_POS)
+#define K3_GPIO_BTN_PIN 		BIT(K3_GPIO_PIN_POS)
+#define K4_GPIO_BTN_PIN 		BIT(K4_GPIO_PIN_POS)
+#define K5_GPIO_BTN_PIN 		BIT(K5_GPIO_PIN_POS)
+#define K6_GPIO_BTN_PIN 		BIT(K6_GPIO_PIN_POS)
 
 #define K1_GPIO_EINT 		(EINT8)
 #define K2_GPIO_EINT 		(EINT11)
@@ -222,6 +229,15 @@
 
 //void set_gpio_clk_dbg();
 //void set_gpio_uart_ch0();
+
+
+#define GPIO_INPUT_FN 		0x0U
+#define GPIO_OUTPUT_FN  	0x1U
+#define GPIO_EINT_FN  		0x2U
+#define GPIO_EXTERNAL_FN    0x3U
+
+#define set_gpio_function(GPIO_FN,GPIO_PIN) \
+	(GPIO_FN)<<(GPIO_PIN<<1)
 
 #define set_gpio_con(BA,param) \
 	set_reg_params(GPCON_REG(BA),param)
