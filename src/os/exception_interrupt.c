@@ -7,14 +7,7 @@
 
 extern void blink_leds(unsigned int leds);
 
-
-void blink_led_test()
-{
-	while(1)
-		blink_leds(LED2|LED3);
-}
-
-
+/*
 void do_handle_undef()
 {
 
@@ -49,3 +42,14 @@ void do_handle_fiq()
 {
 	
 }
+
+void do_handle_reserved()
+{
+	
+}
+
+void do_handle_reset()
+{
+	
+}
+*/

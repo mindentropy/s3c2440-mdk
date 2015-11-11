@@ -5,6 +5,8 @@
 #include "common.h"
 #include "gpio_def.h"
 
+#define EXCEPTION_INTERRUPT_VECTOR_TABLE_START 0x33F00000
+
 /* The translation table base address should be @16kB boundary */
 #define TRANSLATION_TABLE_BASE_ADDR (0x33000000U)
 
