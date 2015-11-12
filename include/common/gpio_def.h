@@ -299,10 +299,10 @@
 #define clear_external_interrupts(BA,mask) \
 	set_reg_params((EINTMASK_REG(BA)),mask)
 
-#define clear_pending_interrupts(BA,mask) \
+#define clear_external_pending_interrupts(BA,mask) \
 	set_reg_params((EINTPEND_REG(BA)),mask)
 
-#define get_pending_interrupts(BA,mask) \
+#define get_external_pending_interrupts(BA,mask) \
 	((readreg32(EINTPEND_REG(BA))) & mask)
 
 #endif

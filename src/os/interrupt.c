@@ -1,5 +1,6 @@
 #include "interrupt.h"
 #include "uart_util.h"
+#include "exception_interrupt.h"
 
 #define IRQ_FIQ_MASK 0xC0
 
@@ -24,4 +25,5 @@ void init_interrupt_controller(void)
 {
 	clear_interrupt_source_pending(INT_BA,0xFFFFFFFFU);
 	enable_irq_fiq();
+	init_jmp_table();
 }

@@ -1,6 +1,7 @@
 #include "gpio_button.h"
 #include "interrupt.h"
 #include "uart_util.h"
+#include "exception_interrupt.h"
 
 /* MINI2440 Button Diagram 
  * -----------------------
@@ -17,6 +18,12 @@
  *
  */
 
+
+void EINT8_23_handler(void)
+{
+	clear_external_pending_interrupts(GPIO_BA,EINT8);
+	test_blink_led();
+}
 
 void init_gpio_button()
 {
@@ -52,7 +59,7 @@ void init_gpio_button()
 								|(TRIGGER_FALLING_EDGE<<24)
 								|(TRIGGER_FALLING_EDGE<<20)
 								|(TRIGGER_FALLING_EDGE<<12)
-								|(TRIGGER_BOTH_EDGE<<0));
+								|(TRIGGER_FALLING_EDGE<<0));
 	
 	enable_external_interrupt((GPIO_BA),
 								K1_GPIO_EINT
@@ -65,4 +72,7 @@ void init_gpio_button()
 	print_hex_uart(UART0_BA,readreg32(EINTMASK_REG(GPIO_BA)));
 	enable_interrupt_service(INT_BA,EINT8_23);
 
+
+	add_irq_handler(INT_EINT8_23_OFFSET,EINT8_23_handler);
 }
+

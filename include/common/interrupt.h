@@ -134,20 +134,17 @@ enum int_offset
 #define enable_all_interrupts(BA) \
 	writereg32(INTMSK_REG(BA),0x0)
 
-
 #define disable_all_interrupt_subservice(BA) \
 	writereg32(INTSUBMSK_REG(BA),0xFFFF)
 	
 #define enable_all_interrupt_subservice(BA) \
 	writereg32(INTSUBMSK_REG(BA),0)
-	
 
 #define enable_interrupt_sub_service(BA,mask) \
 	clear_reg_params(INTSUBMSK_REG(BA),mask)
 
 #define disable_interrupt_sub_service(BA,mask) \
 	set_reg_params(INTSUBMSK_REG(BA),mask)
-
 
 #define get_interrupt_pending_status(BA,interrupt_line) \
 	(readreg32(INTPND_REG(BA)) & (interrupt_line))
@@ -168,7 +165,10 @@ enum int_offset
 	set_reg_params(INTMSK_REG(BA),interrupt_mask)
 
 #define clear_interrupt_source_pending(BA,src_pnd_mask) \
-	writereg32(SRCPND_REG(BA),src_pnd_mask)
+	set_reg_params(SRCPND_REG(BA),src_pnd_mask)
+
+#define clear_interrupt_pending(BA,pnd_mask) \
+	set_reg_params(INTPND_REG(BA),pnd_mask)
 
 void init_interrupt_controller(void);
 

@@ -58,14 +58,6 @@ void dump_cpu_info()
 }
 
 
-void blink_leds(uint32_t leds) 
-{
-	led_on(leds);
-	test_delay();
-	led_off(leds);
-	test_delay();
-}
-
 void last_boot_cause() 
 {
 	uart_puts(UART0_BA,"Last boot cause : ");
