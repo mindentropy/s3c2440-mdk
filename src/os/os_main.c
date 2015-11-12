@@ -66,14 +66,6 @@ void blink_leds(uint32_t leds)
 	test_delay();
 }
 
-void test_blink_led()
-{
-	led_on(LED1|LED2|LED3|LED4);
-	test_delay();
-	led_off(LED1|LED2|LED3|LED4);
-	test_delay();
-}
-
 void last_boot_cause() 
 {
 	uart_puts(UART0_BA,"Last boot cause : ");

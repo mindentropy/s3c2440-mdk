@@ -1,5 +1,5 @@
 .equ LED_MASK, 0x1E0
-.equ LED_BLINK_DELAY, 8000
+.equ LED_BLINK_DELAY, 20
 
 .section .isrhandler,"ax"
 
@@ -31,24 +31,20 @@ do_handle_dabt:
 do_handle_reserved:
 	b do_handle_reserved
 
-/*  
-	LED1 BIT5
-	LED2 BIT6
-	LED3 BIT7
-	LED4 BIT8
-*/
 
 .globl do_handle_irq
 do_handle_irq:
 	sub lr,lr,#4 @Subtract r14(lr) by 4.
-	stmfd sp!, {r0-r12,lr} @Save r0-r12 and lr
-
-looper:
-	bl test_blink_led
-	b looper
-
-
-
+	stmfd sp!, {r0-r12,lr} @Save r0-r12 and lr. 
+							@sp! indicates sp will be subtracted by the sizes of the registers saved.
+							@Instruction details can be read in ARM System Developers guide book at Pg 65.
+							
+	bl handle_irq
+	
+	ldmfd sp!, {r0-r12,pc}^ 	@Restore the stack values to r0 and r12. Next restore lr to pc.
+							@The ^ indicates the spsr has to copied to cpsr. The cpsr was copied to spsr
+							@when the interrupt was generated.
+	
 
 .globl do_handle_fiq
 do_handle_fiq:

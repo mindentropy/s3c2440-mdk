@@ -13,4 +13,6 @@ void do_handle_irq() 		__attribute__((section(".isrhandler")));
 void do_handle_fiq() 		__attribute__((section(".isrhandler")));
 */
 
+void handle_irq(void);
+
 #endif

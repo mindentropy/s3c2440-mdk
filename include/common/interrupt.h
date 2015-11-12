@@ -126,6 +126,8 @@ enum int_offset
 	INT_ADC_OFFSET,
 };
 
+#define NUM_OF_INTERRUPT_SRCS INT_ADC_OFFSET+1
+
 #define  disable_all_interrupts(BA) \
 	writereg32(INTMSK_REG(BA),0xFFFFFFFF)
 	
