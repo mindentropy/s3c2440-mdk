@@ -293,10 +293,10 @@
 	HW_REG((BA),EINTPEND_OFF)
 
 
-#define enable_external_interrupt(BA,mask) \
+#define unmask_external_interrupts(BA,mask) \
 	clear_reg_params((EINTMASK_REG(BA)),mask)
 
-#define clear_external_interrupts(BA,mask) \
+#define mask_external_interrupts(BA,mask) \
 	set_reg_params((EINTMASK_REG(BA)),mask)
 
 #define clear_external_pending_interrupts(BA,mask) \

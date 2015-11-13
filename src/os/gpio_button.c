@@ -21,8 +21,10 @@
 
 void EINT8_23_handler(void)
 {
+	mask_external_interrupts(GPIO_BA,EINT8);
 	clear_external_pending_interrupts(GPIO_BA,EINT8);
 	test_blink_led();
+	unmask_external_interrupts(GPIO_BA,EINT8);
 }
 
 void init_gpio_button()
@@ -59,9 +61,10 @@ void init_gpio_button()
 								|(TRIGGER_FALLING_EDGE<<24)
 								|(TRIGGER_FALLING_EDGE<<20)
 								|(TRIGGER_FALLING_EDGE<<12)
+								|(FILTER_ENABLE<<3)
 								|(TRIGGER_FALLING_EDGE<<0));
 	
-	enable_external_interrupt((GPIO_BA),
+	unmask_external_interrupts((GPIO_BA),
 								K1_GPIO_EINT
 								|K2_GPIO_EINT
 								|K3_GPIO_EINT
@@ -70,8 +73,8 @@ void init_gpio_button()
 								|K6_GPIO_EINT);
 	
 	print_hex_uart(UART0_BA,readreg32(EINTMASK_REG(GPIO_BA)));
-	enable_interrupt_service(INT_BA,EINT8_23);
 
+	enable_interrupt_service(INT_BA,EINT8_23);
 
 	add_irq_handler(INT_EINT8_23_OFFSET,EINT8_23_handler);
 }

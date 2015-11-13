@@ -58,9 +58,11 @@ void handle_irq(void)
  *
  */
 
-
 	
 	offset = readreg32(INTOFFSET_REG(INT_BA));
+
+	mask_interrupt(INT_BA,BIT(offset));
+
 	interrupt_handler_jmp_table[offset]();
 
 	/*
@@ -70,12 +72,13 @@ void handle_irq(void)
 
 
 	clear_interrupt_pending(INT_BA,BIT(offset));
+
+	unmask_interrupt(INT_BA,BIT(offset));
+
+	print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
 	print_hex_uart(UART0_BA,readreg32(INTPND_REG(INT_BA)));
-
-
-/*	print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
 	print_hex_uart(UART0_BA,readreg32(SRCPND_REG(INT_BA)));
-	print_hex_uart(UART0_BA,readreg32(INTOFFSET_REG(INT_BA)));*/
+	print_hex_uart(UART0_BA,readreg32(INTOFFSET_REG(INT_BA)));
 }
 
 

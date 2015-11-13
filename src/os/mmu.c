@@ -82,10 +82,6 @@ static void setup_interrupt_vector_table()
 			i<(uint32_t)__exception_vector_reloc_endaddr__; 
 				i++) {
 		*vector_table = *src;
-
-		print_hex_uart_ch(UART0_BA,*vector_table);
-		uart_puts(UART0_BA," ");
-
 		vector_table++;
 		src++;
 	}
