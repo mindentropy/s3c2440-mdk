@@ -43,6 +43,7 @@ void add_irq_handler(enum int_offset INT_OFFSET,
 void handle_irq(void)
 {
 	uint8_t offset = 0;
+
 /*
  * Handling of interrupts
  * ======================
@@ -50,24 +51,31 @@ void handle_irq(void)
  * SRCPND and INTPND register.
  *
  * To service the interrupt:
- * 1) Clear the SRCPND register.
+ * 1) Clear the SRCPND register. See pg.14-14 of S3C2440 manual.
  * 2) Clear the interrupt pending register. --> Only 1 bit will be set.
  *
  * If the interrupt is a GPIO then clear the EINT field in EINTPEND register.
  *
  */
-	
-	//print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
-	//print_hex_uart(UART0_BA,readreg32(SRCPND_REG(INT_BA)));
-	//print_hex_uart(UART0_BA,readreg32(INTPND_REG(INT_BA)));
-	//print_hex_uart(UART0_BA,readreg32(INTOFFSET_REG(INT_BA)));
+
+
 	
 	offset = readreg32(INTOFFSET_REG(INT_BA));
+	interrupt_handler_jmp_table[offset]();
 
-	clear_interrupt_pending(INT_BA,BIT(offset));
+	/*
+	 * NOTE: Clear the interrupt source pending before interrupt pending. See pg.14-14 of S3C2440 manual
+	 */
 	clear_interrupt_source_pending(INT_BA,BIT(offset));
 
-	interrupt_handler_jmp_table[offset]();
+
+	clear_interrupt_pending(INT_BA,BIT(offset));
+	print_hex_uart(UART0_BA,readreg32(INTPND_REG(INT_BA)));
+
+
+/*	print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
+	print_hex_uart(UART0_BA,readreg32(SRCPND_REG(INT_BA)));
+	print_hex_uart(UART0_BA,readreg32(INTOFFSET_REG(INT_BA)));*/
 }
 
 
