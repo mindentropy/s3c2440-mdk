@@ -39,20 +39,20 @@ do_handle_irq:
 	stmfd sp!, {r0-r12,lr} @Save r0-r12 and lr. 
 							@sp! indicates sp will be subtracted by the sizes of the registers saved.
 							@Instruction details can be read in ARM System Developers guide book at Pg 65.
-
-	/* Disable IRQ and FIQ */
-	mrs r0,cpsr
-	orr r0,r0,#IRQ_FIQ_MASK
-	msr cpsr,r0
-	/**********************/
+	/*
+	 * Note on disabling and enabling CPU IRQ.
+	 * ======================================
+	 * There is no need to disable IRQ when in IRQ mode. When there is 
+	 * an interrupt the processor switches to IRQ mode with the I bit 
+	 * enabled which means it is masked.
+	 *
+	 * It was tested by printing the cpsr_irq which had the value
+	 * 0x60000092. The 7th bit is set which means the IRQ flag is set.
+	 *
+	 * This is the same case with the FIQ.
+	 */
 							
 	bl handle_irq
-
-	/*Enable IRQ and FIQ */
-	mrs r0,cpsr
-	bic r0,r0,#IRQ_FIQ_MASK
-	msr cpsr,r0
-	/**********************/
 	
 	ldmfd sp!, {r0-r12,pc}^ 	@Restore the stack values to r0 and r12. Next restore lr to pc.
 							@The ^ indicates the spsr has to copied to cpsr. The cpsr was copied to spsr
