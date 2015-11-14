@@ -92,13 +92,14 @@ void handle_irq(void)
 	clear_interrupt_source_pending(INT_BA,BIT(offset));
 	clear_interrupt_pending(INT_BA,BIT(offset));
 
-
+/*
 	uart_puts(UART0_BA,"----\n");
 
 	print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
 	print_hex_uart(UART0_BA,readreg32(INTPND_REG(INT_BA)));
 	print_hex_uart(UART0_BA,readreg32(SRCPND_REG(INT_BA)));
 	print_hex_uart(UART0_BA,readreg32(INTOFFSET_REG(INT_BA)));
+*/
 
 //	unmask_interrupt(INT_BA,BIT(offset));
 

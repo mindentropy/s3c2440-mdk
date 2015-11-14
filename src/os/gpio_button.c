@@ -19,117 +19,27 @@
  */
 
 extern void (*external_interrupt_handler_jmp_table[])(void);
+
 //TODO: Improve the below function.
 void EINT8_23_handler(void)
 {
-	uint8_t offset = 0;
+	uint8_t offset = EINT_OFFSET_START;
 
-	for(offset = EINT_OFFSET_START; offset<NUM_OF_EXTERNAL_INTERRUPT_SRCS; offset++) {
+	/* 
+	 * This will reduce the iterations needed if there are no bits set. 
+	 * The bits are cleared by setting the pending interrupt bit 
+	 */
+
+	//Check if there are any pending interrupts.
+	while(get_external_pending_interrupts(GPIO_BA,0xFFFFFFFF)) { 
 		if(get_external_pending_interrupts(GPIO_BA,BIT(offset))) {
 			external_interrupt_handler_jmp_table[offset]();
-			unmask_external_pending_interrupts(GPIO_BA,BIT(offset));
+
+			//Clear off the pending interrupt bit.
+			unmask_external_pending_interrupts(GPIO_BA,BIT(offset)); 
 		}
+		offset++;
 	}
-
-/*	if(get_external_pending_interrupts(GPIO_BA,EINT4)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT4);
-	} 
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT5)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT5);
-	} 
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT6)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT6);
-	} 
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT7)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT7);
-	} 
-	
-	if(get_external_pending_interrupts(GPIO_BA,EINT8)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT8);
-	} 
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT9)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT9);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT10)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT10);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT11)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT11);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT12)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT12);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT13)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT13);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT14)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT14);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT15)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT15);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT16)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT16);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT17)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT17);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT18)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT18);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT19)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT19);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT20)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT20);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT21)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT21);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT22)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT22);
-	}
-
-	if(get_external_pending_interrupts(GPIO_BA,EINT23)) {
-		test_blink_led();
-		unmask_external_pending_interrupts(GPIO_BA,EINT23);
-	}*/
 }
 
 void init_gpio_button()
