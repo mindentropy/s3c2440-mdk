@@ -19,6 +19,9 @@
 #define set_ulcon_reg(UART_BA,param_mask) \
 	set_reg_params(ULCON_REG(UART_BA),param_mask)
 
+#define write_ulcon_reg(UART_BA,param_mask) \
+	writereg32(ULCON_REG(UART_BA),param_mask)
+
 /* Parity Mask */
 #define INFRARED_MODE 		(BIT6)
 #define PARITY_MODE  		(BIT5|BIT4|BIT3)
@@ -47,6 +50,9 @@
 #define set_ucon_reg(UART_BA,param_mask) \
 	set_reg_params(UCON_REG(UART_BA),param_mask)
 
+#define write_ucon_reg(UART_BA,param_mask) \
+	writereg32(UCON_REG(UART_BA),param_mask)
+
 #define FCLK_DIVIDER 				(BIT15|BIT14|BIT13|BIT12)
 #define CLOCK_SELECTION 			(BIT11|BIT10)
 
@@ -71,17 +77,17 @@
 
 #define TRANSMIT_MODE_POS (2)
 
-#define TRANSMIT_MODE_DISABLE 		(0)
-#define TRANSMIT_MODE_INTR_REQ 		(BIT2)
-#define TRANSMIT_MODE_DMA0_DMA3_REQ (BIT3)
-#define TRANSMIT_MODE_DMA1_REQ 		(BIT3|BIT2)
+#define TRANSMIT_MODE_DISABLE 				(0)
+#define TRANSMIT_MODE_INTR_REQ_OR_POLLING 	(BIT2)
+#define TRANSMIT_MODE_DMA0_DMA3_REQ 		(BIT3)
+#define TRANSMIT_MODE_DMA1_REQ 				(BIT3|BIT2)
 
 #define RECEIVE_MODE 				(BIT1|BIT0)
 
-#define RECEIVE_MODE_DISABLE 		(0)
-#define RECEIVE_MODE_INTR_REQ 		(BIT0)
-#define RECEIVE_MODE_DMA0_DMA3_REQ 	(BIT1)
-#define RECEIVE_MODE_DMA1_REQ 		(BIT1|BIT0)
+#define RECEIVE_MODE_DISABLE 				(0)
+#define RECEIVE_MODE_INTR_REQ_OR_POLLING 	(BIT0)
+#define RECEIVE_MODE_DMA0_DMA3_REQ 			(BIT1)
+#define RECEIVE_MODE_DMA1_REQ 				(BIT1|BIT0)
 
 
 /* UART FIFO Control Register Base Address */
@@ -92,6 +98,9 @@
 
 #define set_ufcon_reg(UART_BA,param_mask) \
 	set_reg_params(UFCON_REG(UART_BA),param_mask)
+
+#define write_ufcon_reg(UART_BA,param_mask) \
+	writereg32(UFCON_REG(UART_BA),param_mask)
 
 #define Tx_FIFO_TRIGGER_LVL 	(BIT7|BIT6)
 

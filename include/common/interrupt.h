@@ -199,6 +199,9 @@ enum eint_offset {
 #define clear_interrupt_source_pending(BA,src_pnd_mask) \
 	set_reg_params(SRCPND_REG(BA),src_pnd_mask)
 
+#define clear_interrupt_sub_source_pending(BA,sub_src_pnd_mask) \
+	set_reg_params(SUBSRCPND_REG(BA),sub_src_pnd_mask)
+
 #define clear_interrupt_pending(BA,pnd_mask) \
 	set_reg_params(INTPND_REG(BA),pnd_mask)
 

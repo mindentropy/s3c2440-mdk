@@ -67,18 +67,29 @@ void init_uart(uint32_t UART_BA)
 	set_ulcon_reg(UART_BA,WORD_LENGTH_8BITS);
 	//writereg32(ULCON_REG(UART_BA),WORD_LENGTH); //Set line control.
 	
-	set_ucon_reg(UART_BA,
-			(PCLK_SELECT|Tx_INTR_TYPE_LVL|Rx_INTR_TYPE_LVL|Rx_TIMEOUT_ENABLE|
-			TRANSMIT_MODE_INTR_REQ|RECEIVE_MODE_INTR_REQ));
+	write_ucon_reg(UART_BA,
+				(PCLK_SELECT
+				|Rx_TIMEOUT_ENABLE
+				|Tx_INTR_TYPE_LVL
+				|Rx_INTR_TYPE_LVL
+				|TRANSMIT_MODE_INTR_REQ_OR_POLLING
+				|RECEIVE_MODE_INTR_REQ_OR_POLLING
+				)
+				);
 	
 
 	/* NOTE: PCLK set to 50MHz. Baud rate set to 26 for 115200*/
 	set_uart_brdiv(UART_BA,get_uart_brdiv(UART_BA,BAUD_115200));
 
-	set_ufcon_reg(UART_BA,Tx_FIFO_RESET|Rx_FIFO_RESET);
-	set_ufcon_reg(UART_BA,FIFO_ENABLE);
+	write_ufcon_reg(UART_BA,Tx_FIFO_RESET|Rx_FIFO_RESET);
+	write_ufcon_reg(UART_BA,FIFO_ENABLE);
 
 	add_irq_handler(INT_UART0_OFFSET,uart0_interrupt_handler);
+	
+	clear_interrupt_sub_source_pending(INT_BA,(INT_TXD0|INT_RXD0|INT_ERR0));
+	clear_interrupt_source_pending(INT_BA,INT_UART0);
+	clear_interrupt_pending(INT_BA,INT_UART0);
+
 	unmask_interrupt_service(INT_BA,INT_UART0);
 }
 

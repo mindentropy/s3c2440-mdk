@@ -85,6 +85,13 @@ void blink_leds(uint32_t leds)
 	test_delay();
 }
 
+void dump_chip_id()
+{
+	uart_puts(UART0_BA,"chipid : ");
+	print_hex_uart(UART0_BA,get_gstatus_chipid());
+	uart_puts(UART0_BA,"\r\n");
+}
+
 int main(void) {
 
 	/* Note : Do not put any operations above this */
@@ -96,34 +103,36 @@ int main(void) {
 	mask_all_interrupts(INT_BA);
 	mask_all_interrupt_subservice(INT_BA);
 
-	set_clk_dbg_port();
 	init_clock();
+	mmu_init();
+	apb_clk_enable(CLK_BASE_ADDR,CLK_GPIO);
+	set_clk_dbg_port();
+	init_interrupt_controller();
 	//init_uart0();
-	init_uart(UART0_BA);
 
 	//puts("TB\r\n");
 
 	//apb_clk_enable_gpio();
-	apb_clk_enable(CLK_BASE_ADDR,CLK_GPIO);
+
+	nand_init();
+	init_uart(UART0_BA);
 
 	init_spkr();
 	init_led();
+	init_gpio_button();
+
 	led_off(LED4|LED3|LED2|LED1);
 
 	//sram_loc = 0;
 	
-	dump_clk();
+/*	dump_clk();
 	dump_cpu_info();
 	dump_cache_info();
-	mmu_init();
 
-	nand_init();
 
 	dump_nand_dbg();
-	uart_puts(UART0_BA,"chipid : ");
-	print_hex_uart(UART0_BA,get_gstatus_chipid());
-	uart_puts(UART0_BA,"\r\n");
-	last_boot_cause();
+	dump_chip_id();
+	last_boot_cause();*/
 
 	//init_lcd();
 /*	uart_puts(UART0_BA,"BRDIV:");
@@ -131,8 +140,7 @@ int main(void) {
 */
 
 	//init_sd_controller();
-	init_interrupt_controller();
-	init_gpio_button();
+
 
 /* Without delay the led blink rate is 2MHz. */
 	while(1) {
@@ -140,7 +148,7 @@ int main(void) {
 /*		if(is_btn_K1_pressed(GPG_BA)) {
 			print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
 		}*/
-		//blink_leds(LED1|LED4);
+		blink_leds(LED1|LED4);
 //
 		//Test for interrupt --> Passed as it jumps to the interrupt handler.
 		

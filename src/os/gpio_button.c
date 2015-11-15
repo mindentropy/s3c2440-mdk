@@ -100,7 +100,5 @@ void init_gpio_button()
 								|K6_GPIO_EINT);
 
 	unmask_interrupt_service(INT_BA,EINT8_23);
-
-	print_hex_uart(UART0_BA,readreg32(INTMSK_REG(INT_BA)));
 }
 

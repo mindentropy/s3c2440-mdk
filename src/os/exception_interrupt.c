@@ -97,8 +97,9 @@ void handle_irq(void)
 	print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
 	print_hex_uart(UART0_BA,readreg32(INTPND_REG(INT_BA)));
 	print_hex_uart(UART0_BA,readreg32(SRCPND_REG(INT_BA)));
+	print_hex_uart(UART0_BA,readreg32(SUBSRCPND_REG(INT_BA)));
 	print_hex_uart(UART0_BA,readreg32(INTOFFSET_REG(INT_BA)));
-
+	print_hex_uart(UART0_BA,readreg32(INTMSK_REG(INT_BA)));
 
 //	print_hex_uart(UART0_BA,cpsr_val);
 }
