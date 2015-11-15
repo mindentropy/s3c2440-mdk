@@ -37,6 +37,8 @@
 #define UCON_REG(UART_BA) \
 	HW_REG(UART_BA,UCON)
 
+#define set_ucon_reg(UART_BA,param_mask) \
+	set_reg_params(UCON_REG(UART_BA),param_mask)
 
 #define FCLK_DIVIDER 				(BIT15|BIT14|BIT13|BIT12)
 #define CLOCK_SELECTION 			(BIT11|BIT10)
@@ -193,6 +195,8 @@
 #define UBRDIV_REG(UART_BA) \
 	HW_REG(UART_BA,UBRDIV)
 
+#define set_uart_brdiv(UART_BA,value) \
+	writereg32(UBRDIV_REG(UART_BA),value)
 
 #define UBRDIVn     (SHORT_MASK)
 
