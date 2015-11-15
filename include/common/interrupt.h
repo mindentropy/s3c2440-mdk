@@ -190,10 +190,10 @@ enum eint_offset {
 #define set_fiq_mode(BA,interrupt_line) \
 	clear_reg_params(INTMOD_REG(BA),interrupt_line)
 
-#define enable_interrupt_service(BA,interrupt_mask) \
+#define unmask_interrupt_service(BA,interrupt_mask) \
 	clear_reg_params(INTMSK_REG(BA),interrupt_mask)
 
-#define disable_interrupt_service(BA,interrupt_mask) \
+#define mask_interrupt_service(BA,interrupt_mask) \
 	set_reg_params(INTMSK_REG(BA),interrupt_mask)
 
 #define clear_interrupt_source_pending(BA,src_pnd_mask) \

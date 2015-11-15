@@ -58,6 +58,7 @@ Flashing the loader:
    	  do a sudo insmod ./secbulk.ko
    c) Now from the s3c2440-mdk folder you can do a ../dnw/dnw-linux/src/dnw/dnw bin/mdk_loader.bin. This will start uploading
       the loader on the the NAND flash.
+   d) If you are using usbpush do a ~/usbpush_src_dir/usbpush bin/mdk_loader.bin
 5) To verify toggle the switch to NAND. A 'ldr' message should appear on your terminal program.
 6) Now to upload the OS on to the RAM use the 'uploader' program in the 'test_uploader' folder.
 7) To use the program type in ./test_uploader/uploader bin/mdk_os.bin. This will start uploading the OS on to the RAM.

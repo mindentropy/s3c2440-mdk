@@ -16,12 +16,19 @@
 #define ULCON_REG(UART_BA) \
 	HW_REG(UART_BA,ULCON)
 
+#define set_ulcon_reg(UART_BA,param_mask) \
+	set_reg_params(ULCON_REG(UART_BA),param_mask)
 
 /* Parity Mask */
-#define INFRARED_MODE BIT6
-#define PARITY_MODE  (BIT5|BIT4|BIT3)
-#define STOP_BIT (BIT2)
-#define WORD_LENGTH (BIT1|BIT0)
+#define INFRARED_MODE 		(BIT6)
+#define PARITY_MODE  		(BIT5|BIT4|BIT3)
+#define STOP_BIT 			(BIT2)
+#define WORD_LENGTH_MASK 	(BIT1|BIT0)
+#define WORD_LENGTH_5BITS 	(0)
+#define WORD_LENGTH_6BITS 	(BIT0)
+#define WORD_LENGTH_7BITS 	(BIT1)
+#define WORD_LENGTH_8BITS 	(BIT1|BIT0)
+
 
 #define PARITY_POS 				3
 
@@ -83,6 +90,8 @@
 #define UFCON_REG(UART_BA) \
 	HW_REG(UART_BA,UFCON)
 
+#define set_ufcon_reg(UART_BA,param_mask) \
+	set_reg_params(UFCON_REG(UART_BA),param_mask)
 
 #define Tx_FIFO_TRIGGER_LVL 	(BIT7|BIT6)
 
@@ -99,9 +108,7 @@
 #define Rx_FIFO_64B             (BIT5|BIT4)
 
 #define Tx_FIFO_RESET 			(BIT2)
-
 #define Rx_FIFO_RESET 			(BIT1)
-
 #define FIFO_ENABLE 			(BIT0)
 
 

@@ -79,19 +79,10 @@ void init_gpio_button()
 								|(FILTER_ENABLE<<3)
 								|(TRIGGER_FALLING_EDGE<<0));
 	
-	unmask_external_interrupts((GPIO_BA),
-								K1_GPIO_EINT
-								|K2_GPIO_EINT
-								|K3_GPIO_EINT
-								|K4_GPIO_EINT
-								|K5_GPIO_EINT
-								|K6_GPIO_EINT);
 	
-	print_hex_uart(UART0_BA,readreg32(EINTMASK_REG(GPIO_BA)));
-
-	enable_interrupt_service(INT_BA,EINT8_23);
-
 	add_irq_handler(INT_EINT8_23_OFFSET,EINT8_23_handler);
+
+//	print_hex_uart(UART0_BA,readreg32(EINTMASK_REG(GPIO_BA)));
 
 	add_external_irq_handler(INT_EINT8_OFFSET,test_blink_led);
 	add_external_irq_handler(INT_EINT11_OFFSET,test_blink_led);
@@ -99,5 +90,17 @@ void init_gpio_button()
 	add_external_irq_handler(INT_EINT14_OFFSET,test_blink_led);
 	add_external_irq_handler(INT_EINT15_OFFSET,test_blink_led);
 	add_external_irq_handler(INT_EINT19_OFFSET,test_blink_led);
+
+	unmask_external_interrupts((GPIO_BA),
+								K1_GPIO_EINT
+								|K2_GPIO_EINT
+								|K3_GPIO_EINT
+								|K4_GPIO_EINT
+								|K5_GPIO_EINT
+								|K6_GPIO_EINT);
+
+	unmask_interrupt_service(INT_BA,EINT8_23);
+
+	print_hex_uart(UART0_BA,readreg32(INTMSK_REG(INT_BA)));
 }
 
