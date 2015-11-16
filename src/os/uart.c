@@ -54,8 +54,23 @@ void print_hex_uart_ch(uint32_t UART_BA, uint8_t num)
 
 void uart0_interrupt_handler(void)
 {
-	while(1)
+	/* Check if the interrupt is a Tx,Rx or Err. */
+
+	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_RXD0)) {
 		test_blink_led();
+		putc(UART0_BA,uart_readl_ch(UART0_BA));
+		clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_RXD0);
+	}
+
+	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_TXD0)) {
+
+		clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_TXD0);
+	}
+
+	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_ERR0)) {
+
+		clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_ERR0);
+	}
 }
 
 void init_uart(uint32_t UART_BA)
@@ -70,8 +85,6 @@ void init_uart(uint32_t UART_BA)
 	write_ucon_reg(UART_BA,
 				(PCLK_SELECT
 				|Rx_TIMEOUT_ENABLE
-				|Tx_INTR_TYPE_LVL
-				|Rx_INTR_TYPE_LVL
 				|TRANSMIT_MODE_INTR_REQ_OR_POLLING
 				|RECEIVE_MODE_INTR_REQ_OR_POLLING
 				)
@@ -86,10 +99,12 @@ void init_uart(uint32_t UART_BA)
 
 	add_irq_handler(INT_UART0_OFFSET,uart0_interrupt_handler);
 	
-	clear_interrupt_sub_source_pending(INT_BA,(INT_TXD0|INT_RXD0|INT_ERR0));
+	clear_interrupt_sub_source_pending(INT_BA,
+		(SUBSRC_INT_TXD0|SUBSRC_INT_RXD0|SUBSRC_INT_ERR0));
 	clear_interrupt_source_pending(INT_BA,INT_UART0);
 	clear_interrupt_pending(INT_BA,INT_UART0);
 
+	unmask_interrupt_subservice(INT_BA,(SUBSRC_INT_RXD0));
 	unmask_interrupt_service(INT_BA,INT_UART0);
 }
 

@@ -6,16 +6,16 @@
 
 
 #define uart_writel_ch(UART_BA,ch) \
-	writereg32(UTXH_L_REG(UART_BA),ch)
+	writereg8(UTXH_L_REG(UART_BA),ch)
 
 #define uart_writeb_ch(UART_BA,ch) \
-	writereg32(UTXH_B_REG(UART_BA),ch)
+	writereg8(UTXH_B_REG(UART_BA),ch)
 
 #define uart_readl_ch(UART_BA) \
-	readreg32(URXH_L_REG(UART_BA))
+	readreg8(URXH_L_REG(UART_BA))
 
 #define uart_readb_ch(UART_BA) \
-	readreg32(URXH_B_REG(UART_BA))
+	readreg8(URXH_B_REG(UART_BA))
 
 
 void init_uart(uint32_t UART_BA);
