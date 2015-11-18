@@ -56,21 +56,38 @@ void uart0_interrupt_handler(void)
 {
 	/* Check if the interrupt is a Tx,Rx or Err. */
 
+	uint32_t error_status = 0;
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_RXD0)) {
 		test_blink_led();
 		putc(UART0_BA,uart_readl_ch(UART0_BA));
-		clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_RXD0);
 	}
 
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_TXD0)) {
 
-		clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_TXD0);
 	}
 
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_ERR0)) {
+		error_status = get_uart_error_state(UART0_BA);
+													
 
-		clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_ERR0);
+		if(error_status & BREAK_DETECT) {
+			uart_puts(UART0_BA,"Break detect\n");
+		}
+
+		if(error_status & FRAME_ERROR) {
+			uart_puts(UART0_BA,"Frame error\n");
+		}
+
+		if(error_status & PARITY_ERROR) {
+			uart_puts(UART0_BA,"Parity error\n");
+		}
+
+		if(error_status & OVERRUN_ERROR) {
+			uart_puts(UART0_BA,"Overrun error\n");
+		}
 	}
+
+	clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_RXD0);
 }
 
 void init_uart(uint32_t UART_BA)
@@ -87,6 +104,7 @@ void init_uart(uint32_t UART_BA)
 				|Rx_TIMEOUT_ENABLE
 				|TRANSMIT_MODE_INTR_REQ_OR_POLLING
 				|RECEIVE_MODE_INTR_REQ_OR_POLLING
+				|Rx_ERROR_STATUS_INTR_ENABLE
 				)
 				);
 	
@@ -104,7 +122,7 @@ void init_uart(uint32_t UART_BA)
 	clear_interrupt_source_pending(INT_BA,INT_UART0);
 	clear_interrupt_pending(INT_BA,INT_UART0);
 
-	unmask_interrupt_subservice(INT_BA,(SUBSRC_INT_RXD0));
+	unmask_interrupt_subservice(INT_BA,(SUBSRC_INT_RXD0|SUBSRC_INT_ERR0));
 	unmask_interrupt_service(INT_BA,INT_UART0);
 }
 

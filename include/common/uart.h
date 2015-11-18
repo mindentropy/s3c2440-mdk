@@ -150,10 +150,15 @@
 	HW_REG(UART_BA,UERSTAT)
 
 
+#define ERROR_MASK      (0xFU)
 #define BREAK_DETECT 	(BIT3)
 #define FRAME_ERROR 	(BIT2)
 #define PARITY_ERROR 	(BIT1)
 #define OVERRUN_ERROR 	(BIT0)
+
+
+#define get_uart_error_state(UART_BA) \
+	(readreg32(UERSTAT_REG(UART_BA)) & ERROR_MASK)
 
 /* UART FIFO Status Register Base Address */
 #define UFSTAT 	0x18

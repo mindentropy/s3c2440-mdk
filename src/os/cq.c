@@ -1,10 +1,5 @@
 #include "cq.h"
 
-uint16_t tmptxcnt = 0;
-uint16_t tmprxcnt = 0;
-
-
-
 void cq_init(struct cq * const cq,uint16_t buffsize) {
 	cq->start = 0;
 	cq->end = 0;

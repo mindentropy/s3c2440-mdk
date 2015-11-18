@@ -148,7 +148,7 @@ int main(void) {
 /*		if(is_btn_K1_pressed(GPG_BA)) {
 			print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
 		}*/
-		blink_leds(LED1|LED4);
+//		blink_leds(LED1|LED4);
 //
 		//Test for interrupt --> Passed as it jumps to the interrupt handler.
 		
