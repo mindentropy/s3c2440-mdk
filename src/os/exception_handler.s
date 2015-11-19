@@ -2,6 +2,7 @@
 .equ LED_BLINK_DELAY, 20
 .equ IRQ_FIQ_MASK, 0xC0
 
+
 .section .isrhandler,"ax"
 
 
@@ -51,8 +52,25 @@ do_handle_irq:
 	 *
 	 * This is the same case with the FIQ.
 	 */
-							
+	
+
 	bl handle_irq
+
+	//Clear interrupt source pending
+
+	ldr r2,INTOFFSET    @Load the INTOFFSET value into r2
+	ldr r2,[r2]    		@Load the value in the address to r2
+
+	mov r3,#1 			@move 1 to r3.
+	mov r3,r3, LSL r2   @Shift left by INTOFFSET and store it in r3
+	
+	ldr r4,SRCPND
+	str r3,[r4] 		@Store the value of r3 in r4 address
+
+	ldr r4,INTPND
+	str r3,[r4] 		@Store the value of r3 in r4 address
+
+	
 	
 	ldmfd sp!, {r0-r12,pc}^ 	@Restore the stack values to r0 and r12. Next restore lr to pc.
 							@The ^ indicates the spsr has to copied to cpsr. The cpsr was copied to spsr
@@ -63,7 +81,10 @@ do_handle_irq:
 do_handle_fiq:
  	b do_handle_fiq
 
+GPBDAT: 	.word 		0x56000014
 
-GPBDAT: .word 		0x56000014
+SRCPND:     .word 		0x4A000000
+INTPND: 	.word  		0x4A000010
+INTOFFSET: 	.word 		0x4A000014
 
 .end

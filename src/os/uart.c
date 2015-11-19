@@ -4,6 +4,7 @@
 #include "clock_pm.h"
 #include "interrupt.h"
 #include "exception_interrupt.h"
+#include "led.h"
 
 const char hexchar[] = 
 	{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
@@ -55,11 +56,13 @@ void print_hex_uart_ch(uint32_t UART_BA, uint8_t num)
 void uart0_interrupt_handler(void)
 {
 	/* Check if the interrupt is a Tx,Rx or Err. */
-
+	char ch = 0;
 	uint32_t error_status = 0;
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_RXD0)) {
-		test_blink_led();
-		putc(UART0_BA,uart_readl_ch(UART0_BA));
+		led_on(LED1|LED2);
+		ch = uart_readl_ch(UART0_BA);
+		//putc(UART0_BA,uart_readl_ch(UART0_BA));
+		led_off(LED1|LED2);
 	}
 
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_TXD0)) {

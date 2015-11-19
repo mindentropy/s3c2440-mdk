@@ -5,7 +5,7 @@
 #include "interrupt.h"
 
 
-void handle_irq(void);
+void handle_irq(void); 
 void test_blink_led(void);
 
 void add_irq_handler(enum int_offset INT_OFFSET,

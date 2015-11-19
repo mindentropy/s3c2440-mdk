@@ -51,10 +51,14 @@ void add_external_irq_handler(enum eint_offset EINT_OFFSET,
 }
 
 
+/* 
+ * TODO: Handle irq can be handled in the exception_handler.s in assembly
+ * itself. Presently the following function is inefficient because of the
+ * wasted jump from handle_irq to the interrupt handler.
+ */
 
 void handle_irq(void)
 {
-	uint8_t offset = 0;
 	//uint32_t cpsr_val = 0;
 
 /*
@@ -80,26 +84,25 @@ void handle_irq(void)
 //		: "r0" /* r0 gets clobbered */
 //	);
 	
-	offset = readreg32(INTOFFSET_REG(INT_BA));
 
-	interrupt_handler_jmp_table[offset]();
+	interrupt_handler_jmp_table[readreg32(INTOFFSET_REG(INT_BA))]();
 	/*
 	 * NOTE: Clear the interrupt source pending before interrupt pending. See pg.14-14 of S3C2440 manual
 	 */
 
 	/*** Common interrupt handling procedure ***/
-	clear_interrupt_source_pending(INT_BA,BIT(offset));
-	clear_interrupt_pending(INT_BA,BIT(offset));
+//	clear_interrupt_source_pending(INT_BA,BIT(readreg32(INTOFFSET_REG(INT_BA))));
+//	clear_interrupt_pending(INT_BA,BIT(readreg32(INTOFFSET_REG(INT_BA))));
 
 
-	uart_puts(UART0_BA,"----\n");
+//	uart_puts(UART0_BA,"----\n");
 
 //	print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
-	print_hex_uart(UART0_BA,readreg32(INTPND_REG(INT_BA)));
+	/*print_hex_uart(UART0_BA,readreg32(INTPND_REG(INT_BA)));
 	print_hex_uart(UART0_BA,readreg32(SRCPND_REG(INT_BA)));
 	print_hex_uart(UART0_BA,readreg32(SUBSRCPND_REG(INT_BA)));
 	print_hex_uart(UART0_BA,readreg32(INTOFFSET_REG(INT_BA)));
-	print_hex_uart(UART0_BA,readreg32(INTMSK_REG(INT_BA)));
+	print_hex_uart(UART0_BA,readreg32(INTMSK_REG(INT_BA)));*/
 
 
 //	print_hex_uart(UART0_BA,cpsr_val);
