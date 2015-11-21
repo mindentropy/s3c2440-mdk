@@ -53,8 +53,17 @@ do_handle_irq:
 	 * This is the same case with the FIQ.
 	 */
 	
+	ldr r2,INTOFFSET    @Load the INTOFFSET value into r2
+	ldr r2,[r2]    		@Load the value in the address to r2
+	
 
-	bl handle_irq
+	ldr r3,=interrupt_handler_jmp_table @Load the address of the interrupt handler jump table.
+
+	mov lr,pc
+	ldr pc,[r3,r2,LSL #2] @Load the value which is the interrupt handler jmp table.
+
+
+//	bl handle_irq
 
 	//Clear interrupt source pending
 

@@ -59,6 +59,7 @@ void add_external_irq_handler(enum eint_offset EINT_OFFSET,
 
 void handle_irq(void)
 {
+	uint32_t int_ptr = 0;
 	//uint32_t cpsr_val = 0;
 
 /*
@@ -84,6 +85,34 @@ void handle_irq(void)
 //		: "r0" /* r0 gets clobbered */
 //	);
 	
+
+	__asm__ __volatile__ (
+		"ldr r3,=interrupt_handler_jmp_table\n\t"
+		"mov r1,#5\n\t"
+		"ldr r3,[r3,r1,LSL #2]\n\t"
+		"mov %0,r3\n\t"
+//		"str [r3],%0\n\t"
+		:[int_ptr]"=r"(int_ptr)
+		:
+		:"r3"
+	);
+
+
+
+
+/*	__asm__ __volatile__ (
+		"mov %0,r2\n\t"
+		:[int_ptr]"=r"(int_ptr)
+		:
+		:"r2"
+	);*/
+
+
+	print_hex_uart(UART0_BA,int_ptr);
+	print_hex_uart(UART0_BA,
+				(uint32_t)interrupt_handler_jmp_table[readreg32(INTOFFSET_REG(INT_BA))]);
+	print_hex_uart(UART0_BA,(uint32_t)interrupt_handler_jmp_table);
+//	print_hex_uart(UART0_BA,(uint32_t)&dummy_handler);
 
 	interrupt_handler_jmp_table[readreg32(INTOFFSET_REG(INT_BA))]();
 	/*
