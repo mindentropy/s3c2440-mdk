@@ -92,8 +92,10 @@ void dump_chip_id()
 	uart_puts(UART0_BA,"\r\n");
 }
 
-int main(void) {
+char buff[20];
+uint8_t result,i;
 
+int main(void) {
 	/* Note : Do not put any operations above this */
 	/* Disable watchdog.*/
 //	unsigned char *sram_loc;
@@ -148,7 +150,17 @@ int main(void) {
 /*		if(is_btn_K1_pressed(GPG_BA)) {
 			print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
 		}*/
+
 		blink_leds(LED1|LED4);
+
+		mask_interrupt_service(INT_BA,INT_UART0);
+		result = uart_getbuff(buff,20);
+		unmask_interrupt_service(INT_BA,INT_UART0);
+
+		for(i = 0;i<result;i++) 
+			putc(UART0_BA,buff[i]);
+		
+
 //
 		//Test for interrupt --> Passed as it jumps to the interrupt handler.
 		

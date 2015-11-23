@@ -6,6 +6,11 @@
 #include "exception_interrupt.h"
 #include "led.h"
 
+#include "cq.h"
+
+struct cq tx_q;
+struct cq rx_q;
+
 const char hexchar[] = 
 	{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
@@ -17,6 +22,20 @@ char getc(uint32_t UART_BA)
 	return uart_readl_ch(UART_BA);
 }
 
+
+int uart_getbuff(char *buff,int length)
+{
+	int i;
+	for(i = 0;i<length;i++) {
+		if(!cq_is_empty(&rx_q)) {
+			buff[i] = cq_del(&rx_q);
+		} else {
+			break;
+		}
+	}
+
+	return i;
+}
 
 void uart_puts(uint32_t UART_BA,const char *str)
 {
@@ -59,8 +78,13 @@ void uart0_interrupt_handler(void)
 	char ch = 0;
 	uint32_t error_status = 0;
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_RXD0)) {
+
 		led_on(LED1|LED2);
 		ch = uart_readl_ch(UART0_BA);
+		if(!cq_is_full(&rx_q)) {
+			cq_add(&rx_q,ch);
+		}
+
 		//putc(UART0_BA,uart_readl_ch(UART0_BA));
 		led_off(LED1|LED2);
 	}
@@ -117,6 +141,10 @@ void init_uart(uint32_t UART_BA)
 
 	write_ufcon_reg(UART_BA,Tx_FIFO_RESET|Rx_FIFO_RESET);
 	write_ufcon_reg(UART_BA,FIFO_ENABLE);
+
+	// Initialize Tx and Rx circular queue 
+	cq_init(&tx_q,32);
+	cq_init(&rx_q,32);
 
 	add_irq_handler(INT_UART0_OFFSET,uart0_interrupt_handler);
 	

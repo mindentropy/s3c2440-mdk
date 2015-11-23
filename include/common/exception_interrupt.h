@@ -15,4 +15,6 @@ void add_external_irq_handler(enum eint_offset EINT_OFFSET,
 
 void init_jmp_table(void);
 
+void dummy_handler(void);
+
 #endif

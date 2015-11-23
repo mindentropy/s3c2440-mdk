@@ -84,6 +84,8 @@ do_handle_irq:
 	ldmfd sp!, {r0-r12,pc}^ 	@Restore the stack values to r0 and r12. Next restore lr to pc.
 							@The ^ indicates the spsr has to copied to cpsr. The cpsr was copied to spsr
 							@when the interrupt was generated.
+							@The restoration of CPSR will change the mode to whatever mode was
+							@present before the interrupt was called.
 	
 
 .globl do_handle_fiq

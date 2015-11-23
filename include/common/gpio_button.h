@@ -30,5 +30,6 @@ void init_gpio_button();
 #define is_btn_K6_pressed(BA) 	\
 	((readreg32(GPDAT_REG(BA)) & K6_GPIO_BTN) == 0)
 
+void EINT8_23_handler(void);
 
 #endif

@@ -21,6 +21,9 @@
 void init_uart(uint32_t UART_BA);
 char getc(uint32_t UART_BA);
 void uart_puts(uint32_t UART_BA,const char *str);
+int uart_getbuff(char *ch,int length);
+
+void uart0_interrupt_handler(void);
 
 void print_hex_uart(uint32_t UART_BA,uint32_t num);
 void print_hex_uart_ch(uint32_t UART_BA,uint8_t num);
