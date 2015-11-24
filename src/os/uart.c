@@ -33,9 +33,9 @@ int uart_getbuff(char *buff,int length)
 			break;
 		}
 	}
-
 	return i;
 }
+
 
 void uart_puts(uint32_t UART_BA,const char *str)
 {
@@ -77,20 +77,23 @@ void uart0_interrupt_handler(void)
 	/* Check if the interrupt is a Tx,Rx or Err. */
 	char ch = 0;
 	uint32_t error_status = 0;
-	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_RXD0)) {
 
-		led_on(LED1|LED2);
+	led_on(LED1|LED2);
+
+	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_RXD0)) {
 		ch = uart_readl_ch(UART0_BA);
 		if(!cq_is_full(&rx_q)) {
 			cq_add(&rx_q,ch);
 		}
-
-		//putc(UART0_BA,uart_readl_ch(UART0_BA));
-		led_off(LED1|LED2);
+		clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_RXD0);
 	}
 
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_TXD0)) {
-
+		if(!cq_is_empty(&tx_q)) {
+			ch = cq_del(&tx_q);
+			uart_writel_ch(UART0_BA,ch);
+			clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_TXD0);
+		}
 	}
 
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_ERR0)) {
@@ -113,8 +116,8 @@ void uart0_interrupt_handler(void)
 			uart_puts(UART0_BA,"Overrun error\n");
 		}
 	}
+	led_off(LED1|LED2);
 
-	clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_RXD0);
 }
 
 void init_uart(uint32_t UART_BA)
