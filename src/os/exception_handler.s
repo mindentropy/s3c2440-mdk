@@ -73,9 +73,12 @@ do_handle_irq:
 	mov r3,#1 			@move 1 to r3.
 	mov r3,r3, LSL r2   @Shift left by INTOFFSET and store it in r3
 	
+
+	//Clear source pending register.
 	ldr r4,SRCPND
 	str r3,[r4] 		@Store the value of r3 in r4 address
 
+	//Clear interrupt pending register.
 	ldr r4,INTPND
 	str r3,[r4] 		@Store the value of r3 in r4 address
 

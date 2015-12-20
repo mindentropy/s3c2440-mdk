@@ -5,6 +5,7 @@
 #include "clock_pm.h"
 #include "gpio_def.h"
 #include "sd_mmc.h"
+#include "interrupt.h"
 
 void dump_cache_info()
 {
@@ -303,3 +304,15 @@ void parse_CSD_response_reg(uint32_t BA)
 	ack_cmd_resp(BA);
 }
 #endif
+
+void dump_interrupt_reg()
+{
+/*
+	uart_puts(UART0_BA,"INTSUBMSK :");
+	print_hex_uart(UART0_BA,
+			get_interrupt_subservice_status(INT_BA,0xFFFFFFFFU));
+
+	print_hex_uart(UART0_BA,
+			get_interrupt_sub_source_pending_status(INT_BA,0xFFFFFFFFU));
+*/
+}

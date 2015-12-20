@@ -4,6 +4,8 @@
 
 #include "uart.h"
 
+#define UART_Tx_BUFF_SIZE 	32
+#define UART_Rx_BUFF_SIZE 	32
 
 #define uart_writel_ch(UART_BA,ch) \
 	writereg8(UTXH_L_REG(UART_BA),ch)
@@ -21,7 +23,8 @@
 void init_uart(uint32_t UART_BA);
 char getc(uint32_t UART_BA);
 void uart_puts(uint32_t UART_BA,const char *str);
-int uart_getbuff(char *ch,int length);
+int uart_getbuff(char *buff,int length);
+uint32_t uart_int_puts(uint32_t UART_BA,char *buff,int length);
 
 void uart0_interrupt_handler(void);
 

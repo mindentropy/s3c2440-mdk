@@ -60,7 +60,7 @@ void wait_until_free()
 {
 	while(!get_RnB_status())
 	{
-		uart_puts(UART0_BA,"NAND Busy\n");
+		uart_puts(UART0_BA,"NAND Busy\r\n");
 	}
 }
 

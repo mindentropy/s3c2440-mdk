@@ -8,7 +8,7 @@
 #define MODSIZE (BUFFSIZE - 1)
 
 struct cq {
-	volatile uint8_t buff[BUFFSIZE];
+	volatile uint8_t *buff;
 	volatile uint16_t start;
 	volatile uint16_t end;
 	volatile uint16_t curfreesize;
@@ -16,7 +16,7 @@ struct cq {
 	volatile uint16_t modsize;
 };
 
-void cq_init(struct cq * const cq,uint16_t buffsize);
+void cq_init(struct cq * const cq,uint8_t *buff,uint16_t buffsize);
 uint8_t cq_is_empty(struct cq * const cq);
 uint8_t cq_is_full(struct cq * const cq);
 void cq_add(struct cq * const cq,uint8_t ch);

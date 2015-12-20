@@ -92,8 +92,10 @@ void dump_chip_id()
 	uart_puts(UART0_BA,"\r\n");
 }
 
+/*
 char buff[20];
 uint8_t result,i;
+*/
 
 int main(void) {
 	/* Note : Do not put any operations above this */
@@ -143,8 +145,19 @@ int main(void) {
 
 	//init_sd_controller();
 
-
 /* Without delay the led blink rate is 2MHz. */
+
+	//putc(UART0_BA,'c');
+	//dump_interrupt_reg();
+/*	
+ 	while(!uart_is_tx_empty(UART0_BA))
+		;
+
+	while(!uart_is_tx_buff_empty(UART0_BA))
+		;
+*/
+
+	
 	while(1) {
 
 /*		if(is_btn_K1_pressed(GPG_BA)) {
@@ -153,12 +166,21 @@ int main(void) {
 
 		blink_leds(LED1|LED4);
 
+
+		mask_interrupt_service(INT_BA,INT_UART0);
+		uart_int_puts(UART0_BA,"test\r\n",6);
+		unmask_interrupt_service(INT_BA,INT_UART0);
+
+
+/*
 		mask_interrupt_service(INT_BA,INT_UART0);
 		result = uart_getbuff(buff,20);
 		unmask_interrupt_service(INT_BA,INT_UART0);
 
+
 		for(i = 0;i<result;i++) 
 			putc(UART0_BA,buff[i]);
+*/
 		
 
 //

@@ -78,11 +78,12 @@
 #define INTSUBMSK_REG(BA) \
 		HW_REG((BA),INTSUBMSK_OFF)
 
-#define unmask_interrupt_subservice(BA,pnd_mask) \
-	clear_reg_params(INTSUBMSK_REG(BA),pnd_mask)
 
-#define mask_interrupt_subservice(BA,pnd_mask) \
-	clear_reg_params(INTSUBMSK_REG(BA),pnd_mask)
+#define unmask_interrupt_subservice(BA,mask) \
+	clear_reg_params(INTSUBMSK_REG(BA),mask)
+
+#define mask_interrupt_subservice(BA,mask) \
+	set_reg_params(INTSUBMSK_REG(BA),mask)
 
 #define mask_all_interrupt_subservice(BA) \
 	writereg32(INTSUBMSK_REG(BA),0xFFFF)
@@ -90,11 +91,8 @@
 #define unmask_all_interrupt_subservice(BA) \
 	writereg32(INTSUBMSK_REG(BA),0)
 
-#define mask_interrupt_sub_service(BA,mask) \
-	set_reg_params(INTSUBMSK_REG(BA),mask)
-
-#define unmask_interrupt_sub_service(BA,mask) \
-	clear_reg_params(INTSUBMSK_REG(BA),mask)
+#define get_interrupt_subservice_status(BA,mask) \
+	(readreg32(INTSUBMSK_REG(BA)) & mask)
 
 #define EINT0 				BIT0
 #define EINT1   			BIT1

@@ -1,9 +1,10 @@
 #include "cq.h"
 
-void cq_init(struct cq * const cq,uint16_t buffsize) {
+void cq_init(struct cq * const cq,uint8_t *buff,uint16_t buffsize) {
 	cq->start = 0;
 	cq->end = 0;
 	
+	cq->buff = buff;
 	cq->buffsize = buffsize;
 	cq->modsize = (cq->buffsize) - 1;
 	

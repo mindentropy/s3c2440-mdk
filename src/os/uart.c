@@ -11,6 +11,9 @@
 struct cq tx_q;
 struct cq rx_q;
 
+uint8_t txbuff[UART_Tx_BUFF_SIZE];
+uint8_t rxbuff[UART_Rx_BUFF_SIZE];
+
 const char hexchar[] = 
 	{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
@@ -36,6 +39,27 @@ int uart_getbuff(char *buff,int length)
 	return i;
 }
 
+uint32_t uart_int_puts(uint32_t UART_BA, char *buff, int length)
+{
+	int i = 0;
+
+	//Trigger the first interrupt if the buffer is empty.
+	if(uart_is_tx_empty(UART_BA)) {
+		uart_writel_ch(UART_BA,buff[i++]);
+	}
+
+	for( ;i<length; i++) {
+		if(!cq_is_full(&tx_q)) {
+			cq_add(&tx_q,buff[i]);
+		} else {
+			break;
+		}
+	}
+
+	led_on(LED2);
+
+	return i;
+}
 
 void uart_puts(uint32_t UART_BA,const char *str)
 {
@@ -62,6 +86,7 @@ void print_hex_uart(uint32_t UART_BA,uint32_t num)
 }
 
 
+
 void print_hex_uart_ch(uint32_t UART_BA, uint8_t num)
 {
 	uart_puts(UART_BA,"0x");
@@ -78,22 +103,35 @@ void uart0_interrupt_handler(void)
 	char ch = 0;
 	uint32_t error_status = 0;
 
-	led_on(LED1|LED2);
 
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_RXD0)) {
+		
 		ch = uart_readl_ch(UART0_BA);
-		if(!cq_is_full(&rx_q)) {
-			cq_add(&rx_q,ch);
+		if(!cq_is_full(&tx_q)) {
+			cq_add(&tx_q,ch);
 		}
+
+		//Trigger an interrupt with a first write.
+		if(uart_is_tx_empty(UART0_BA) && !cq_is_empty(&tx_q)) {
+			uart_writel_ch(UART0_BA,cq_del(&tx_q));
+		}
+		
 		clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_RXD0);
 	}
 
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_TXD0)) {
+		led_on(LED3);
 		if(!cq_is_empty(&tx_q)) {
-			ch = cq_del(&tx_q);
-			uart_writel_ch(UART0_BA,ch);
-			clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_TXD0);
+			uart_writel_ch(UART0_BA,cq_del(&tx_q));
 		}
+
+		/* 
+		 * Clear the sub source pending. After the character
+		 * is transmitted and the buffer is empty an interrupt is
+		 * again generated.
+		 */
+		clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_TXD0);
+		led_off(LED3);
 	}
 
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_ERR0)) {
@@ -116,7 +154,6 @@ void uart0_interrupt_handler(void)
 			uart_puts(UART0_BA,"Overrun error\n");
 		}
 	}
-	led_off(LED1|LED2);
 
 }
 
@@ -146,8 +183,8 @@ void init_uart(uint32_t UART_BA)
 	write_ufcon_reg(UART_BA,FIFO_ENABLE);
 
 	// Initialize Tx and Rx circular queue 
-	cq_init(&tx_q,32);
-	cq_init(&rx_q,32);
+	cq_init(&tx_q,txbuff,UART_Tx_BUFF_SIZE);
+	cq_init(&rx_q,rxbuff,UART_Rx_BUFF_SIZE);
 
 	add_irq_handler(INT_UART0_OFFSET,uart0_interrupt_handler);
 	
@@ -156,7 +193,19 @@ void init_uart(uint32_t UART_BA)
 	clear_interrupt_source_pending(INT_BA,INT_UART0);
 	clear_interrupt_pending(INT_BA,INT_UART0);
 
-	unmask_interrupt_subservice(INT_BA,(SUBSRC_INT_RXD0|SUBSRC_INT_ERR0));
+
+/*
+ * Note on Tx Interrupt:
+ * Tx interrupt happens when the Tx buffer is empty. This does not end there. There is
+ * one more constraint. From the documentation: 
+ * "In the Non-FIFO mode, transferring data from the transmit holding register to the transmit 
+ *  shifter will cause Tx interrupt under the Interrupt request and polling mode."
+ *
+ * So to kick start the interrupt we need to place a byte initially into the buffer. When
+ * this byte moves from the transmit holding register to the transmit shifter a Tx interrupt
+ * will signalled.
+ */
+	unmask_interrupt_subservice(INT_BA,(SUBSRC_INT_TXD0|SUBSRC_INT_RXD0|SUBSRC_INT_ERR0));
 	unmask_interrupt_service(INT_BA,INT_UART0);
 }
 
