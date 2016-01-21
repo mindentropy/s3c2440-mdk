@@ -129,14 +129,16 @@ int main(void) {
 
 	//sram_loc = 0;
 	
-/*	dump_clk();
+/*	
+	dump_clk();
 	dump_cpu_info();
 	dump_cache_info();
 
 
 	dump_nand_dbg();
 	dump_chip_id();
-	last_boot_cause();*/
+	last_boot_cause();
+*/
 
 	//init_lcd();
 /*	uart_puts(UART0_BA,"BRDIV:");
@@ -149,15 +151,8 @@ int main(void) {
 
 	//putc(UART0_BA,'c');
 	//dump_interrupt_reg();
-/*	
- 	while(!uart_is_tx_empty(UART0_BA))
-		;
-
-	while(!uart_is_tx_buff_empty(UART0_BA))
-		;
-*/
-
 	
+
 	while(1) {
 
 /*		if(is_btn_K1_pressed(GPG_BA)) {
@@ -166,11 +161,11 @@ int main(void) {
 
 		blink_leds(LED1|LED4);
 
-
+/*
 		mask_interrupt_service(INT_BA,INT_UART0);
 		uart_int_puts(UART0_BA,"test\r\n",6);
 		unmask_interrupt_service(INT_BA,INT_UART0);
-
+*/
 
 /*
 		mask_interrupt_service(INT_BA,INT_UART0);

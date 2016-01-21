@@ -54,7 +54,7 @@ LD = $(TOOLCHAIN_PREFIX)ld
 OBJCOPY = $(TOOLCHAIN_PREFIX)objcopy
 
 
-CONDITIONAL_FLAGS = -DMINI2440 -DNAND_FLASH_K9K8G08U0D -DLCD_P35
+CONDITIONAL_FLAGS = -DMINI2440 -DNAND_FLASH_K9K8G08U0D -DLCD_P35 -DUART_NO_INT
 ASFLAGS = -mcpu=arm9tdmi  -gstabs
 CFLAGS = -mcpu=arm9tdmi -Wall -g -nostdlib -nodefaultlibs -O0 -ffreestanding $(CONDITIONAL_FLAGS) -I$(COMMON_INC_DIR)
 LDFLAGS =  -Wl,--build-id=none -nostartfiles -nostdlib -nodefaultlibs -lgcc -L.

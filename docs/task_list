@@ -79,7 +79,9 @@ constraints present. RAM will be initialized by supervivi. With this we can
 build different components. -->Done.
 
 2) Design a polling driver. --> Done
-3) Design a interrupt driven driver. -->
+3) Design a interrupt driven driver. --> Done.
+4) Port existing terminal using functions to the interrupt driver driver. Create a 
+   ifdef structure so that any of the options can be used.
 
 USB HOST CONTROLLER
 -------------------

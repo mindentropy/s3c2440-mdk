@@ -39,28 +39,29 @@ int uart_getbuff(char *buff,int length)
 	return i;
 }
 
-uint32_t uart_int_puts(uint32_t UART_BA, char *buff, int length)
+#ifdef UART_INT
+void uart_puts(uint32_t UART_BA,const char *str)
 {
-	int i = 0;
-
 	//Trigger the first interrupt if the buffer is empty.
 	if(uart_is_tx_empty(UART_BA)) {
-		uart_writel_ch(UART_BA,buff[i++]);
+		uart_writel_ch(UART_BA,*str);
+		str++;
 	}
 
-	for( ;i<length; i++) {
+	while((*str) != '\0') {
 		if(!cq_is_full(&tx_q)) {
-			cq_add(&tx_q,buff[i]);
+			cq_add(&tx_q,*str);
+			str++;
 		} else {
 			break;
 		}
 	}
-
-	led_on(LED2);
-
-	return i;
 }
 
+#endif
+
+
+#ifdef UART_NO_INT
 void uart_puts(uint32_t UART_BA,const char *str)
 {
 	while((*str) != '\0') {
@@ -68,8 +69,7 @@ void uart_puts(uint32_t UART_BA,const char *str)
 		str++;
 	}
 }
-
-
+#endif
 
 void print_hex_uart(uint32_t UART_BA,uint32_t num) 
 {
