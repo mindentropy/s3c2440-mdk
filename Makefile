@@ -54,9 +54,17 @@ LD = $(TOOLCHAIN_PREFIX)ld
 OBJCOPY = $(TOOLCHAIN_PREFIX)objcopy
 
 
-CONDITIONAL_FLAGS = -DMINI2440 -DNAND_FLASH_K9K8G08U0D -DLCD_P35 -DUART_NO_INT
+COMMON_FLAGS = -DMINI2440 -DNAND_FLASH_K9K8G08U0D -DLCD_P35
+LOADER_CONDITIONAL_FLAGS = -DMINI2440 -DNAND_FLASH_K9K8G08U0D -DLCD_P35 -DUART_NO_INT
+OS_CONDITIONAL_FLAGS = -DMINI2440 -DNAND_FLASH_K9K8G08U0D -DLCD_P35 -DUART_INT
+
 ASFLAGS = -mcpu=arm9tdmi  -gstabs
-CFLAGS = -mcpu=arm9tdmi -Wall -g -nostdlib -nodefaultlibs -O0 -ffreestanding $(CONDITIONAL_FLAGS) -I$(COMMON_INC_DIR)
+
+COMMON_CFLAGS = -mcpu=arm9tdmi -Wall -g -nostdlib -nodefaultlibs -O0 -ffreestanding  $(COMMON_FLAGS) -I$(COMMON_INC_DIR)
+LOADER_CFLAGS = -mcpu=arm9tdmi -Wall -g -nostdlib -nodefaultlibs -O0 -ffreestanding $(LOADER_CONDITIONAL_FLAGS) -I$(COMMON_INC_DIR)
+OS_CFLAGS = -mcpu=arm9tdmi -Wall -g -nostdlib -nodefaultlibs -O0 -ffreestanding $(OS_CONDITIONAL_FLAGS) -I$(COMMON_INC_DIR)
+
+
 LDFLAGS =  -Wl,--build-id=none -nostartfiles -nostdlib -nodefaultlibs -lgcc -L.
 
 
@@ -83,19 +91,19 @@ $(EXEOS): $(OS_AS_OBJ_FILES) $(OS_OBJ_FILES) $(COMMON_OBJS)
 	ls -al $(BIN_DIR)/mdk_os.bin
 
 $(COMMON_OBJ_DIR)/%.o: $(COMMON_SRC_DIR)/%.c 
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(COMMON_CFLAGS) $< -o $@
 
 $(OS_OBJ_DIR)/%.o: $(OS_SRC_DIR)/%.s
 	$(AS) $(ASFLAGS) $< -o $@
 
 $(OS_OBJ_DIR)/%.o: $(OS_SRC_DIR)/%.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(OS_CFLAGS) $< -o $@
 
 $(LOADER_OBJ_DIR)/%.o: $(LOADER_SRC_DIR)/%.s
 	$(AS) $(ASFLAGS) $< -o $@
 
 $(LOADER_OBJ_DIR)/%.o: $(LOADER_SRC_DIR)/%.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(LOADER_CFLAGS) $< -o $@
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)

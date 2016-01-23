@@ -9,14 +9,14 @@
 
 struct cq {
 	volatile uint8_t *buff;
-	volatile uint16_t start;
-	volatile uint16_t end;
-	volatile uint16_t curfreesize;
-	volatile uint16_t buffsize;
-	volatile uint16_t modsize;
+	volatile uint32_t start;
+	volatile uint32_t end;
+	volatile uint32_t curfreesize;
+	volatile uint32_t buffsize;
+	volatile uint32_t modsize;
 };
 
-void cq_init(struct cq * const cq,uint8_t *buff,uint16_t buffsize);
+void cq_init(struct cq * const cq,uint8_t *buff,uint32_t buffsize);
 uint8_t cq_is_empty(struct cq * const cq);
 uint8_t cq_is_full(struct cq * const cq);
 void cq_add(struct cq * const cq,uint8_t ch);

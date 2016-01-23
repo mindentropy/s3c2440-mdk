@@ -55,6 +55,7 @@ void dump_clk()
 	print_hex_uart(UART0_BA,readreg32(CLKCON_REG(CLK_BASE_ADDR)));
 
 	uart_puts(UART0_BA,"************************\r\n");
+
 }
 
 void dump_nand_dbg()
@@ -307,12 +308,12 @@ void parse_CSD_response_reg(uint32_t BA)
 
 void dump_interrupt_reg()
 {
-/*
+
 	uart_puts(UART0_BA,"INTSUBMSK :");
 	print_hex_uart(UART0_BA,
 			get_interrupt_subservice_status(INT_BA,0xFFFFFFFFU));
 
 	print_hex_uart(UART0_BA,
 			get_interrupt_sub_source_pending_status(INT_BA,0xFFFFFFFFU));
-*/
+
 }

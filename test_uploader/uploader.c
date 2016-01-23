@@ -155,7 +155,7 @@ int main(int argc, char **argv)
 	}
 	
 	printf("\nOS uploaded\n");
-
+	fflush(stdout);
 #ifdef TEST_LCD
 	printf("Uploading picture of size :%u\n",pic_size);
 	sleep(2);

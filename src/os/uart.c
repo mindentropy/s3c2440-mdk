@@ -43,7 +43,9 @@ int uart_getbuff(char *buff,int length)
 void uart_puts(uint32_t UART_BA,const char *str)
 {
 	//Trigger the first interrupt if the buffer is empty.
-	if(uart_is_tx_empty(UART_BA)) {
+	mask_interrupt_service(INT_BA,INT_UART0);
+	
+	if(cq_is_empty(&tx_q) && uart_is_tx_empty(UART_BA)) {
 		uart_writel_ch(UART_BA,*str);
 		str++;
 	}
@@ -56,9 +58,32 @@ void uart_puts(uint32_t UART_BA,const char *str)
 			break;
 		}
 	}
+
+
+	unmask_interrupt_service(INT_BA,INT_UART0);
+}
+
+
+void putc(uint32_t UART_BA, const char ch)
+{
+	mask_interrupt_service(INT_BA,INT_UART0);
+
+	if(cq_is_empty(&tx_q) && uart_is_tx_empty(UART_BA)) {
+		uart_writel_ch(UART_BA,ch);
+	} else {
+		if(!cq_is_full(&tx_q)) {
+			cq_add(&tx_q,ch);
+		} else {
+			led_on(LED3);
+		}
+	}
+
+	unmask_interrupt_service(INT_BA,INT_UART0);
 }
 
 #endif
+
+
 
 
 #ifdef UART_NO_INT
@@ -120,7 +145,6 @@ void uart0_interrupt_handler(void)
 	}
 
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_TXD0)) {
-		led_on(LED3);
 		if(!cq_is_empty(&tx_q)) {
 			uart_writel_ch(UART0_BA,cq_del(&tx_q));
 		}
@@ -131,7 +155,6 @@ void uart0_interrupt_handler(void)
 		 * again generated.
 		 */
 		clear_interrupt_sub_source_pending(INT_BA,SUBSRC_INT_TXD0);
-		led_off(LED3);
 	}
 
 	if(get_interrupt_sub_source_pending_status(INT_BA,SUBSRC_INT_ERR0)) {

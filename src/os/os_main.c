@@ -112,11 +112,7 @@ int main(void) {
 	apb_clk_enable(CLK_BASE_ADDR,CLK_GPIO);
 	set_clk_dbg_port();
 	init_interrupt_controller();
-	//init_uart0();
 
-	//puts("TB\r\n");
-
-	//apb_clk_enable_gpio();
 
 	nand_init();
 	init_uart(UART0_BA);
@@ -129,16 +125,17 @@ int main(void) {
 
 	//sram_loc = 0;
 	
-/*	
+
+	//uart_puts(UART0_BA,"T\r\n");
 	dump_clk();
-	dump_cpu_info();
+/*	dump_cpu_info();
 	dump_cache_info();
 
 
 	dump_nand_dbg();
 	dump_chip_id();
-	last_boot_cause();
-*/
+	last_boot_cause();*/
+
 
 	//init_lcd();
 /*	uart_puts(UART0_BA,"BRDIV:");
@@ -152,20 +149,14 @@ int main(void) {
 	//putc(UART0_BA,'c');
 	//dump_interrupt_reg();
 	
-
 	while(1) {
 
 /*		if(is_btn_K1_pressed(GPG_BA)) {
 			print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
 		}*/
 
-		blink_leds(LED1|LED4);
+	//	blink_leds(LED1|LED4);
 
-/*
-		mask_interrupt_service(INT_BA,INT_UART0);
-		uart_int_puts(UART0_BA,"test\r\n",6);
-		unmask_interrupt_service(INT_BA,INT_UART0);
-*/
 
 /*
 		mask_interrupt_service(INT_BA,INT_UART0);

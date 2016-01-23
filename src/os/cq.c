@@ -1,6 +1,6 @@
 #include "cq.h"
 
-void cq_init(struct cq * const cq,uint8_t *buff,uint16_t buffsize) {
+void cq_init(struct cq * const cq,uint8_t *buff,uint32_t buffsize) {
 	cq->start = 0;
 	cq->end = 0;
 	
@@ -83,7 +83,6 @@ uint8_t cq_peek(struct cq * const cq,uint16_t index) {
 	} else {	
 		return cq->buff[(cq->start) + index];
 	}
-//	return cq->buff[(cq->start) + index];
 }
 
 uint16_t cq_freesize(struct cq * const cq) {

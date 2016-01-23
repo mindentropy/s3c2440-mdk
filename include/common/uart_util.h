@@ -46,6 +46,8 @@ uint32_t isTxBuffEmpty(uint32_t channel);
 	((readreg32(UTRSTAT_REG(UART_BA)) & Rx_BUFF_DATA_RDY) == (Rx_BUFF_DATA_RDY))
 	
 
+#ifdef UART_NO_INT
+
 #define putc(UART_BA,ch) \
 { \
 	uart_writel_ch(UART_BA,ch); \
@@ -53,5 +55,10 @@ uint32_t isTxBuffEmpty(uint32_t channel);
 		; \
 }
 
+#endif
+
+#ifdef UART_INT
+void putc(uint32_t UART_BA, const char ch);
+#endif
 
 #endif
