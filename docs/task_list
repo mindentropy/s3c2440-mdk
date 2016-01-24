@@ -18,7 +18,6 @@ Generic board bring up
 1) Code to bring up to main -> Done
 2) Creation of linker scripts to handle the binary -> Partially done. Optimization -> Pending.
 
-
 Memory Management Unit
 ----------------------
 
@@ -79,15 +78,22 @@ constraints present. RAM will be initialized by supervivi. With this we can
 build different components. -->Done.
 
 2) Design a polling driver. --> Done
-3) Design a interrupt driven driver. --> Done.
+3) Design a interrupt driven driver. --> Done. but blocks until the buffer full condition is
+	partially drained.
 4) Port existing terminal using functions to the interrupt driver driver. Create a 
-   ifdef structure so that any of the options can be used.
+   ifdef structure so that any of the options can be used. --> Done.
+5) Provide support for FIFO.
+6) Provide support for DMA.
 
 USB HOST CONTROLLER
 -------------------
+1) Bring up the USB host controller block.
+2) 
 
 USB DEVICE CONTROLLER
 ---------------------
+1) Bring up the USB device controller block.
+
 
 INTERRUPT CONTROLLER
 --------------------

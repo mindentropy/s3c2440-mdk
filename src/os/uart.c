@@ -39,45 +39,61 @@ int uart_getbuff(char *buff,int length)
 	return i;
 }
 
+
 #ifdef UART_INT
+/*
+ * NOTE: uart_puts and putc still blocks until the buffer sent to it is drained completely.
+ * TODO: Return the data written so that user space can decide to further drain the buffer.
+ * TODO: Use the UART FIFO to create an additional buffer and reduce the costly per character
+ * 		interrupts.
+ */
 void uart_puts(uint32_t UART_BA,const char *str)
 {
 	//Trigger the first interrupt if the buffer is empty.
-	mask_interrupt_service(INT_BA,INT_UART0);
-	
-	if(cq_is_empty(&tx_q) && uart_is_tx_empty(UART_BA)) {
-		uart_writel_ch(UART_BA,*str);
-		str++;
-	}
 
+//	mask_interrupt_service(INT_BA,INT_UART0);
 	while((*str) != '\0') {
+
+		mask_interrupt_service(INT_BA,INT_UART0);
+		if(cq_is_empty(&tx_q) && uart_is_tx_buff_empty(UART_BA)) {
+			uart_writel_ch(UART_BA,*str);
+			unmask_interrupt_service(INT_BA,INT_UART0);
+			str++;
+			continue;
+		}
+
 		if(!cq_is_full(&tx_q)) {
 			cq_add(&tx_q,*str);
+			unmask_interrupt_service(INT_BA,INT_UART0);
 			str++;
 		} else {
-			break;
+			led_on(LED3);
+			unmask_interrupt_service(INT_BA,INT_UART0);
+			continue;
 		}
 	}
-
-
-	unmask_interrupt_service(INT_BA,INT_UART0);
+//	unmask_interrupt_service(INT_BA,INT_UART0);
 }
 
 
 void putc(uint32_t UART_BA, const char ch)
 {
-	mask_interrupt_service(INT_BA,INT_UART0);
 
-	if(cq_is_empty(&tx_q) && uart_is_tx_empty(UART_BA)) {
-		uart_writel_ch(UART_BA,ch);
-	} else {
-		if(!cq_is_full(&tx_q)) {
-			cq_add(&tx_q,ch);
+	while(1) {
+		mask_interrupt_service(INT_BA,INT_UART0);
+		if(cq_is_empty(&tx_q) && uart_is_tx_buff_empty(UART_BA)) {
+			uart_writel_ch(UART_BA,ch);
+			break;
 		} else {
-			led_on(LED3);
+			if(!cq_is_full(&tx_q)) {
+				cq_add(&tx_q,ch);
+				break;
+			} else {
+				unmask_interrupt_service(INT_BA,INT_UART0);
+				continue;
+			}
 		}
 	}
-
 	unmask_interrupt_service(INT_BA,INT_UART0);
 }
 

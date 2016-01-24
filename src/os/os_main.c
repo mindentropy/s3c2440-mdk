@@ -124,17 +124,19 @@ int main(void) {
 	led_off(LED4|LED3|LED2|LED1);
 
 	//sram_loc = 0;
-	
 
-	//uart_puts(UART0_BA,"T\r\n");
+	//uart_puts(UART0_BA,"**********************\r\n");
+/*	putc(UART0_BA,'t');
+	putc(UART0_BA,'\n');*/
+
 	dump_clk();
-/*	dump_cpu_info();
+	dump_cpu_info();
 	dump_cache_info();
 
 
 	dump_nand_dbg();
 	dump_chip_id();
-	last_boot_cause();*/
+	last_boot_cause();
 
 
 	//init_lcd();
@@ -146,7 +148,6 @@ int main(void) {
 
 /* Without delay the led blink rate is 2MHz. */
 
-	//putc(UART0_BA,'c');
 	//dump_interrupt_reg();
 	
 	while(1) {

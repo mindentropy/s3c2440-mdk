@@ -16,5 +16,6 @@
 void init_led();
 void led_on(unsigned led);
 void led_off(unsigned led);
+void toggle_led(unsigned led);
 
 #endif

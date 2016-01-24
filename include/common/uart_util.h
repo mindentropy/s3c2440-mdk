@@ -4,8 +4,8 @@
 
 #include "uart.h"
 
-#define UART_Tx_BUFF_SIZE 	64
-#define UART_Rx_BUFF_SIZE 	64
+#define UART_Tx_BUFF_SIZE 	16
+#define UART_Rx_BUFF_SIZE 	16
 
 #define uart_writel_ch(UART_BA,ch) \
 	writereg8(UTXH_L_REG(UART_BA),ch)

@@ -25,3 +25,12 @@ void led_on(unsigned led)
 {
 	clear_reg_params(GPDAT_REG(GPB_BA),led);
 }
+
+/*
+void toggle_led(unsigned led)
+{
+	set_reg_params(GPDAT_REG(GPB_BA),
+			(readreg32(GPDAT_REG(GPB_BA)) ^ (led)) );
+					
+}
+*/
