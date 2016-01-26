@@ -5,7 +5,7 @@
 #include "wdt.h"
 #include "spkr.h"
 #include "interrupt.h"
-#include "sdram.h"
+#include "memctl.h"
 #include "board_config.h"
 #include "cpu.h"
 #include "cache.h"
@@ -92,6 +92,7 @@ void dump_chip_id()
 	uart_puts(UART0_BA,"\r\n");
 }
 
+
 /*
 char buff[20];
 uint8_t result,i;
@@ -137,7 +138,8 @@ int main(void) {
 	dump_nand_dbg();
 	dump_chip_id();
 	last_boot_cause();
-
+	
+	dump_bank_regs();
 
 	//init_lcd();
 /*	uart_puts(UART0_BA,"BRDIV:");

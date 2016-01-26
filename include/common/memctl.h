@@ -1,6 +1,6 @@
-#ifndef SDRAM_H_
+#ifndef MEMCTL_H_
 
-#define SDRAM_H_
+#define MEMCTL_H_
 
 #include "common.h"
 #include "gpio_def.h"
@@ -49,6 +49,7 @@
 #define DW4_16b    			(BIT16)
 #define DW4_32b    			(BIT17)
 #define DW4_RESERVED   		(BIT17|BIT16)
+#define BANK4_CONFIG_MASK 	(BIT19|BIT18|BIT17|BIT16)
 
 #define ST3 				(BIT15)
 #define WS3        	 		(BIT14)

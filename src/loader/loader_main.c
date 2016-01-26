@@ -5,7 +5,7 @@
 #include "wdt.h"
 #include "spkr.h"
 #include "interrupt.h"
-#include "sdram.h"
+#include "memctl.h"
 #include "board_config.h"
 #include "uart_util.h"
 

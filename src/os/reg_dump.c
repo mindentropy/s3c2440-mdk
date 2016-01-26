@@ -6,6 +6,7 @@
 #include "gpio_def.h"
 #include "sd_mmc.h"
 #include "interrupt.h"
+#include "memctl.h"
 
 void dump_cache_info()
 {
@@ -316,4 +317,11 @@ void dump_interrupt_reg()
 	print_hex_uart(UART0_BA,
 			get_interrupt_sub_source_pending_status(INT_BA,0xFFFFFFFFU));
 
+}
+
+void dump_bank_regs()
+{
+	uart_puts(UART0_BA,"BWSCON :");
+	print_hex_uart(UART0_BA,
+					readreg32(BWSCON_REG(MEM_BA)));
 }
