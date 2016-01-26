@@ -64,7 +64,7 @@ Flashing the loader:
 7) To use the program type in ./test_uploader/uploader bin/mdk_os.bin. This will start uploading the OS on to the RAM.
 8) After the OS upload is complete it runs the mdk_os automatically.
 
----------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
 
 Developer diary:
 You can find me blogging about development of this here -> http://thesoulofamachine.blogspot.in/

@@ -18,7 +18,11 @@ void sdram_init()
 	/* Configure BANKCON6/BANKCON7 */
 	writereg32(BANKCON6_REG(MEM_BA),MT_SYNC_DRAM|SCAN_9BIT);
 
-	/* Set BANKCON7 to ROM/SRAM */
+	/* 
+	 * Set BANKCON7 to ROM/SRAM i.e 00 and not SYNC_DRAM.
+	 * Rest of the values should not be used as they are reserved
+	 * Default value is SYNC_DRAM which should not be used.
+	 */
 	writereg32(BANKCON7_REG(MEM_BA),MT_ROM_SRAM);
 
 	/* Configure SDRAM Refresh settings */

@@ -115,6 +115,13 @@
 #define CLKOUT0_PIN BIT9
 #define CLKOUT1_PIN BIT10
 
+/*
+ * MISCCR Register settings
+ */
+
+#define nEN_SCLK1 	BIT18
+#define nEN_SCLK0 	BIT17 
+
 void init_clock();
 void set_clk_dbg_port();
 void enable_gpio_clk();
