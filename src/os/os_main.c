@@ -139,7 +139,6 @@ int main(void) {
 	dump_chip_id();
 	last_boot_cause();
 	
-	dump_bank_regs();
 
 	//init_lcd();
 /*	uart_puts(UART0_BA,"BRDIV:");
@@ -151,14 +150,17 @@ int main(void) {
 /* Without delay the led blink rate is 2MHz. */
 
 	//dump_interrupt_reg();
+	//
+	init_ethernet();
 	
+	dump_bank_regs();
 	while(1) {
 
 /*		if(is_btn_K1_pressed(GPG_BA)) {
 			print_hex_uart(UART0_BA,readreg32(EINTPEND_REG(GPIO_BA)));
 		}*/
 
-	//	blink_leds(LED1|LED4);
+		blink_leds(LED1|LED4);
 
 
 /*
