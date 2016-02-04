@@ -19,7 +19,7 @@
 #include "usb_host_controller.h"
 #include "reg_dump.h"
 #include "gpio_button.h"
-
+#include "ethernet.h"
 
 #include <stdint.h>
 
@@ -151,7 +151,7 @@ int main(void) {
 
 	//dump_interrupt_reg();
 	//
-	init_ethernet();
+	//init_ethernet();
 	
 	dump_bank_regs();
 	while(1) {
