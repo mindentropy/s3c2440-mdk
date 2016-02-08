@@ -7,6 +7,7 @@
 #include "sd_mmc.h"
 #include "interrupt.h"
 #include "memctl.h"
+#include "usb_ohci.h"
 
 void dump_cache_info()
 {
@@ -324,4 +325,11 @@ void dump_bank_regs()
 	uart_puts(UART0_BA,"BWSCON :");
 	print_hex_uart(UART0_BA,
 					readreg32(BWSCON_REG(MEM_BA)));
+}
+
+void dump_usb_regs()
+{
+	uart_puts(UART0_BA,"HcRevision :");
+	print_hex_uart(UART0_BA,
+			readreg32(HC_REVISION_REG(USB_OHCI_BA)));
 }

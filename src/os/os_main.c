@@ -16,7 +16,7 @@
 #include "rtc.h"
 #include "adc_ts.h"
 #include "ac97.h"
-#include "usb_host_controller.h"
+#include "usb_ohci.h"
 #include "reg_dump.h"
 #include "gpio_button.h"
 #include "ethernet.h"
@@ -154,6 +154,8 @@ int main(void) {
 	//init_ethernet();
 	
 	dump_bank_regs();
+	dump_usb_regs();
+
 	while(1) {
 
 /*		if(is_btn_K1_pressed(GPG_BA)) {

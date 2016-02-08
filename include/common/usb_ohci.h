@@ -1,10 +1,10 @@
-#ifndef USB_HOST_CONTROLLER_H_
+#ifndef USB_OHCI_H_
 
-#define USB_HOST_CONTROLLER_H_
+#define USB_OHCI_H_
 
 #include "common.h"
 
-#define USB_HOST_CONTROLLER_BA 			(0x49000000U)
+#define USB_OHCI_BA 			(0x49000000U)
 
 #define HC_REVISION_OFF 				0x00
 #define HC_REVISION_REG(BA) \
@@ -14,13 +14,40 @@
 #define HC_CONTROL_REG(BA) \
 	HW_REG(BA,HC_CONTROL_OFF)
 
-#define HC_COMMON_STATUS_OFF 			0x08
-#define HC_COMMON_STATUS_REG(BA) \
-	HW_REG(BA,HC_COMMON_STATUS_OFF)
+#define CBSR_0 	0
+#define CBSR_1 	BIT0
+#define CBSR_2 	BIT1
+#define CBSR_3 	(BIT1|BIT0)
+
+#define PLE 	BIT2
+#define IE 	 	BIT3
+#define CLE 	BIT4
+#define BLE 	BIT5
+
+#define HCFS_USB_RESET 			0
+#define HCFS_USB_RESUME 		BIT6
+#define HCFS_USB_OPERATIONAL 	BIT7
+#define HCFS_USB_SUSPEND 		BIT7|BIT6
+#define IR 						BIT8
+#define RWC 					BIT9
+#define RWE 					BIT10
+
+
+#define HC_COMMAND_STATUS_OFF 			0x08
+#define HC_COMMAND_STATUS_REG(BA) \
+	HW_REG(BA,HC_COMMAND_STATUS_OFF)
+
+#define HCR BIT0
+#define CLF BIT1
+#define BLF BIT2
+#define OCR BIT3
+
+#define SOC (BIT7|BIT6)
 
 #define HC_INTERRUPT_STATUS_OFF 		0x0C
 #define HC_INTERRUPT_STATUS_REG(BA) \
 	HW_REG(BA,HC_INTERRUPT_STATUS_OFF)
+
 
 #define HC_INTERRUPT_ENABLE_OFF 		0x10
 #define HC_INTERRUPT_ENABLE_REG(BA) \
@@ -31,14 +58,23 @@
 #define HC_INTERRUPT_DISABLE_REG(BA) \
 	HW_REG(BA,HC_INTERRUPT_DISABLE_OFF)
 
+#define SO 		BIT0
+#define WDH 	BIT1
+#define SF  	BIT2
+#define RD 		BIT3
+#define UE 		BIT4
+#define FNO  	BIT5
+#define RHSC 	BIT6
+#define OC 		BIT10
+#define MIE 	BIT11
 
 #define HC_HCCA_OFF 					0x18
 #define HC_HCCA_REG(BA) \
 	HW_REG(BA,HC_HCCA_OFF)
 
-#define HC_PERIOD_CUTTENT_ED_OFF 		0x1C
-#define HC_PERIOD_CUTTENT_ED_REG(BA) \
-	HW_REG(BA,HC_PERIOD_CUTTENT_ED_OFF)
+#define HC_PERIOD_CURRENT_ED_OFF 		0x1C
+#define HC_PERIOD_CURRENT_ED_REG(BA) \
+	HW_REG(BA,HC_PERIOD_CURRENT_ED_OFF)
 
 
 #define HC_CONTROL_HEAD_ED_OFF 			0x20
@@ -107,6 +143,9 @@
 #define HC_RH_PORT_STATUS2_OFF 			0x58
 #define HC_RH_PORT_STATUS2_REG(BA) \
 	HW_REG(BA,HC_RH_PORT_STATUS2_OFF)
+
+
+/**** OHCI functionality ****/
 
 
 #endif
