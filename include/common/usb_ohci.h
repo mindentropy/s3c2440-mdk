@@ -10,9 +10,13 @@
 #define HC_REVISION_REG(BA) \
 	HW_REG(BA,HC_REVISION_OFF)
 
+#define REV_MASK 	set_bit_range(7,0)
+
 #define HC_CONTROL_OFF 					0x04
 #define HC_CONTROL_REG(BA) \
 	HW_REG(BA,HC_CONTROL_OFF)
+
+#define HC_CONTROL_MASK 	set_bit_range(10,0)
 
 #define CBSR_0 	0
 #define CBSR_1 	BIT0
@@ -42,7 +46,7 @@
 #define BLF BIT2
 #define OCR BIT3
 
-#define SOC (BIT7|BIT6)
+#define SOC (BIT17|BIT16)
 
 #define HC_INTERRUPT_STATUS_OFF 		0x0C
 #define HC_INTERRUPT_STATUS_REG(BA) \
@@ -65,8 +69,8 @@
 #define UE 		BIT4
 #define FNO  	BIT5
 #define RHSC 	BIT6
-#define OC 		BIT10
-#define MIE 	BIT11
+#define OC 		BIT30
+#define MIE 	BIT31
 
 #define HC_HCCA_OFF 					0x18
 #define HC_HCCA_REG(BA) \
@@ -76,64 +80,100 @@
 #define HC_PERIOD_CURRENT_ED_REG(BA) \
 	HW_REG(BA,HC_PERIOD_CURRENT_ED_OFF)
 
+#define PCED_MASK 	set_bit_range(31,4)
 
 #define HC_CONTROL_HEAD_ED_OFF 			0x20
 #define HC_CONTROL_HEAD_ED_REG(BA) \
 	HW_REG(BA,HC_CONTROL_HEAD_ED_OFF)
 
+#define CHED_MASK 	set_bit_range(31,4)
 
 #define HC_CONTROL_CURRENT_ED_OFF 		0x24
 #define HC_CONTROL_CURRENT_ED_REG(BA) \
 	HW_REG(BA,HC_CONTROL_CURRENT_ED_OFF)
 
+#define CCED_MASK 	set_bit_range(31,4)
+
 #define HC_BULK_HEAD_ED_OFF 			0x28
 #define HC_BULK_HEAD_ED_REG(BA) \
 	HW_REG(BA,HC_BULK_HEAD_ED_OFF)
 
+#define BHED_MASK 	set_bit_range(31,4)
 
 #define HC_BULK_CURRENT_ED_OFF 			0x2C
 #define HC_BULK_CURRENT_ED_REG(BA) \
 	HW_REG(BA,HC_BULK_CURRENT_ED_OFF)
 
+#define BCED_MASK 	set_bit_range(31,4)
+
 #define HC_DONE_HEAD_OFF 				0x30
 #define HC_DONE_HEAD_REG(BA) \
 	HW_REG(BA,HC_DONE_HEAD_OFF)
 
+#define DH_MASK 	set_bit_range(31,4)
 
-#define HC_RM_INTERVAL_OFF 				0x34
-#define HC_RM_INTERVAL_REG(BA) \
-	HW_REG(BA,HC_RM_INTERVAL_OFF)
+#define HC_FM_INTERVAL_OFF 				0x34
+#define HC_FM_INTERVAL_REG(BA) \
+	HW_REG(BA,HC_FM_INTERVAL_OFF)
+
+#define FI_MASK 	set_bit_range(13,0)
+#define FSMPS_MASK 	set_bit_range(30,6)
+#define FIT_MASK 	BIT31
 
 #define HC_FM_REMAINING_OFF 			0x38
 #define HC_FM_REMAINING_REG(BA) \
 	HW_REG(BA,HC_FM_REMAINING_OFF)
 
+#define FR_MASK 	set_bit_range(13,0)
+#define FRT_MASK 	BIT31
+
 #define HC_FM_NUMBER_OFF 				0x3C
 #define HC_FM_NUMBER_REG(BA) \
 	HW_REG(BA,HC_FM_NUMBER_OFF)
+
+#define FN_MASK 	set_bit_range(15,0)
 
 #define HC_PERIOD_START_OFF 			0x40
 #define HC_PERIOD_START_REG(BA) \
 	HW_REG(BA,HC_PERIOD_START_OFF)
 
+#define PS_MASK 	set_bit_range(13,0)
+
 #define HC_LS_THRESHOLD_OFF 			0x44
 #define HC_LS_THRESHOLD_REG(BA) \
 	HW_REG(BA,HC_LS_THRESHOLD_OFF)
 
+#define LST_MASK 	set_bit_range(11,0)
 
 #define HC_RH_DESCRIPTOR_A_OFF 			0x48
 #define HC_RH_DESCRIPTOR_A_REG(BA) \
 	HW_REG(BA,HC_RH_DESCRIPTOR_A_OFF)
 
+#define NDP_MASK 	set_bit_range(7,0)
+#define PSM 		BIT8
+#define NPS 		BIT9
+#define DT 			BIT10
+#define OCPM 		BIT11
+#define NOCP 		BIT12
+#define POTPGT 		set_bit_range(31,24)
 
 #define HC_RH_DESCRIPTOR_B_OFF 			0x4C
 #define HC_RH_DESCRIPTOR_B_REG(BA) \
 	HW_REG(BA,HC_RH_DESCRIPTOR_B_OFF)
 
+#define DR_MASK 	set_bit_range(15,0)
+#define PPCM_MASK 	set_bit_range(31,16)
+
 #define HC_RH_STATUS_OFF 				0x50
 #define HC_RH_STATUS_REG(BA) \
 	HW_REG(BA,HC_RH_STATUS_OFF)
 
+#define LPS 			BIT0
+#define OCI 			BIT1
+#define DRWE 			BIT15
+#define LPSC 			BIT16
+#define OCIC_RH 		BIT17
+#define CRWE 			BIT31
 
 #define HC_RH_PORT_STATUS1_OFF 			0x54
 #define HC_RH_PORT_STATUS1_REG(BA) \
@@ -144,8 +184,67 @@
 #define HC_RH_PORT_STATUS2_REG(BA) \
 	HW_REG(BA,HC_RH_PORT_STATUS2_OFF)
 
+#define CCS 	BIT0
+#define PES 	BIT1
+#define PSS 	BIT2
+#define POCI 	BIT3
+#define PRS 	BIT4
+#define PPS 	BIT8
+#define LSDA 	BIT9
+#define CSC 	BIT16
+#define PESC 	BIT17
+#define PSSC 	BIT18
+#define OCIC 	BIT19
+#define PRSC 	BIT20
 
 /**** OHCI functionality ****/
 
+struct  __attribute__((packed)) HC_ENDPOINT_DESCRIPTOR
+{
+	uint32_t endpoint_ctrl;
+	uint32_t TailP;
+	uint32_t HeadP;
+	uint32_t NextED;
+};
+
+#define FA_MASK 		set_bit_range(6,0)
+#define EN_MASK 		set_bit_range(10,7)
+#define DIR_MASK  		BIT12|BIT11
+#define SPEED_MASK  	BIT13
+#define SKIP_MASK 		BIT14
+#define FORMAT_MASK 	BIT15
+#define MPS_MASK  		set_bit_range(26,16)
+
+#define TailP_MASK  	set_bit_range(31,4)
+#define HeadP_MASK  	set_bit_range(31,4)
+#define Halted 			BIT1
+#define TOGGLE_CARRY 	BIT0
+#define NextED_MASK 	set_bit_range(31,4)
+
+struct __attribute__((packed)) GENERAL_TRANSFER_DESCRIPTOR
+{
+	uint32_t td_control;
+	uint32_t current_buffer_pointer;
+	uint32_t next_td;
+	uint32_t buffer_end;
+};
+
+#define BUFFER_ROUNDING 	BIT18
+#define DP_SETUP 			(0)
+#define DP_OUT 				(BIT19)
+#define DP_IN 				(BIT20)
+#define DP_RESERVED 		(BIT20|BIT19)
+#define DP_MASK  			(BIT20|BIT19)
+#define DELAY_INTERRUPT 	(BIT23|BIT22|BIT21)
+#define DATA_TOGGLE 		(BIT25|BIT24)
+#define ERROR_COUNT 		(BIT27|BIT26)
+#define CONDITION_CODE 		set_bit_range(31,28)
+
+#define NEXT_TD_MASK 		set_bit_range(31,4)
+
+
+
+
+void init_ohci();
 
 #endif

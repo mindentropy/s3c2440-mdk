@@ -2,4 +2,5 @@
 
 void init_ohci()
 {
+	
 }
