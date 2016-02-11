@@ -239,11 +239,46 @@ struct __attribute__((packed)) GENERAL_TRANSFER_DESCRIPTOR
 #define DATA_TOGGLE 		(BIT25|BIT24)
 #define ERROR_COUNT 		(BIT27|BIT26)
 #define CONDITION_CODE 		set_bit_range(31,28)
-
 #define NEXT_TD_MASK 		set_bit_range(31,4)
 
 
+struct __attribute__((packed)) ISOCHRONOUS_TRANSFER_DESCRIPTOR
+{
+	uint32_t dword0;
+	uint32_t dword1;
+	uint32_t dword2;
+	uint32_t dword3;
+	uint32_t dword4;
+	uint32_t dword5;
+	uint32_t dword6;
+	uint32_t dword7;
+};
 
+
+#define SF_MASK  		set_bit_range(15,0)
+#define DI_MASK 		set_bit_range(23,21)
+#define FC_MASK 		set_bit_range(26,24)
+#define CC_MASK 		set_bit_range(31,28)
+
+#define BP0_MASK 		set_bit_range(31,12)
+#define ISO_NEXT_TD_MASK 	set_bit_range(31,5)
+
+#define OFF0_PSW0_MASK 	set_bit_range(15,0)
+#define OFF1_PSW1_MASK 	set_bit_range(31,16)
+#define OFF2_PSW2_MASK 	set_bit_range(15,0)
+#define OFF3_PSW3_MASK 	set_bit_range(31,16)
+#define OFF4_PSW4_MASK 	set_bit_range(15,0)
+#define OFF5_PSW5_MASK 	set_bit_range(31,16)
+#define OFF6_PSW6_MASK 	set_bit_range(15,0)
+#define OFF7_PSW7_MASK 	set_bit_range(31,16)
+
+struct __attribute__((packed)) PACKET_STATUS_WORD
+{
+	uint16_t PSW;
+};
+
+#define PSW_SIZE_MASK 	set_bit_range(10,0)
+#define PSW_CC 			set_bit_range(15,12)
 
 void init_ohci();
 
