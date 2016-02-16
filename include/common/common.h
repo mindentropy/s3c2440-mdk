@@ -120,4 +120,14 @@
 	((1<<(high+1)) - (1<<low))
 	
 
+/*
+ * n-byte alignment calculation
+ *
+ * See wiki on the calculation of padding:
+ * https://en.wikipedia.org/wiki/Data_structure_alignment#Computing_padding
+ */
+
+#define nbyte_align(offset,byte_align) \
+	((offset + byte_align - 1) & (~(byte_align - 1)))
+
 #endif

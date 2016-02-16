@@ -154,7 +154,8 @@ int main(void) {
 	//init_ethernet();
 	
 	dump_bank_regs();
-	dump_usb_regs();
+	//dump_usb_regs();
+	init_ohci();
 
 	while(1) {
 

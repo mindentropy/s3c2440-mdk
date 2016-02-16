@@ -4,6 +4,8 @@
 
 #include "common.h"
 
+
+
 #define USB_OHCI_BA 			(0x49000000U)
 
 #define HC_REVISION_OFF 				0x00
@@ -117,7 +119,7 @@
 	HW_REG(BA,HC_FM_INTERVAL_OFF)
 
 #define FI_MASK 	set_bit_range(13,0)
-#define FSMPS_MASK 	set_bit_range(30,6)
+#define FSMPS_MASK 	set_bit_range(30,16)
 #define FIT_MASK 	BIT31
 
 #define HC_FM_REMAINING_OFF 			0x38
@@ -276,6 +278,8 @@ struct __attribute__((packed)) PACKET_STATUS_WORD
 {
 	uint16_t PSW;
 };
+
+
 
 #define PSW_SIZE_MASK 	set_bit_range(10,0)
 #define PSW_CC 			set_bit_range(15,12)
