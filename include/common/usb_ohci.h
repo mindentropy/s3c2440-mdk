@@ -4,8 +4,6 @@
 
 #include "common.h"
 
-
-
 #define USB_OHCI_BA 			(0x49000000U)
 
 #define HC_REVISION_OFF 				0x00
@@ -78,6 +76,14 @@
 #define HC_HCCA_REG(BA) \
 	HW_REG(BA,HC_HCCA_OFF)
 
+struct __attribute__((packed)) HCCARegion {
+	uint32_t HccaInterruptTable[32];
+	uint16_t HccaFrameNumber;
+	uint16_t HccaPad1;
+	uint32_t HccaDoneHead;
+	uint8_t  HccaReserved[116];
+};
+
 #define HC_PERIOD_CURRENT_ED_OFF 		0x1C
 #define HC_PERIOD_CURRENT_ED_REG(BA) \
 	HW_REG(BA,HC_PERIOD_CURRENT_ED_OFF)
@@ -135,9 +141,9 @@
 
 #define FN_MASK 	set_bit_range(15,0)
 
-#define HC_PERIOD_START_OFF 			0x40
-#define HC_PERIOD_START_REG(BA) \
-	HW_REG(BA,HC_PERIOD_START_OFF)
+#define HC_PERIODIC_START_OFF 			0x40
+#define HC_PERIODIC_START_REG(BA) \
+	HW_REG(BA,HC_PERIODIC_START_OFF)
 
 #define PS_MASK 	set_bit_range(13,0)
 
