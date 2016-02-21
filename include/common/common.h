@@ -103,6 +103,12 @@
 	} while(0)
 
 
+#define set_regs_value(reg,mask,value,shift) \
+	do { \
+		writereg32(reg,(readreg32(reg) & ~mask) | ((value)<<(shift))); \
+	} while(0)
+
+
 /*
  *
  * For methods on bit range settings see:

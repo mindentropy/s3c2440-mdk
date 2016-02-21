@@ -4,6 +4,21 @@
 
 #include "common.h"
 
+#define MAX_ED_DESCRIPTORS 	(10)
+#define ED_SIZE 			(16)
+#define ED_SIZE_SHIFT 		(4)
+#define ED_TOTAL_SIZE  		(MAX_ED_DESCRIPTORS << ED_SIZE_SHIFT)
+
+#define MAX_TD_DESCRIPTORS 	(10)
+#define TD_SIZE 			(16)
+#define TD_SIZE_SHIFT 		(4)
+#define TD_TOTAL_SIZE 		(MAX_TD_DESCRIPTORS << TD_SIZE_SHIFT)
+
+#define MAX_ISO_TD_DESCRIPTORS 	(10)
+#define ISO_TD_SIZE 			(32)
+#define ISO_TD_SIZE_SHIFT 		(5)
+#define ISO_TD_TOTAL_SIZE  		(MAX_ISO_TD_DESCRIPTORS << ISO_TD_SIZE_SHIFT)
+
 #define USB_OHCI_BA 			(0x49000000U)
 
 #define HC_REVISION_OFF 				0x00
@@ -207,6 +222,8 @@ struct __attribute__((packed)) HCCARegion {
 
 /**** OHCI functionality ****/
 
+#define HC_ED_ALIGNMENT 	16
+
 struct  __attribute__((packed)) HC_ENDPOINT_DESCRIPTOR
 {
 	uint32_t endpoint_ctrl;
@@ -215,21 +232,95 @@ struct  __attribute__((packed)) HC_ENDPOINT_DESCRIPTOR
 	uint32_t NextED;
 };
 
+struct ed_info {
+	struct HC_ENDPOINT_DESCRIPTOR *hc_ed;
+	uint32_t size;
+};
+
+#define FA_SHIFT  		0
 #define FA_MASK 		set_bit_range(6,0)
+
+#define set_hc_ed_fa(reg,value) \
+	set_regs_value(reg,FA_MASK,value,FA_SHIFT)
+
 #define EN_MASK 		set_bit_range(10,7)
-#define DIR_MASK  		BIT12|BIT11
+#define EN_SHIFT  		7
+
+#define set_hc_ed_en(reg,value) \
+	set_regs_value(reg,EN_MASK,value,EN_SHIFT)
+
+#define DIR_MASK  		(BIT12|BIT11)
+#define DIR_SHIFT 		11
+
+#define GET_DIR_FROM_TD 	(0)
+#define OUT 				(1)
+#define IN 					(2)
+#define GET_DIR_FROM_TD1 	(3)
+
+#define set_hc_ed_dir(reg,value) \
+	set_regs_value(reg,DIR_MASK,value,DIR_SHIFT)
+
 #define SPEED_MASK  	BIT13
+#define SPEED_SHIFT 	13
+
+#define SLOW_SPEED 		0
+#define HIGH_SPEED 		1
+
+#define set_hc_ed_speed(reg,value) \
+	set_regs_value(reg,SPEED_MASK,value,SPEED_SHIFT)
+
 #define SKIP_MASK 		BIT14
+#define SKIP_SHIFT 		14
+
+#define set_hc_ed_skip(reg,value) \
+	set_regs_value(reg,SKIP_MASK,value,SKIP_SHIFT)
+
 #define FORMAT_MASK 	BIT15
+#define FORMAT_SHIFT 	15
+
+#define set_hc_ed_format(reg,value) \
+	set_regs_value(reg,FORMAT_MASK,value,FORMAT_SHIFT)
+
 #define MPS_MASK  		set_bit_range(26,16)
+#define MPS_SHIFT 		16
 
-#define TailP_MASK  	set_bit_range(31,4)
-#define HeadP_MASK  	set_bit_range(31,4)
-#define Halted 			BIT1
-#define TOGGLE_CARRY 	BIT0
-#define NextED_MASK 	set_bit_range(31,4)
+#define set_hc_ed_mps(reg,value) \
+	set_regs_value(reg,MPS_MASK,value,MPS_SHIFT)
 
-struct __attribute__((packed)) GENERAL_TRANSFER_DESCRIPTOR
+#define TAILP_MASK  	set_bit_range(31,4)
+#define TAILP_SHIFT 	4
+
+#define set_hc_ed_tailp(reg,value) \
+	set_regs_value(reg,TAILP_MASK,value,TAILP_SHIFT)
+
+#define HEADP_MASK  	set_bit_range(31,4)
+#define HEADP_SHIFT 	4
+
+#define set_hc_ed_headp(reg,value) \
+	set_regs_value(reg,HEADP_MASK,value,HEADP_SHIFT)
+
+#define HALT_ED_MASK 	BIT0
+#define HALT_ED_SHIFT 	0
+
+#define set_hc_ed_halted(reg,value) \
+	set_regs_value(reg,HALT_ED_MASK,value,HALT_ED_SHIFT)
+
+#define TOGGLE_CARRY_MASK 	BIT1
+#define TOGGLE_SHIFT 		1
+
+#define set_hc_ed_toggle(reg,value) \
+	set_regs_value(reg,TOGGLE_CARRY_MASK,value,TOGGLE_SHIFT)
+
+#define NEXT_ED_MASK 	set_bit_range(31,4)
+#define NEXT_ED_SHIFT 	4
+
+#define set_hc_ed_next_ed(reg,value) \
+	set_regs_value(reg,NEXT_ED_MASK,value,NEXT_ED_SHIFT)
+
+#define HC_GEN_TD_ALIGNMENT 	16
+
+
+struct __attribute__((packed)) GEN_TRANSFER_DESCRIPTOR
 {
 	uint32_t td_control;
 	uint32_t current_buffer_pointer;
@@ -237,18 +328,37 @@ struct __attribute__((packed)) GENERAL_TRANSFER_DESCRIPTOR
 	uint32_t buffer_end;
 };
 
-#define BUFFER_ROUNDING 	BIT18
-#define DP_SETUP 			(0)
-#define DP_OUT 				(BIT19)
-#define DP_IN 				(BIT20)
-#define DP_RESERVED 		(BIT20|BIT19)
-#define DP_MASK  			(BIT20|BIT19)
-#define DELAY_INTERRUPT 	(BIT23|BIT22|BIT21)
-#define DATA_TOGGLE 		(BIT25|BIT24)
-#define ERROR_COUNT 		(BIT27|BIT26)
-#define CONDITION_CODE 		set_bit_range(31,28)
-#define NEXT_TD_MASK 		set_bit_range(31,4)
+struct td_info {
+	struct GEN_TRANSFER_DESCRIPTOR *hc_gen_td;
+	uint32_t size;
+};
 
+#define BUFFER_ROUNDING_MASK 	BIT18
+#define BUFFER_ROUND 			BIT18
+#define BUFFER_ROUNDING_SHIFT 	18 
+
+#define DP_SETUP_SHIFT 			19
+
+#define DP_SETUP 				(0)
+#define DP_OUT 					(BIT19)
+#define DP_IN 					(BIT20)
+#define DP_RESERVED 			(BIT20|BIT19)
+
+#define DP_MASK  				(BIT20|BIT19)
+
+#define DELAY_INTERRUPT_MASK 	(BIT23|BIT22|BIT21)
+#define DELAY_INTERRUPT_SHIFT 	(21)
+
+#define DATA_TOGGLE_MASK		(BIT25|BIT24)
+#define DATA_TOGGLE_SHIFT 		(24)
+
+#define ERROR_COUNT_MASK		(BIT27|BIT26)
+#define ERROR_COUNT_SHIFT 		(26)
+
+#define CONDITION_CODE_MASK 	set_bit_range(31,28)
+#define CC_SHIFT 				(28)
+
+#define NEXT_TD_MASK 			set_bit_range(31,4)
 
 struct __attribute__((packed)) ISOCHRONOUS_TRANSFER_DESCRIPTOR
 {
@@ -291,5 +401,6 @@ struct __attribute__((packed)) PACKET_STATUS_WORD
 #define PSW_CC 			set_bit_range(15,12)
 
 void init_ohci();
+
 
 #endif

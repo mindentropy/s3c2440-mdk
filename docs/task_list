@@ -87,8 +87,11 @@ build different components. -->Done.
 
 USB HOST CONTROLLER
 -------------------
-1) Bring up the USB host controller block.
-2) 
+1) Setup Host controller hardware block. --> Done (Nothing much to do).
+2) Setup Endpoint descriptors.
+3) Setup Transfer descriptors.
+4) Get the device setup descriptors right.
+
 
 USB DEVICE CONTROLLER
 ---------------------
