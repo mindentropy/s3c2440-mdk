@@ -44,9 +44,13 @@
 #define BLE 	BIT5
 
 #define HCFS_USB_RESET 			0
-#define HCFS_USB_RESUME 		BIT6
-#define HCFS_USB_OPERATIONAL 	BIT7
-#define HCFS_USB_SUSPEND 		BIT7|BIT6
+#define HCFS_USB_RESUME 		BIT0
+#define HCFS_USB_OPERATIONAL 	BIT1
+#define HCFS_USB_SUSPEND 		BIT1|BIT0
+
+#define HCFS_MASK 				(BIT7|BIT6)
+#define HCFS_SHIFT 				6
+
 #define IR 						BIT8
 #define RWC 					BIT9
 #define RWE 					BIT10
@@ -348,6 +352,8 @@ struct td_info {
 
 #define DELAY_INTERRUPT_MASK 	(BIT23|BIT22|BIT21)
 #define DELAY_INTERRUPT_SHIFT 	(21)
+
+#define NO_DELAY_INTERRUPT 		(BIT23|BIT22|BIT21)
 
 #define DATA_TOGGLE_MASK		(BIT25|BIT24)
 #define DATA_TOGGLE_SHIFT 		(24)

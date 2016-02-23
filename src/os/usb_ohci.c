@@ -13,6 +13,8 @@ uint8_t ed_list[MAX_ED_DESCRIPTORS << ED_SIZE_SHIFT];
 uint8_t td_list[MAX_TD_DESCRIPTORS << TD_SIZE_SHIFT];
 uint8_t iso_td_list[MAX_ISO_TD_DESCRIPTORS << ISO_TD_SIZE_SHIFT];
 
+uint8_t usb_buffer_pool[512];
+
 struct ed_info ed_info;
 struct td_info td_info;
 
@@ -98,7 +100,7 @@ static void init_td(struct td_info *td_info,
 }
 						
 
-static void config_ep0(struct ed_info *ed_info,struct td_info *td_info)
+static void config_ep0(struct ed_info *ed_info,struct td_info *td_info,void *usb_buff_pool)
 {
 	//Set the function address to 0 initially.
 	set_hc_ed_fa(&(ed_info->hc_ed[0].endpoint_ctrl),0);
@@ -113,8 +115,17 @@ static void config_ep0(struct ed_info *ed_info,struct td_info *td_info)
 	ed_info->hc_ed[0].NextED = 0;
 
 	//Setup the td for the ed. I will setup a single td at index 0.
-	/*writereg32(&(td_info->hc_gen_td[0].td_control),
-				BUFFER_ROUND|DP_SETUP|*/
+	writereg32(&(td_info->hc_gen_td[0].td_control),
+				BUFFER_ROUND|DP_SETUP|NO_DELAY_INTERRUPT);
+	
+	writereg32(&(td_info->hc_gen_td[0].current_buffer_pointer),
+				(uintptr_t)usb_buff_pool);
+	writereg32(&(td_info->hc_gen_td[0].next_td),
+				(uintptr_t)(&(td_info->hc_gen_td[1])));
+
+	// Setup the head and tail pointers to point to the TD's.
+	ed_info->hc_ed[0].HeadP = (uintptr_t)(&(td_info->hc_gen_td[0]));
+	ed_info->hc_ed[0].TailP = (uintptr_t)(&(td_info->hc_gen_td[1]));
 	
 }
 
@@ -137,7 +148,7 @@ void init_ohci()
 
 	init_ed(&ed_info,ed_list);
 	init_td(&td_info,td_list);
-	config_ep0(&ed_info,&td_info);
+	config_ep0(&ed_info,&td_info,usb_buffer_pool);
 
 	uart_puts(UART0_BA,"HcRevision :");
 	print_hex_uart(UART0_BA,
@@ -171,17 +182,36 @@ void init_ohci()
 	writereg32(HC_HCCA_REG(USB_OHCI_BA),
 		nbyte_align(((uintptr_t) hcca_region),256));
 
+	
+	//Write the ControlED.
+	writereg32(HC_CONTROL_HEAD_ED_REG(USB_OHCI_BA),
+							(uintptr_t)ed_info.hc_ed);
+					
+	//Set the ControlBulkED to the same ED.
+	writereg32(HC_BULK_HEAD_ED_REG(USB_OHCI_BA),
+							(uintptr_t)ed_info.hc_ed);
+
 	//Enable all interrupts except Start of frame (SOF) 
 	//in HcInterruptEnable register.
 	writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),0xC000007B);
+
+	//Setup control registers.
+	set_reg_params(HC_CONTROL_REG(USB_OHCI_BA),
+					PLE|IE|CLE|BLE
+					);
 
 	//Set to 90% of HcFmInterval.
 	writereg32(HC_PERIODIC_START_REG(USB_OHCI_BA),((uint32_t)(0.9 * HcFmInterval)));
 	//print_hex_uart(UART0_BA,readreg32(HC_CONTROL_REG(USB_OHCI_BA)));
 	
-	//Setup control registers.
-	set_reg_params(HC_CONTROL_REG(USB_OHCI_BA),
-					PLE|IE|CLE|BLE
-					);
+	//Set to USB_OPERATIONAL to start sending SOF.
+	set_regs_value(HC_CONTROL_REG(USB_OHCI_BA),
+					HCFS_MASK,
+					HCFS_USB_OPERATIONAL,
+					HCFS_SHIFT);
+
+	/*
+	 * Test Poll for data.
+	 */
 
 }
