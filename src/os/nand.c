@@ -44,12 +44,12 @@ struct nand_page_cache_info nand_page_cache;
 
 void set_nand_gpio_config_pins()
 {
-	clear_reg_params(GPCON_REG(GPG_BA),NAND_GPG13_INPUT);
-	clear_reg_params(GPCON_REG(GPG_BA),NAND_GPG14_INPUT);
-	clear_reg_params(GPCON_REG(GPG_BA),NAND_GPG15_INPUT);
+	clear_reg_bits(GPCON_REG(GPG_BA),NAND_GPG13_INPUT);
+	clear_reg_bits(GPCON_REG(GPG_BA),NAND_GPG14_INPUT);
+	clear_reg_bits(GPCON_REG(GPG_BA),NAND_GPG15_INPUT);
 
 	/* Clear pull up */
-	set_reg_params(GPUP_REG(GPG_BA),
+	set_reg_bits(GPUP_REG(GPG_BA),
 								NAND_MEM_PG_CAP_SEL_PIN
 								|NAND_MEM_ADDR_CYCL_SEL_PIN
 								|NAND_MEM_BUS_WIDTH_SEL_PIN);

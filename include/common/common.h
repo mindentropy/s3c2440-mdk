@@ -91,13 +91,13 @@
 #define readreg8(addr) \
 	((*((volatile uint8_t *)(addr))) & (0xFFU))
 
-#define set_reg_params(reg,regmask) \
+#define set_reg_bits(reg,regmask) \
 	do { \
 		writereg32((reg),setbits(readreg32(reg),(regmask))); \
 	} while(0)
 
 
-#define clear_reg_params(reg,regmask) \
+#define clear_reg_bits(reg,regmask) \
 	do { \
 		writereg32((reg),clearbits(readreg32(reg),(regmask))); \
 	} while(0)

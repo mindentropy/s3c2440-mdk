@@ -19,16 +19,16 @@
 		HW_REG((BA),SRCPND_OFF)
 
 #define clear_interrupt_source_pending(BA,src_pnd_mask) \
-	set_reg_params(SRCPND_REG(BA),src_pnd_mask)
+	set_reg_bits(SRCPND_REG(BA),src_pnd_mask)
 
 #define INTMOD_REG(BA) \
 		HW_REG((BA),INTMOD_OFF)
 
 #define set_interrupt_mode(BA,interrupt_line) \
-	set_reg_params(INTMOD_REG(BA),interrupt_line)
+	set_reg_bits(INTMOD_REG(BA),interrupt_line)
 
 #define set_fiq_mode(BA,interrupt_line) \
-	clear_reg_params(INTMOD_REG(BA),interrupt_line)
+	clear_reg_bits(INTMOD_REG(BA),interrupt_line)
 
 #define INTMSK_REG(BA) \
 		HW_REG((BA),INTMSK_OFF)
@@ -40,16 +40,16 @@
 	writereg32(INTMSK_REG(BA),0x0)
 
 #define mask_interrupt(BA,mask) \
-	set_reg_params(INTMSK_REG(BA),mask)
+	set_reg_bits(INTMSK_REG(BA),mask)
 
 #define unmask_interrupt(BA,mask) \
-	clear_reg_params(INTMSK_REG(BA),mask)
+	clear_reg_bits(INTMSK_REG(BA),mask)
 
 #define unmask_interrupt_service(BA,interrupt_mask) \
-	clear_reg_params(INTMSK_REG(BA),interrupt_mask)
+	clear_reg_bits(INTMSK_REG(BA),interrupt_mask)
 
 #define mask_interrupt_service(BA,interrupt_mask) \
-	set_reg_params(INTMSK_REG(BA),interrupt_mask)
+	set_reg_bits(INTMSK_REG(BA),interrupt_mask)
 
 #define INTPRIORITY_REG(BA) \
 		HW_REG((BA),INTPRIORITY_OFF)
@@ -58,7 +58,7 @@
 		HW_REG((BA),INTPND_OFF)
 
 #define clear_interrupt_pending(BA,pnd_mask) \
-	set_reg_params(INTPND_REG(BA),pnd_mask)
+	set_reg_bits(INTPND_REG(BA),pnd_mask)
 
 #define get_interrupt_pending_status(BA,interrupt_line) \
 	(readreg32(INTPND_REG(BA)) & (interrupt_line))
@@ -70,7 +70,7 @@
 		HW_REG((BA),SUBSRCPND_OFF)
 
 #define clear_interrupt_sub_source_pending(BA,sub_src_pnd_mask) \
-	set_reg_params(SUBSRCPND_REG(BA),sub_src_pnd_mask)
+	set_reg_bits(SUBSRCPND_REG(BA),sub_src_pnd_mask)
 
 #define get_interrupt_sub_source_pending_status(BA,sub_src_pnd_mask) \
 	(readreg32(SUBSRCPND_REG(BA)) & sub_src_pnd_mask)
@@ -80,10 +80,10 @@
 
 
 #define unmask_interrupt_subservice(BA,mask) \
-	clear_reg_params(INTSUBMSK_REG(BA),mask)
+	clear_reg_bits(INTSUBMSK_REG(BA),mask)
 
 #define mask_interrupt_subservice(BA,mask) \
-	set_reg_params(INTSUBMSK_REG(BA),mask)
+	set_reg_bits(INTSUBMSK_REG(BA),mask)
 
 #define mask_all_interrupt_subservice(BA) \
 	writereg32(INTSUBMSK_REG(BA),0xFFFF)

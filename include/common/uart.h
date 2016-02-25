@@ -17,7 +17,7 @@
 	HW_REG(UART_BA,ULCON)
 
 #define set_ulcon_reg(UART_BA,param_mask) \
-	set_reg_params(ULCON_REG(UART_BA),param_mask)
+	set_reg_bits(ULCON_REG(UART_BA),param_mask)
 
 #define write_ulcon_reg(UART_BA,param_mask) \
 	writereg32(ULCON_REG(UART_BA),param_mask)
@@ -48,7 +48,7 @@
 	HW_REG(UART_BA,UCON)
 
 #define set_ucon_reg(UART_BA,param_mask) \
-	set_reg_params(UCON_REG(UART_BA),param_mask)
+	set_reg_bits(UCON_REG(UART_BA),param_mask)
 
 #define write_ucon_reg(UART_BA,param_mask) \
 	writereg32(UCON_REG(UART_BA),param_mask)
@@ -97,7 +97,7 @@
 	HW_REG(UART_BA,UFCON)
 
 #define set_ufcon_reg(UART_BA,param_mask) \
-	set_reg_params(UFCON_REG(UART_BA),param_mask)
+	set_reg_bits(UFCON_REG(UART_BA),param_mask)
 
 #define write_ufcon_reg(UART_BA,param_mask) \
 	writereg32(UFCON_REG(UART_BA),param_mask)

@@ -21,7 +21,7 @@ void sdram_init()
 	writereg32(BANKCON7_REG(MEM_BA),MT_ROM_SRAM);
 
 	/* Disable clock to BANK7 */
-	//set_reg_params(MISCCR_REG(),nEN_SCLK1);
+	//set_reg_bits(MISCCR_REG(),nEN_SCLK1);
 
 	/* Configure SDRAM Refresh settings */
 	writereg32(REFRESHCTL_REG(MEM_BA),REFEN|Tsrc_5|1269);

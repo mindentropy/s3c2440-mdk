@@ -20,10 +20,10 @@
 #define CLK_OUT_EN 		(BIT0)
 
 #define reset_sdmmc(BA) \
-	set_reg_params(SDICON_REG(BA),SDMMC_RESET)
+	set_reg_bits(SDICON_REG(BA),SDMMC_RESET)
 
 #define set_clk_out_en(BA) \
-	set_reg_params(SDICON_REG(SD_MMC_BA),CLK_OUT_EN)
+	set_reg_bits(SDICON_REG(SD_MMC_BA),CLK_OUT_EN)
 	
 
 #define SDIPRE_OFF 		(0x04)
@@ -33,7 +33,7 @@
 #define PRESCALER_MASK (BYTE_MASK)
 
 #define set_sd_clk_prescale(BA,prescaler_value)	\
-	set_reg_params(SDIPRE_REG(BA),prescaler_value)
+	set_reg_bits(SDIPRE_REG(BA),prescaler_value)
 
 #define SDI_CMD_ARG_OFF	(0x08)
 #define SDI_CMD_ARG_REG(BA) \
@@ -77,7 +77,7 @@
 
 #define ack_cmd_sent(BA) \
 	do {\
-		set_reg_params(SDI_CMD_STATUS_REG(BA),CMD_SENT); \
+		set_reg_bits(SDI_CMD_STATUS_REG(BA),CMD_SENT); \
 		while(readreg32(SDI_CMD_STATUS_REG(BA)) & CMD_SENT); \
 	} while(0)
 	
@@ -87,7 +87,7 @@
 	(readreg32(SDI_CMD_STATUS_REG(BA)) & CMD_TIMEOUT)
 
 #define ack_cmd_resp(BA) \
-	set_reg_params(SDI_CMD_STATUS_REG(BA),RESP_RECV_END)
+	set_reg_bits(SDI_CMD_STATUS_REG(BA),RESP_RECV_END)
 
 #define get_cmd_progress_status(BA) \
 	((readreg32(SDI_CMD_STATUS_REG(BA))) & CMD_PROGRESS_ON)
@@ -162,7 +162,7 @@
 #define DATA_TRANSFER_START 	(BIT14)
 
 #define sd_start_data_transfer(BA) \
-	set_reg_params(SDID_DATA_CON_REG(BA),DATA_TRANSFER_START)
+	set_reg_bits(SDID_DATA_CON_REG(BA),DATA_TRANSFER_START)
 
 #define DATA_TRANS_MODE_MASK 		(BIT13|BIT12)
 #define DATA_NO_OPERATION 			(0)
@@ -219,7 +219,7 @@
 #define FFCNT_MASK					(BIT6|BIT5|BIT4|BIT3|BIT2|BIT1|BIT0)
 
 #define reset_fifo(BA) \
-	set_reg_params(SDIFSTA_REG(BA),FIFO_RESET)
+	set_reg_bits(SDIFSTA_REG(BA),FIFO_RESET)
 
 #define is_fifo_rx_available(BA) \
 	(readreg32(SDIFSTA_REG(BA)) & FIFO_RFDET)

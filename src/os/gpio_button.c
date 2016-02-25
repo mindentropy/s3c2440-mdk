@@ -44,10 +44,10 @@ void EINT8_23_handler(void)
 
 void init_gpio_button()
 {
-	//TODO: Do a clear_reg_params just to be safe.
+	//TODO: Do a clear_reg_bits just to be safe.
 
 	//Disable pull up.	
-	set_reg_params(GPUP_REG(GPG_BA),
+	set_reg_bits(GPUP_REG(GPG_BA),
 			K1_GPIO_BTN_PIN
 			|K2_GPIO_BTN_PIN
 			|K3_GPIO_BTN_PIN

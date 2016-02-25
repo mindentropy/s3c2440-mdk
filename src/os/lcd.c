@@ -28,9 +28,9 @@ void init_lcd()
 	config_lcd_gpio();
 	disable_lcd_controller(LCD_BA);
 
-	set_reg_params(GPCON_REG(GPG_BA),LCD_PWR);
-	set_reg_params(GPUP_REG(GPG_BA),LCD_GPIO_PWR_PIN);
-	clear_reg_params(GPDAT_REG(GPG_BA),LCD_GPIO_PWR_PIN);
+	set_reg_bits(GPCON_REG(GPG_BA),LCD_PWR);
+	set_reg_bits(GPUP_REG(GPG_BA),LCD_GPIO_PWR_PIN);
+	clear_reg_bits(GPDAT_REG(GPG_BA),LCD_GPIO_PWR_PIN);
 
 	/*print_hex_uart(UART0_BA,readreg32(GPCON_REG(GPG_BA)));
 	print_hex_uart(UART0_BA,readreg32(GPDAT_REG(GPG_BA)));
@@ -47,14 +47,14 @@ void init_lcd()
 	writereg32(LCDCON3_REG(LCD_BA),((HBPD<<19)|(HOZVAL<<8)|(HFPD)));
 	writereg32(LCDCON4_REG(LCD_BA),(HSPW));
 
-	set_reg_params(LCDCON5_REG(LCD_BA), FRM565_5_6_5_1_FRMT|PWREN);
+	set_reg_bits(LCDCON5_REG(LCD_BA), FRM565_5_6_5_1_FRMT|PWREN);
 
 	writereg32(LCDSADDR1_REG(LCD_BA),LCD_START_ADDR>>1);
 	writereg32(LCDSADDR2_REG(LCD_BA),((LCD_START_ADDR+MEMBUFF_SIZE) & 0x1FFFFF)>>1);
 	writereg32(LCDSADDR3_REG(LCD_BA),((HRES*BPP)>>4)&0x3F);
 	writereg32(LCDINTMSK_REG(LCD_BA),FIWSEL|INT_FRAME_SYNC|INT_FIFO_CNT);
 
-	clear_reg_params(TCONSEL_REG(LCD_BA),LCC_SEL3|LPC_EN|LCC_EN);
+	clear_reg_bits(TCONSEL_REG(LCD_BA),LCC_SEL3|LPC_EN|LCC_EN);
 
 	for(i = 0; i<(MEMBUFF_SIZE); i++) {
 		lcd_frame_buff[i] = 0xAA;

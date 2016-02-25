@@ -225,7 +225,7 @@
 	((readreg32(GSTATUS_REG(GSTATUS2))) & PWRST)
 
 #define disable_pull_up(port_reg,linemask) \
-	set_reg_params(port_reg,linemask)
+	set_reg_bits(port_reg,linemask)
 
 //void set_gpio_clk_dbg();
 //void set_gpio_uart_ch0();
@@ -240,7 +240,7 @@
 	(GPIO_FN)<<(GPIO_PIN<<1)
 
 #define set_gpio_con(BA,param) \
-	set_reg_params(GPCON_REG(BA),param)
+	set_reg_bits(GPCON_REG(BA),param)
 
 
 #define EXTINT0_OFF 	(0x88)
@@ -294,13 +294,13 @@
 
 
 #define unmask_external_interrupts(BA,mask) \
-	clear_reg_params((EINTMASK_REG(BA)),mask)
+	clear_reg_bits((EINTMASK_REG(BA)),mask)
 
 #define mask_external_interrupts(BA,mask) \
-	set_reg_params((EINTMASK_REG(BA)),mask)
+	set_reg_bits((EINTMASK_REG(BA)),mask)
 
 #define unmask_external_pending_interrupts(BA,mask) \
-	set_reg_params((EINTPEND_REG(BA)),mask)
+	set_reg_bits((EINTPEND_REG(BA)),mask)
 
 #define get_external_pending_interrupts(BA,mask) \
 	((readreg32(EINTPEND_REG(BA))) & mask)

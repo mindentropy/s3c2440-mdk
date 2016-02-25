@@ -7,13 +7,13 @@
 void set_clk_dbg_port()
 {
 	set_gpio_clk_dbg();
-	//set_reg_params(MISCCR,(CLK_SEL1_HCLK|CLK_SEL0_MPLL_INPUT_XTAL));
+	//set_reg_bits(MISCCR,(CLK_SEL1_HCLK|CLK_SEL0_MPLL_INPUT_XTAL));
 	
-	/*set_reg_params(MISCCR,BIT8);
-	clear_reg_params(MISCCR,BIT10|BIT9);*/
-	//set_reg_params(MISCCR,BIT5|BIT4);
-	set_reg_params(MISCCR_REG(),(BIT5|BIT4));
-	clear_reg_params(MISCCR_REG(),(BIT6));
+	/*set_reg_bits(MISCCR,BIT8);
+	clear_reg_bits(MISCCR,BIT10|BIT9);*/
+	//set_reg_bits(MISCCR,BIT5|BIT4);
+	set_reg_bits(MISCCR_REG(),(BIT5|BIT4));
+	clear_reg_bits(MISCCR_REG(),(BIT6));
 }
 
 

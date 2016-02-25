@@ -79,7 +79,7 @@
 
 
 #define apb_clk_enable(BA,CLK) \
-	set_reg_params(CLKCON_REG(BA),CLK)
+	set_reg_bits(CLKCON_REG(BA),CLK)
 
 
 #define UCLK_ON		BIT7
@@ -193,13 +193,13 @@ uint32_t get_pclk(uint32_t BA);
 	(readreg32(CLKDIVN_REG(BA)) & DIVN_UPLL_MASK)
 
 #define clear_slow_clock(BA) do { \
-	clear_reg_params(CLKSLOW_REG(BA),SLOW_BIT); \
-	clear_reg_params(CLKSLOW_REG(BA),UCLK_ON); \
-	clear_reg_params(CLKSLOW_REG(BA),MPLL_OFF); \
+	clear_reg_bits(CLKSLOW_REG(BA),SLOW_BIT); \
+	clear_reg_bits(CLKSLOW_REG(BA),UCLK_ON); \
+	clear_reg_bits(CLKSLOW_REG(BA),MPLL_OFF); \
 	} while(0)
 
 
 #define set_gpio_clk_dbg() \
-	set_reg_params(GPCON_REG(GPH_BA),(CLKOUT1|CLKOUT0))
+	set_reg_bits(GPCON_REG(GPH_BA),(CLKOUT1|CLKOUT0))
 
 #endif

@@ -112,7 +112,7 @@ static void config_ep0(struct ed_info *ed_info,struct td_info *td_info,void *usb
 	set_hc_ed_mps(&(ed_info->hc_ed[0].endpoint_ctrl),64);
 
 	ed_info->hc_ed[0].HeadP = 0;
-	ed_info->hc_ed[0].NextED = 0;
+	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
 
 	//Setup the td for the ed. I will setup a single td at index 0.
 	writereg32(&(td_info->hc_gen_td[0].td_control),
@@ -196,7 +196,7 @@ void init_ohci()
 	writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),0xC000007B);
 
 	//Setup control registers.
-	set_reg_params(HC_CONTROL_REG(USB_OHCI_BA),
+	set_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),
 					PLE|IE|CLE|BLE
 					);
 

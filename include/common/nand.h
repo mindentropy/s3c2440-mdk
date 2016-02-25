@@ -205,42 +205,42 @@
 
 
 #define nand_set_spare_ecc_lock() \
-	set_reg_params(NFCONT_REG(NAND_BA),SPARE_ECC_LOCK)
+	set_reg_bits(NFCONT_REG(NAND_BA),SPARE_ECC_LOCK)
 
 #define nand_clear_spare_ecc_lock() \
-	clear_reg_params(NFCONT_REG(NAND_BA),SPARE_ECC_LOCK)
+	clear_reg_bits(NFCONT_REG(NAND_BA),SPARE_ECC_LOCK)
 
 #define nand_set_main_ecc_lock() \
-	set_reg_params(NFCONT_REG(NAND_BA),MAIN_ECC_LOCK)
+	set_reg_bits(NFCONT_REG(NAND_BA),MAIN_ECC_LOCK)
 
 #define nand_clear_main_ecc_lock() \
-	clear_reg_params(NFCONT_REG(NAND_BA),MAIN_ECC_LOCK)
+	clear_reg_bits(NFCONT_REG(NAND_BA),MAIN_ECC_LOCK)
 
 #define nand_init_ecc() \
-	set_reg_params(NFCONT_REG(NAND_BA),INIT_ECC)
+	set_reg_bits(NFCONT_REG(NAND_BA),INIT_ECC)
 
 #define nand_deinit_ecc() \
-	clear_reg_params(NFCONT_REG(NAND_BA),INIT_ECC)
+	clear_reg_bits(NFCONT_REG(NAND_BA),INIT_ECC)
 
 //Chip select disable
 #define set_nand_nfce_high() \
-	set_reg_params(NFCONT_REG(NAND_BA),REG_nCE)
+	set_reg_bits(NFCONT_REG(NAND_BA),REG_nCE)
 
 //Chip select enable
 #define set_nand_nfce_low() \
-	clear_reg_params(NFCONT_REG(NAND_BA),REG_nCE)
+	clear_reg_bits(NFCONT_REG(NAND_BA),REG_nCE)
 
 #define set_nand_flash_mode() \
-	set_reg_params(NFCONT_REG(NAND_BA),MODE)
+	set_reg_bits(NFCONT_REG(NAND_BA),MODE)
 
 #define disable_nand_flash_mode() \
-	clear_reg_params(NFCONT_REG(NAND_BA),MODE)
+	clear_reg_bits(NFCONT_REG(NAND_BA),MODE)
 
 #define enable_nand_soft_lock() \
-	set_reg_params(NFCONT_REG(NAND_BA),SOFTLOCK)
+	set_reg_bits(NFCONT_REG(NAND_BA),SOFTLOCK)
 
 #define disable_nand_soft_lock() \
-	clear_reg_params(NFCONT_REG(NAND_BA),SOFTLOCK)
+	clear_reg_bits(NFCONT_REG(NAND_BA),SOFTLOCK)
 
 #define enable_nand_flash_controller() do {\
 		set_nand_flash_mode();\

@@ -191,10 +191,10 @@
 
 
 #define enable_lcd_controller(BA) \
-	set_reg_params(LCDCON1_REG(BA),ENVID)
+	set_reg_bits(LCDCON1_REG(BA),ENVID)
 
 #define disable_lcd_controller(BA) \
-	clear_reg_params(LCDCON1_REG(BA),ENVID)
+	clear_reg_bits(LCDCON1_REG(BA),ENVID)
 
 void init_lcd();
 

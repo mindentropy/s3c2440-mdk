@@ -207,12 +207,12 @@ static void parse_CSD_response(uint32_t BA, struct csd_info *csd_info)
 static void config_sd_gpio()
 {
 	//Enable SD Card controller block.
-	set_reg_params(GPCON_REG(GPE_BA),
+	set_reg_bits(GPCON_REG(GPE_BA),
 		(SDCLK_GPIO_CONF|SDCMD_GPIO_CONF|SDDAT3_GPIO_CONF|SDDAT2_GPIO_CONF|
 		SDDAT1_GPIO_CONF|SDDAT0_GPIO_CONF)); 
 
 	//Disable pull up resistors
-/*	set_reg_params(GPUP_REG(GPE_BA),
+/*	set_reg_bits(GPUP_REG(GPE_BA),
 		(SDCLK_GPIO_PIN|SDCMD_GPIO_PIN|SDDAT0_GPIO_PIN|
 			SDDAT1_GPIO_PIN|SDDAT2_GPIO_PIN| SDDAT3_GPIO_PIN));*/
 
@@ -795,7 +795,7 @@ void init_sd_controller()
 	writereg32(SDICON_REG(SD_MMC_BA),RCV_IO_INT|BYTE_ORDER_B);
 
 	set_data_timeout_period(SD_MMC_BA,0x7FFFFF);
-	//set_reg_params(SDIFSTA_REG(SD_MMC_BA),FIFO_RESET);
+	//set_reg_bits(SDIFSTA_REG(SD_MMC_BA),FIFO_RESET);
 	reset_fifo(SD_MMC_BA);
 	set_clk_out_en(SD_MMC_BA);
 
