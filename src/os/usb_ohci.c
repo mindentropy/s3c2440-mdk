@@ -207,8 +207,8 @@ void init_ohci()
 	//Set to USB_OPERATIONAL to start sending SOF.
 	set_regs_value(HC_CONTROL_REG(USB_OHCI_BA),
 					HCFS_MASK,
-					HCFS_USB_OPERATIONAL,
-					HCFS_SHIFT);
+					HCFS_USB_OPERATIONAL<<HCFS_SHIFT
+					);
 
 	/*
 	 * Test Poll for data.

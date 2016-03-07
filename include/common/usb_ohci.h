@@ -245,81 +245,81 @@ struct ed_info {
 #define FA_MASK 		set_bit_range(6,0)
 
 #define set_hc_ed_fa(reg,value) \
-	set_regs_value(reg,FA_MASK,value,FA_SHIFT)
+	set_regs_value(reg,FA_MASK,(value<<FA_SHIFT))
 
 #define EN_MASK 		set_bit_range(10,7)
 #define EN_SHIFT  		7
 
 #define set_hc_ed_en(reg,value) \
-	set_regs_value(reg,EN_MASK,value,EN_SHIFT)
+	set_regs_value(reg,EN_MASK,(value<<EN_SHIFT))
 
 #define DIR_MASK  		(BIT12|BIT11)
 #define DIR_SHIFT 		11
 
-#define GET_DIR_FROM_TD 	(0)
-#define OUT 				(1)
-#define IN 					(2)
-#define GET_DIR_FROM_TD1 	(3)
+#define GET_DIR_FROM_TD 	(0<<DIR_SHIFT)
+#define OUT 				(1<<DIR_SHIFT)
+#define IN 					(2<<DIR_SHIFT)
+#define GET_DIR_FROM_TD1 	(3<<DIR_SHIFT)
 
 #define set_hc_ed_dir(reg,value) \
-	set_regs_value(reg,DIR_MASK,value,DIR_SHIFT)
+	set_regs_value(reg,DIR_MASK,(value))
 
 #define SPEED_MASK  	BIT13
 #define SPEED_SHIFT 	13
 
-#define SLOW_SPEED 		0
-#define HIGH_SPEED 		1
+#define SLOW_SPEED 		(0<<SPEED_SHIFT)
+#define HIGH_SPEED 		(1<<SPEED_SHIFT)
 
 #define set_hc_ed_speed(reg,value) \
-	set_regs_value(reg,SPEED_MASK,value,SPEED_SHIFT)
+	set_regs_value(reg,SPEED_MASK,value)
 
 #define SKIP_MASK 		BIT14
 #define SKIP_SHIFT 		14
 
 #define set_hc_ed_skip(reg,value) \
-	set_regs_value(reg,SKIP_MASK,value,SKIP_SHIFT)
+	set_regs_value(reg,SKIP_MASK,(value<<SKIP_SHIFT))
 
 #define FORMAT_MASK 	BIT15
 #define FORMAT_SHIFT 	15
 
 #define set_hc_ed_format(reg,value) \
-	set_regs_value(reg,FORMAT_MASK,value,FORMAT_SHIFT)
+	set_regs_value(reg,FORMAT_MASK,(value<<FORMAT_SHIFT))
 
 #define MPS_MASK  		set_bit_range(26,16)
 #define MPS_SHIFT 		16
 
 #define set_hc_ed_mps(reg,value) \
-	set_regs_value(reg,MPS_MASK,value,MPS_SHIFT)
+	set_regs_value(reg,MPS_MASK,(value<<MPS_SHIFT))
 
 #define TAILP_MASK  	set_bit_range(31,4)
 #define TAILP_SHIFT 	4
 
 #define set_hc_ed_tailp(reg,value) \
-	set_regs_value(reg,TAILP_MASK,value,TAILP_SHIFT)
+	set_regs_value(reg,TAILP_MASK,(value<<TAILP_SHIFT))
 
 #define HEADP_MASK  	set_bit_range(31,4)
 #define HEADP_SHIFT 	4
 
 #define set_hc_ed_headp(reg,value) \
-	set_regs_value(reg,HEADP_MASK,value,HEADP_SHIFT)
+	set_regs_value(reg,HEADP_MASK,(value<<HEADP_SHIFT))
 
 #define HALT_ED_MASK 	BIT0
 #define HALT_ED_SHIFT 	0
 
 #define set_hc_ed_halted(reg,value) \
-	set_regs_value(reg,HALT_ED_MASK,value,HALT_ED_SHIFT)
+	set_regs_value(reg,HALT_ED_MASK,(value<<HALT_ED_SHIFT))
 
 #define TOGGLE_CARRY_MASK 	BIT1
 #define TOGGLE_SHIFT 		1
 
 #define set_hc_ed_toggle(reg,value) \
-	set_regs_value(reg,TOGGLE_CARRY_MASK,value,TOGGLE_SHIFT)
+	set_regs_value(reg,TOGGLE_CARRY_MASK,(value<<TOGGLE_SHIFT))
 
 #define NEXT_ED_MASK 	set_bit_range(31,4)
 #define NEXT_ED_SHIFT 	4
 
 #define set_hc_ed_next_ed(reg,value) \
-	set_regs_value(reg,NEXT_ED_MASK,value,NEXT_ED_SHIFT)
+	set_regs_value(reg,NEXT_ED_MASK,(value<<NEXT_ED_SHIFT))
 
 #define HC_GEN_TD_ALIGNMENT 	16
 

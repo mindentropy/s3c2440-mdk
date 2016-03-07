@@ -103,10 +103,15 @@
 	} while(0)
 
 
-#define set_regs_value(reg,mask,value,shift) \
+#define set_regs_value(reg,mask,value) \
 	do { \
-		writereg32(reg,(readreg32(reg) & ~mask) | ((value)<<(shift))); \
+		writereg32(reg,( (clearbits(readreg32(reg),mask)) | (value) )); \
 	} while(0)
+
+
+/*	do { \
+		writereg32(reg,(readreg32(reg) & ~mask) | ((value)<<(shift))); \
+	} while(0)*/
 
 
 /*
