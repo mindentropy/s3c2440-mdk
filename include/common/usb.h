@@ -30,8 +30,7 @@
 #define REQ_TYPE_SYNCH_FRAME 		0x82
 
 
-
-struct __attribute__((packed)) usb_setup
+struct __attribute__((packed)) usb_request
 {
 	uint8_t bmRequestType;
 	uint8_t bRequest;
@@ -64,7 +63,109 @@ enum DescriptorType {
 	DESC_ENDPOINT
 };
 
-#define SELECTOR_DEVICE_REMOTE_WAKEUP 	1
-#define SELECTOR_ENDPOINT_HALT 			0
+#define FEATURE_SELECTOR_DEVICE_REMOTE_WAKEUP 	1
+#define FEATURE_SELECTOR_ENDPOINT_HALT 			0
+
+#define set_usb_req_parameters(usb_req_ptr, \
+						bmRequestType,\
+						bRequest,\
+						wValue,\
+						wLength) \
+	do { \
+		usb_req_ptr->bmRequestType = bmRequestType;\
+		usb_req_ptr->bRequest = bRequest;\
+		usb_req_ptr->wValue = wValue; \
+		usb_req_ptr->wLength = wLength; \
+	} while(0)
+
+
+#define usb_clear_feature(usb_req_ptr,feature_selector) \
+	set_usb_req_parameters(usb_req_ptr,\
+							REQ_TYPE_CLEAR_FEATURE1,\
+							REQ_CLEAR_FEATURE,\
+							feature_selector,\
+							0, \
+							0)
+
+#define usb_get_configuration(usb_req_ptr) \
+	set_usb_req_parameters(usb_req_ptr,\
+						REQ_TYPE_GET_CONFIGURATION,\
+						REQ_GET_CONFIGURATION,\
+						0,\
+						0,\
+						1)
+
+
+#define usb_get_descriptor(usb_req_ptr,desc_type_idx,wIndex,desc_len) \
+	set_usb_req_parameters(usb_req_ptr,\
+						REQ_TYPE_GET_DESCRIPTOR,\
+						REQ_GET_DESCRIPTOR,\
+						desc_type_idx,\
+						wIndex,\
+						desc_len)
+
+#define usb_get_interface(usb_req_ptr,interface) \
+	set_usb_req_parameters(usb_req_ptr,\
+					REQ_TYPE_GET_INTERFACE,\
+					REQ_GET_INTERFACE,\
+					0,\
+					interface,\
+					1)
+
+#define usb_get_status(usb_req_ptr) \
+	set_usb_req_parameters(usb_req_ptr,\
+				REQ_TYPE_GET_STATUS1,\
+				REQ_GET_STATUS,\
+				0,\
+				0,\
+				2)
+
+#define usb_set_address(usb_req_ptr,dev_addr) \
+	set_usb_req_parameters(usb_req_ptr,\
+				REQ_TYPE_SET_ADDRESS,\
+				REQ_SET_ADDRESS,\
+				dev_addr,\
+				0,\
+				0)
+
+#define usb_set_configuration(usb_req_ptr,config_value) \
+	set_usb_req_parameters(usb_req_ptr,\
+				REQ_TYPE_SET_CONFIGURATION,\
+				REQ_SET_CONFIGURATION,\
+				config_value,\
+				0,\
+				0)
+
+#define usb_set_descriptor(usb_req_ptr,desc_type_idx,wIndex,desc_len) \
+	set_usb_req_parameters(usb_req_ptr,\
+				REQ_TYPE_SET_DESCRIPTOR,\
+				REQ_SET_DESCRIPTOR,\
+				desc_type_idx,\
+				wIndex,\
+				desc_len)
+
+#define usb_set_feature(usb_req_ptr,feature_selector) \
+	set_usb_req_parameters(usb_req_ptr,\
+							REQ_TYPE_SET_FEATURE1,\
+							REQ_SET_FEATURE,\
+							feature_selector,\
+							0,\
+							0)
+
+#define usb_set_interface(usb_req_ptr,alt_setting,interface) \
+	set_usb_req_parameters(usb_req_ptr,\
+						REQ_TYPE_SET_INTERFACE,\
+						REQ_SET_INTERFACE,\
+						alt_setting,\
+						interface,\
+						0)
+
+#define usb_synch_frame(usb_req_ptr,endpoint) \
+	set_usb_req_parameters(usb_req_ptr,\
+						REQ_TYPE_SYNCH_FRAME,\
+						REQ_SYNCH_FRAME,\
+						0,\
+						endpoint,\
+						2)
 
 #endif
