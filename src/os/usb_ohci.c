@@ -1,5 +1,6 @@
 #include "usb_ohci.h"
 #include "uart_util.h"
+#include "usb.h"
 
 /* 
  * hcca_region should be 256 byte boundary attached. 
@@ -36,8 +37,6 @@ static void init_ed(struct ed_info *ed_info,
 
 //	print_hex_uart(UART0_BA,(uintptr_t)ed_ll);
 //	print_hex_uart(UART0_BA,(uintptr_t)ed_info->hc_ed);
-
-
 
 
 	for(i = 0; ; i++,ed_info->size++) {
@@ -100,32 +99,73 @@ static void init_td(struct td_info *td_info,
 }
 						
 
-static void config_ep0(struct ed_info *ed_info,struct td_info *td_info,void *usb_buff_pool)
+static void get_dev_descriptor(struct ed_info *ed_info,
+						struct td_info *td_info,
+						void *usb_buff_pool)
 {
+	struct usb_request *usb_req;
+
 	//Set the function address to 0 initially.
 	set_hc_ed_fa(&(ed_info->hc_ed[0].endpoint_ctrl),0);
+
 	//Set the endpoint to 0.
 	set_hc_ed_en(&(ed_info->hc_ed[0].endpoint_ctrl),0);
+	//Get the direction from td and not from ed.
 	set_hc_ed_dir(&(ed_info->hc_ed[0].endpoint_ctrl),GET_DIR_FROM_TD);
 	set_hc_ed_speed(&(ed_info->hc_ed[0].endpoint_ctrl),
 									HIGH_SPEED);
 	set_hc_ed_mps(&(ed_info->hc_ed[0].endpoint_ctrl),64);
 
-	ed_info->hc_ed[0].HeadP = 0;
+	ed_info->hc_ed[0].HeadP = 0; //Init to 0.
 	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
 
 	//Setup the td for the ed. I will setup a single td at index 0.
+
+	/* 
+	 * Initialize 3 td's,the first td to send the request,
+	 * the second td to receive the response and 
+	 * the last td being the 'terminator' td with
+	 * all 0's
+	 */
+
 	writereg32(&(td_info->hc_gen_td[0].td_control),
 				BUFFER_ROUND|DP_SETUP|NO_DELAY_INTERRUPT);
 	
+	writereg32(&(td_info->hc_gen_td[1].td_control),
+				BUFFER_ROUND|IN|NO_DELAY_INTERRUPT);
+	
 	writereg32(&(td_info->hc_gen_td[0].current_buffer_pointer),
 				(uintptr_t)usb_buff_pool);
+
+
+	usb_req = (struct usb_request *)
+			(&(td_info->hc_gen_td[0].current_buffer_pointer));
+
+
+	usb_get_descriptor( 
+			usb_req,
+			DESC_CONFIGURATION,
+			0,
+			18);
+
+	writereg32(&(td_info->hc_gen_td[1].current_buffer_pointer),
+				(uintptr_t)usb_buff_pool+32);
+
+	
+	
 	writereg32(&(td_info->hc_gen_td[0].next_td),
 				(uintptr_t)(&(td_info->hc_gen_td[1])));
 
+	writereg32(&(td_info->hc_gen_td[1].next_td),
+				(uintptr_t)(&(td_info->hc_gen_td[2])));
+
+	/* 
+	 * We will config the head and tail pointers based on the 
+	 * type of operations.
+	 */
 	// Setup the head and tail pointers to point to the TD's.
 	ed_info->hc_ed[0].HeadP = (uintptr_t)(&(td_info->hc_gen_td[0]));
-	ed_info->hc_ed[0].TailP = (uintptr_t)(&(td_info->hc_gen_td[1]));
+	ed_info->hc_ed[0].TailP = (uintptr_t)(&(td_info->hc_gen_td[2]));
 	
 }
 
@@ -133,6 +173,18 @@ void set_end_point_config(struct ed_info *ed_info,
 								uint32_t ed_idx)
 {
 }
+
+/*
+ * Setting up USB for getting intial config data.
+ * ==============================================
+ * 
+ * 1) Initialize ed.
+ * 2) Initialize td.
+ * 3) Save the HcFmInterval register for later setup.
+ * 4) Reset the host controller.
+ * 5) Wait until the host controller sets itself to 0 after 10s.
+ * 6) Write back the save HcFmInterval register.
+ */
 
 void init_ohci()
 {
@@ -148,12 +200,14 @@ void init_ohci()
 
 	init_ed(&ed_info,ed_list);
 	init_td(&td_info,td_list);
-	config_ep0(&ed_info,&td_info,usb_buffer_pool);
+
+	get_dev_descriptor(&ed_info,&td_info,usb_buffer_pool);
 
 	uart_puts(UART0_BA,"HcRevision :");
 	print_hex_uart(UART0_BA,
 			readreg32(HC_REVISION_REG(USB_OHCI_BA)));
 
+	//Save the HcFmInterval register for later set up.
 	HcFmInterval = readreg32(HC_FM_INTERVAL_REG(USB_OHCI_BA));
 	
 	// Reset the Host controller
@@ -188,8 +242,10 @@ void init_ohci()
 							(uintptr_t)ed_info.hc_ed);
 					
 	//Set the ControlBulkED to the same ED.
+	/*
 	writereg32(HC_BULK_HEAD_ED_REG(USB_OHCI_BA),
 							(uintptr_t)ed_info.hc_ed);
+	*/
 
 	//Enable all interrupts except Start of frame (SOF) 
 	//in HcInterruptEnable register.

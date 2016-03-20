@@ -67,16 +67,29 @@ enum DescriptorType {
 #define FEATURE_SELECTOR_ENDPOINT_HALT 			0
 
 #define set_usb_req_parameters(usb_req_ptr, \
-						bmRequestType,\
-						bRequest,\
-						wValue,\
-						wLength) \
+		RequestType, \
+		Request, \
+		Value, \
+		Index, \
+		Length) \
 	do { \
-		usb_req_ptr->bmRequestType = bmRequestType;\
-		usb_req_ptr->bRequest = bRequest;\
-		usb_req_ptr->wValue = wValue; \
-		usb_req_ptr->wLength = wLength; \
+		usb_req_ptr->bmRequestType = RequestType; 	\
+		usb_req_ptr->bRequest = Request; 	\
+		usb_req_ptr->wValue = Value; 	\
+		usb_req_ptr->wIndex = Index; 	\
+		usb_req_ptr->wLength = Length; 	\
 	} while(0)
+
+#define usb_get_descriptor(usb_req_ptr, \
+				desc_type_idx, \
+				wIndex, \
+				desc_len) \
+	set_usb_req_parameters(usb_req_ptr, \
+			REQ_TYPE_GET_DESCRIPTOR, \
+			REQ_GET_DESCRIPTOR, \
+			desc_type_idx, \
+			wIndex, \
+			desc_len)
 
 
 #define usb_clear_feature(usb_req_ptr,feature_selector) \
@@ -95,14 +108,6 @@ enum DescriptorType {
 						0,\
 						1)
 
-
-#define usb_get_descriptor(usb_req_ptr,desc_type_idx,wIndex,desc_len) \
-	set_usb_req_parameters(usb_req_ptr,\
-						REQ_TYPE_GET_DESCRIPTOR,\
-						REQ_GET_DESCRIPTOR,\
-						desc_type_idx,\
-						wIndex,\
-						desc_len)
 
 #define usb_get_interface(usb_req_ptr,interface) \
 	set_usb_req_parameters(usb_req_ptr,\
