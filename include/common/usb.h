@@ -80,6 +80,7 @@ enum DescriptorType {
 		usb_req_ptr->wLength = Length; 	\
 	} while(0)
 
+
 #define usb_get_descriptor(usb_req_ptr, \
 				desc_type_idx, \
 				wIndex, \

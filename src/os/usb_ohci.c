@@ -52,7 +52,6 @@ static void init_ed(struct ed_info *ed_info,
 	}
 
 
-
 //	print_hex_uart(UART0_BA,(uintptr_t)(ed_ll+ED_TOTAL_SIZE));
 //	print_hex_uart(UART0_BA,(uintptr_t)(ed_info->hc_ed+i));
 //	print_hex_uart(UART0_BA,(uintptr_t)(ed_info->hc_ed+(i-1)));
@@ -141,13 +140,21 @@ static void get_dev_descriptor(struct ed_info *ed_info,
 	usb_req = (struct usb_request *)
 			(&(td_info->hc_gen_td[0].current_buffer_pointer));
 
-
+	/* 
+	 * Set the current buffer pointer for td0 to get device
+	 * descriptor
+	 */ 
 	usb_get_descriptor( 
 			usb_req,
-			DESC_CONFIGURATION,
+			DESC_DEVICE,
 			0,
 			18);
 
+
+	/*
+	 * Set the second buffer to 32 bytes from the initial 
+	 * buffer pool 
+	 */
 	writereg32(&(td_info->hc_gen_td[1].current_buffer_pointer),
 				(uintptr_t)usb_buff_pool+32);
 
@@ -214,7 +221,7 @@ void init_ohci()
 	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
 		readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) | HCR);
 
-	// Host controller sets itself to 0 after 10s
+	// Host controller sets itself to 0 after 10ms
 	while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
 		;
 
@@ -242,16 +249,15 @@ void init_ohci()
 							(uintptr_t)ed_info.hc_ed);
 					
 	//Set the ControlBulkED to the same ED.
-	/*
-	writereg32(HC_BULK_HEAD_ED_REG(USB_OHCI_BA),
-							(uintptr_t)ed_info.hc_ed);
-	*/
+	
+//	writereg32(HC_BULK_HEAD_ED_REG(USB_OHCI_BA), (uintptr_t)ed_info.hc_ed);
+	
 
 	//Enable all interrupts except Start of frame (SOF) 
 	//in HcInterruptEnable register.
 	writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),0xC000007B);
 
-	//Setup control registers.
+	/* Set control registers to enable all queues on. */
 	set_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),
 					PLE|IE|CLE|BLE
 					);
@@ -266,6 +272,17 @@ void init_ohci()
 					HCFS_USB_OPERATIONAL<<HCFS_SHIFT
 					);
 
+	print_hex_uart(UART0_BA,
+				readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)));
+
+/*
+	print_hex_uart(UART0_BA,
+		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT1)));
+
+	print_hex_uart(UART0_BA,
+		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT2)));
+*/
+	
 	/*
 	 * Test Poll for data.
 	 */

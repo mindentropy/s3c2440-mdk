@@ -603,6 +603,13 @@ static uint32_t get_sd_card_CSD_info(
 	return 0;
 }
 
+
+static uint32_t get_sd_card_CID_info(
+						uint32_t BA,
+						uint32_t RCA,
+						struct cid_info *sd_cid_info
+						) __attribute__((unused));
+
 static uint32_t get_sd_card_CID_info(
 						uint32_t BA,
 						uint32_t RCA,
@@ -698,6 +705,13 @@ static uint32_t send_if_cond(uint32_t BA)
 }
 
 //TODO: Handle error condition response.
+
+
+static uint32_t make_sd_card_inactive(
+							uint32_t BA,
+							uint32_t RCA
+							)__attribute__((unused));
+
 static uint32_t make_sd_card_inactive(
 							uint32_t BA,
 							uint32_t RCA

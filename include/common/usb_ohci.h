@@ -184,6 +184,7 @@ struct __attribute__((packed)) HCCARegion {
 #define NOCP 		BIT12
 #define POTPGT 		set_bit_range(31,24)
 
+
 #define HC_RH_DESCRIPTOR_B_OFF 			0x4C
 #define HC_RH_DESCRIPTOR_B_REG(BA) \
 	HW_REG(BA,HC_RH_DESCRIPTOR_B_OFF)
@@ -202,6 +203,29 @@ struct __attribute__((packed)) HCCARegion {
 #define OCIC_RH 		BIT17
 #define CRWE 			BIT31
 
+enum Ports {
+	PORT1 = 0,
+	PORT2,
+	PORT3,
+	PORT4,
+	PORT5,
+	PORT6,
+	PORT7,
+	PORT8,
+	PORT9,
+	PORT10,
+	PORT11,
+	PORT12,
+	PORT13,
+	PORT14,
+	PORT15,
+};
+
+#define HC_RH_PORT_STATUS_OFF 			0x54
+#define HC_RH_PORT_STATUS_REG(BA,PORTNUM) \
+	HW_REG(BA,(HC_RH_PORT_STATUS_OFF + (PORTNUM<<2)))
+
+/*
 #define HC_RH_PORT_STATUS1_OFF 			0x54
 #define HC_RH_PORT_STATUS1_REG(BA) \
 	HW_REG(BA,HC_RH_PORT_STATUS1_OFF)
@@ -210,6 +234,7 @@ struct __attribute__((packed)) HCCARegion {
 #define HC_RH_PORT_STATUS2_OFF 			0x58
 #define HC_RH_PORT_STATUS2_REG(BA) \
 	HW_REG(BA,HC_RH_PORT_STATUS2_OFF)
+*/
 
 #define CCS 	BIT0
 #define PES 	BIT1
