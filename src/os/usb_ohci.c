@@ -248,8 +248,7 @@ void init_ohci()
 	writereg32(HC_CONTROL_HEAD_ED_REG(USB_OHCI_BA),
 							(uintptr_t)ed_info.hc_ed);
 					
-	//Set the ControlBulkED to the same ED.
-	
+	//Set the ControlBulkED to an ED.
 //	writereg32(HC_BULK_HEAD_ED_REG(USB_OHCI_BA), (uintptr_t)ed_info.hc_ed);
 	
 
@@ -259,7 +258,7 @@ void init_ohci()
 
 	/* Set control registers to enable all queues on. */
 	set_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),
-					PLE|IE|CLE|BLE
+					CLE
 					);
 
 	//Set to 90% of HcFmInterval.
@@ -272,8 +271,14 @@ void init_ohci()
 					HCFS_USB_OPERATIONAL<<HCFS_SHIFT
 					);
 
+
+	/*set_regs_value(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
+					CLF,CLF);*/
+
+	set_reg_bits(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
+					
 	print_hex_uart(UART0_BA,
-				readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)));
+			readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)));
 
 /*
 	print_hex_uart(UART0_BA,
