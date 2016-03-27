@@ -382,12 +382,38 @@ struct td_info {
 
 #define DATA_TOGGLE_MASK		(BIT25|BIT24)
 #define DATA_TOGGLE_SHIFT 		(24)
+#define DATA_TOGGLE(TOGGLE_VAL) \
+	(TOGGLE_VAL << DATA_TOGGLE_SHIFT)
+
 
 #define ERROR_COUNT_MASK		(BIT27|BIT26)
 #define ERROR_COUNT_SHIFT 		(26)
 
-#define CONDITION_CODE_MASK 	set_bit_range(31,28)
+#define CC_MASK 	set_bit_range(31,28)
 #define CC_SHIFT 				(28)
+
+#define CC(CC_CODE) \
+	(CC_CODE<<CC_SHIFT)
+
+enum CONDITION_CODE
+{
+	NoError,
+	CRC,
+	BitStuffing,
+	DataToggleMismatch,
+	Stall,
+	DeviceNotResponding,
+	PIDCheckFailure,
+	UnexpectedPID,
+	DataOverrun,
+	DataUnderrun,
+	reserved1,
+	reserved2,
+	BufferOverrun,
+	BufferUnderrun,
+	NotAccessed
+};
+
 
 #define NEXT_TD_MASK 			set_bit_range(31,4)
 

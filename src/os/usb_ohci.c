@@ -128,14 +128,17 @@ static void get_dev_descriptor(struct ed_info *ed_info,
 	 */
 
 	writereg32(&(td_info->hc_gen_td[0].td_control),
-				BUFFER_ROUND|DP_SETUP|NO_DELAY_INTERRUPT);
+		BUFFER_ROUND|DP_SETUP|NO_DELAY_INTERRUPT|CC(NotAccessed)|DATA_TOGGLE(2));
+
+	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);
 	
 	writereg32(&(td_info->hc_gen_td[1].td_control),
-				BUFFER_ROUND|IN|NO_DELAY_INTERRUPT);
+		BUFFER_ROUND|IN|NO_DELAY_INTERRUPT|CC(NotAccessed)|DATA_TOGGLE(3));
 	
 	writereg32(&(td_info->hc_gen_td[0].current_buffer_pointer),
 				(uintptr_t)usb_buff_pool);
-
+	writereg32(&(td_info->hc_gen_td[0].buffer_end),
+					(uintptr_t)(usb_buff_pool+31));
 
 	usb_req = (struct usb_request *)
 			(&(td_info->hc_gen_td[0].current_buffer_pointer));
@@ -158,6 +161,8 @@ static void get_dev_descriptor(struct ed_info *ed_info,
 	writereg32(&(td_info->hc_gen_td[1].current_buffer_pointer),
 				(uintptr_t)usb_buff_pool+32);
 
+	writereg32(&(td_info->hc_gen_td[1].buffer_end),
+				(uintptr_t)usb_buff_pool+63);
 	
 	
 	writereg32(&(td_info->hc_gen_td[0].next_td),
@@ -244,19 +249,22 @@ void init_ohci()
 		nbyte_align(((uintptr_t) hcca_region),256));
 
 	
-	//Write the ControlED.
+	//Write the ControlED to the HcControlHeadED register.
 	writereg32(HC_CONTROL_HEAD_ED_REG(USB_OHCI_BA),
 							(uintptr_t)ed_info.hc_ed);
-					
-	//Set the ControlBulkED to an ED.
-//	writereg32(HC_BULK_HEAD_ED_REG(USB_OHCI_BA), (uintptr_t)ed_info.hc_ed);
+	
+	//Init the HcControlCurrentED register to 0 to indicate
+	//the end of the control list.
+	writereg32(HC_CONTROL_CURRENT_ED_REG(USB_OHCI_BA),0);
+
+	//TODO:Set the ControlBulkED to an ED.
 	
 
 	//Enable all interrupts except Start of frame (SOF) 
 	//in HcInterruptEnable register.
 	writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),0xC000007B);
 
-	/* Set control registers to enable all queues on. */
+	/* Set control registers to enable control queue. */
 	set_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),
 					CLE
 					);
@@ -272,14 +280,11 @@ void init_ohci()
 					);
 
 
-	/*set_regs_value(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
-					CLF,CLF);*/
-
+	//Set the control list filled.
 	set_reg_bits(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
-					
-	print_hex_uart(UART0_BA,
-			readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)));
 
+	print_hex_uart(UART0_BA,td_info.hc_gen_td[0].td_control);
+	
 /*
 	print_hex_uart(UART0_BA,
 		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT1)));
