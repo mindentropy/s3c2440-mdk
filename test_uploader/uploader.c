@@ -12,12 +12,14 @@
 
 //#define OS_UPLOAD_DBG 
 
+#define SERIAL_DEVICE_IDX 		1
+#define FILENAME_PARAMETER_IDX 	2
+#define MAX_PARAMETERS  		3
 
 #undef TEST_LCD
 
 #define TERM_SPEED 115200
 
-const char *serial_dev = "/dev/ttyUSB0";
 
 
 int read_str_response(int serial_fd)
@@ -57,6 +59,8 @@ int main(int argc, char **argv)
 	unsigned int size = 0,serial_index = 0;
 	unsigned progress = 0;
 
+	char *serial_dev;
+
 #ifdef TEST_LCD
 	unsigned pic_size = sizeof(image)/sizeof(char);
 	unsigned pic_idx = 0;
@@ -64,20 +68,27 @@ int main(int argc, char **argv)
 
 	struct stat stat_buff;
 
-	if(argc != 2) {
-		printf("Usage: uploader <filename>\n");
+	if(argc != MAX_PARAMETERS) {
+		printf("Usage: uploader <serial_device> <filename>\n");
 		return 0;
 	}
 
-	binary_fd = open(argv[1],O_RDONLY);
+	serial_dev = argv[SERIAL_DEVICE_IDX];
+
+	printf("Using serial device : %s\n",serial_dev);
+
+	binary_fd = open(argv[FILENAME_PARAMETER_IDX],O_RDONLY);
 	
 	if(binary_fd == -1) {
 		perror("uploader_open");
 		return -1;
 	}
 
-	stat(argv[1],&stat_buff);
-	printf("Uploading size : %lu\n",stat_buff.st_size);
+
+	stat(argv[FILENAME_PARAMETER_IDX],&stat_buff);
+	printf("File : %s, Uploading size : %lu\n",
+								argv[FILENAME_PARAMETER_IDX],
+								stat_buff.st_size);
 
 	serial_fd = open(serial_dev,O_RDWR);
 

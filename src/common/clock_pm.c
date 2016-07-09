@@ -141,7 +141,7 @@ void init_clock()
 	/* 	
 	 *  FCLK = 405 MHz.
 	 *  HCLK = 405/4 = 101MHz
-	 *  PCLK = 405/8 = 50 Mhz
+	 *  PCLK = 405/8 = 50 MHz
 	 */
 
 	set_clock_divn(CLK_BASE_ADDR,
@@ -167,7 +167,7 @@ void init_clock()
 
 	/* Set upll first, use 7 "nops" delay and then set mpll */
 
-	set_clk_upll(CLK_BASE_ADDR,0x38,0x2,0x2); //48 Mhz.
+	set_clk_upll(CLK_BASE_ADDR,0x38,0x2,0x2); //48 MHz.
     
 	__asm__ __volatile__(
 			"mov r0,r0\n\t"
@@ -183,7 +183,7 @@ void init_clock()
 		);
 
 	
-	set_clk_mpll(CLK_BASE_ADDR,0x7f,0x2,0x1); //405 Mhz
+	set_clk_mpll(CLK_BASE_ADDR,0x7f,0x2,0x1); //405 MHz
 
 	__asm__ __volatile__(
 			"mov r0,r0\n\t"
@@ -198,5 +198,7 @@ void init_clock()
 			"mov r0,r0\n\t"
 		);
 
+
+//TODO: Verify if clearing slow clock is proper.
 	clear_slow_clock(CLK_BASE_ADDR);
 }

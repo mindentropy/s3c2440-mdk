@@ -82,7 +82,7 @@
 	set_reg_bits(CLKCON_REG(BA),CLK)
 
 
-#define UCLK_ON		BIT7
+#define UCLK_OFF	BIT7
 #define MPLL_OFF	BIT5
 #define SLOW_BIT	BIT4
 #define SLOW_VAL	(BIT2|BIT1|BIT0)
@@ -192,10 +192,21 @@ uint32_t get_pclk(uint32_t BA);
 #define get_clock_upll_divn(BA) \
 	(readreg32(CLKDIVN_REG(BA)) & DIVN_UPLL_MASK)
 
+// Clear slow clock after the MPLL is turned.
+// The slow clock can be turned OFF after
+// a minimum 300us.
 #define clear_slow_clock(BA) do { \
-	clear_reg_bits(CLKSLOW_REG(BA),SLOW_BIT); \
-	clear_reg_bits(CLKSLOW_REG(BA),UCLK_ON); \
+	clear_reg_bits(CLKSLOW_REG(BA),UCLK_OFF); \
 	clear_reg_bits(CLKSLOW_REG(BA),MPLL_OFF); \
+	__asm__ __volatile__ ( \
+		"mov r0,r0 \n\t" 	\
+		"mov r0,r0 \n\t" 	\
+		"mov r0,r0 \n\t" 	\
+		"mov r0,r0 \n\t" 	\
+		"mov r0,r0 \n\t" 	\
+		"mov r0,r0 \n\t" 	\
+	); \
+	clear_reg_bits(CLKSLOW_REG(BA),SLOW_BIT); \
 	} while(0)
 
 
