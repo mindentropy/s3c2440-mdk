@@ -98,22 +98,46 @@ static void init_td(struct td_info *td_info,
 }
 						
 
-static void get_dev_descriptor(struct ed_info *ed_info,
-						struct td_info *td_info,
-						void *usb_buff_pool)
+static void 
+		get_dev_descriptor(
+				struct ed_info *ed_info,
+				struct td_info *td_info,
+				void *usb_buff_pool
+				)
 {
 	struct usb_request *usb_req;
 
 	//Set the function address to 0 initially.
-	set_hc_ed_fa(&(ed_info->hc_ed[0].endpoint_ctrl),0);
+	set_hc_ed_fa(
+			&(ed_info->hc_ed[0].endpoint_ctrl),
+			0
+		);
 
 	//Set the endpoint to 0.
-	set_hc_ed_en(&(ed_info->hc_ed[0].endpoint_ctrl),0);
+	set_hc_ed_en(
+			&(ed_info->hc_ed[0].endpoint_ctrl),
+			0
+		);
+
 	//Get the direction from td and not from ed.
-	set_hc_ed_dir(&(ed_info->hc_ed[0].endpoint_ctrl),GET_DIR_FROM_TD);
-	set_hc_ed_speed(&(ed_info->hc_ed[0].endpoint_ctrl),
-									HIGH_SPEED);
-	set_hc_ed_mps(&(ed_info->hc_ed[0].endpoint_ctrl),64);
+	set_hc_ed_dir(
+			&(ed_info->hc_ed[0].endpoint_ctrl),
+			GET_DIR_FROM_TD
+		);
+
+	set_hc_ed_speed(
+			&(ed_info->hc_ed[0].endpoint_ctrl),
+			HIGH_SPEED //Set to high speed.
+		);
+
+	set_hc_ed_mps(
+			&(ed_info->hc_ed[0].endpoint_ctrl),
+			64U //Set max pkt size to 64.
+		);
+
+	//Dump the endpoint_ctrl for verification.
+	uart_puts(UART0_BA,"Endpt ctrl : ");
+	print_hex_uart(UART0_BA,ed_info->hc_ed[0].endpoint_ctrl);
 
 	ed_info->hc_ed[0].HeadP = 0; //Init to 0.
 	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
@@ -127,21 +151,58 @@ static void get_dev_descriptor(struct ed_info *ed_info,
 	 * all 0's
 	 */
 
-	writereg32(&(td_info->hc_gen_td[0].td_control),
-		BUFFER_ROUND|DP_SETUP|NO_DELAY_INTERRUPT|CC(NotAccessed)|DATA_TOGGLE(2));
+	writereg32(
+				&(td_info->hc_gen_td[0].td_control),
+					BUFFER_ROUND
+					|DP_SETUP
+					|NO_DELAY_INTERRUPT
+					|DATA_TOGGLE(2) /* 
+									 * See pg24(39) of spec. 
+									 * DATA0 data PID for setup packet, 
+									 * MSB of dataToggle = 1 for setup
+									 * and LSB of dataToggle = 0 for setup.
+									 */
+					|CC(NotAccessed) /* 
+					                  * See pg35(50) of spec.
+					                  * 
+									  */
+			);
 
+	uart_puts(UART0_BA,"TD0 control :");
 	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);
 	
-	writereg32(&(td_info->hc_gen_td[1].td_control),
-		BUFFER_ROUND|IN|NO_DELAY_INTERRUPT|CC(NotAccessed)|DATA_TOGGLE(3));
+	writereg32(
+				&(td_info->hc_gen_td[1].td_control),
+					BUFFER_ROUND
+					|IN
+					|NO_DELAY_INTERRUPT
+					|DATA_TOGGLE(3) /* 
+									 * See pg24(39) of spec.
+									 * DATA0 data PID for setup packet, 
+									 * MSB of dataToggle = 1 for status 
+									 * and LSB of dataToggle = 1 for setup.
+									 */
+					|CC(NotAccessed) /* 
+					                  * See pg35(50) of spec.
+					                  * 
+									  */
+			);
 	
-	writereg32(&(td_info->hc_gen_td[0].current_buffer_pointer),
-				(uintptr_t)usb_buff_pool);
-	writereg32(&(td_info->hc_gen_td[0].buffer_end),
-					(uintptr_t)(usb_buff_pool+31));
+	uart_puts(UART0_BA,"TD1 control :");
+	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);
 
-	usb_req = (struct usb_request *)
-			(&(td_info->hc_gen_td[0].current_buffer_pointer));
+	writereg32(
+				&(td_info->hc_gen_td[0].current_buffer_pointer),
+				(uintptr_t)usb_buff_pool
+			);
+
+	writereg32(
+				&(td_info->hc_gen_td[0].buffer_end),
+				(uintptr_t)(usb_buff_pool+31)
+			);
+
+	usb_req = (struct usb_request *)(
+				&(td_info->hc_gen_td[0].current_buffer_pointer));
 
 	/* 
 	 * Set the current buffer pointer for td0 to get device
@@ -164,18 +225,16 @@ static void get_dev_descriptor(struct ed_info *ed_info,
 	writereg32(&(td_info->hc_gen_td[1].buffer_end),
 				(uintptr_t)usb_buff_pool+63);
 	
-	
+	/* Set the td0 next_td to td1 */
 	writereg32(&(td_info->hc_gen_td[0].next_td),
 				(uintptr_t)(&(td_info->hc_gen_td[1])));
 
+	/* Set the td1 next_td to td2 */
 	writereg32(&(td_info->hc_gen_td[1].next_td),
 				(uintptr_t)(&(td_info->hc_gen_td[2])));
 
-	/* 
-	 * We will config the head and tail pointers based on the 
-	 * type of operations.
-	 */
-	// Setup the head and tail pointers to point to the TD's.
+
+	// Setup the head and tail pointers of ED to point to the TD's.
 	ed_info->hc_ed[0].HeadP = (uintptr_t)(&(td_info->hc_gen_td[0]));
 	ed_info->hc_ed[0].TailP = (uintptr_t)(&(td_info->hc_gen_td[2]));
 	
@@ -184,6 +243,19 @@ static void get_dev_descriptor(struct ed_info *ed_info,
 void set_end_point_config(struct ed_info *ed_info,
 								uint32_t ed_idx)
 {
+}
+
+
+static void dump_usb_port_status()
+{
+	
+	uart_puts(UART0_BA,"Port1 status :");
+	print_hex_uart(UART0_BA,
+		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT1)));
+
+	uart_puts(UART0_BA,"Port2 status :");
+	print_hex_uart(UART0_BA,
+		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT2)));
 }
 
 /*
@@ -217,25 +289,34 @@ void init_ohci()
 
 	uart_puts(UART0_BA,"HcRevision :");
 	print_hex_uart(UART0_BA,
-			readreg32(HC_REVISION_REG(USB_OHCI_BA)));
+				readreg32(HC_REVISION_REG(USB_OHCI_BA))
+				);
 
-	//Save the HcFmInterval register for later set up.
+	/* Save the HcFmInterval register for later set up. */
 	HcFmInterval = readreg32(HC_FM_INTERVAL_REG(USB_OHCI_BA));
 	
-	// Reset the Host controller
+	/*** Reset the Host controller ****/
 	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
-		readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) | HCR);
+				(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)))
+				|HCR
+				);
 
-	// Host controller sets itself to 0 after 10ms
+	/*** Host controller sets itself to 0 after 10ms ***/
 	while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
 		;
 
-	// Write the HcFmInterval register back after reset
+	/*
+	 * Host controller will be in suspend state. See Pg 116(131) 
+	 */
+
+
+	/* Write the HcFmInterval register back after reset */
 	writereg32(HC_FM_INTERVAL_REG(USB_OHCI_BA),HcFmInterval);
 
 	uart_puts(UART0_BA,"USB Reset\r\n");
 
-	hccaregion = (struct HCCARegion *)nbyte_align(((uintptr_t)hcca_region),256);
+	hccaregion = (struct HCCARegion *)
+						nbyte_align(((uintptr_t)hcca_region),256);
 	
 /*
 	print_hex_uart(UART0_BA,
@@ -244,24 +325,32 @@ void init_ohci()
 		nbyte_align(((uintptr_t) hcca_region),256));
 */
 
-	//Write the HCCA register.
+	/*** Write the HCCA register. ***/
 	writereg32(HC_HCCA_REG(USB_OHCI_BA),
 		nbyte_align(((uintptr_t) hcca_region),256));
 
 	
-	//Write the ControlED to the HcControlHeadED register.
-	writereg32(HC_CONTROL_HEAD_ED_REG(USB_OHCI_BA),
-							(uintptr_t)ed_info.hc_ed);
+	/*** Write the ControlED to the HcControlHeadED register. ***/
+	writereg32(
+				HC_CONTROL_HEAD_ED_REG(USB_OHCI_BA),
+				(uintptr_t)ed_info.hc_ed
+			);
 	
-	//Init the HcControlCurrentED register to 0 to indicate
-	//the end of the control list.
+	/*
+	 * Init the HcControlCurrentED register to 0 to indicate
+	 * the end of the control list.
+	 * TODO: Check if 0 is a valid value. In addition make sure
+	 * ControlListEnable (CLE) is cleared.
+	 *
+	 */
 	writereg32(HC_CONTROL_CURRENT_ED_REG(USB_OHCI_BA),0);
 
 	//TODO:Set the ControlBulkED to an ED.
 	
-
-	//Enable all interrupts except Start of frame (SOF) 
-	//in HcInterruptEnable register.
+	/*
+	 * Enable all interrupts except Start of frame (SOF) 
+	 * in HcInterruptEnable register.
+	 */
 	writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),0xC000007B);
 
 	/* Set control registers to enable control queue. */
@@ -269,7 +358,7 @@ void init_ohci()
 					CLE
 					);
 
-	//Set to 90% of HcFmInterval.
+	/*** Set to 90% of HcFmInterval. ***/
 	writereg32(HC_PERIODIC_START_REG(USB_OHCI_BA),((uint32_t)(0.9 * HcFmInterval)));
 	//print_hex_uart(UART0_BA,readreg32(HC_CONTROL_REG(USB_OHCI_BA)));
 	
@@ -282,16 +371,10 @@ void init_ohci()
 
 	//Set the control list filled.
 	set_reg_bits(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
-
-	print_hex_uart(UART0_BA,td_info.hc_gen_td[0].td_control);
 	
-/*
-	print_hex_uart(UART0_BA,
-		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT1)));
+	hc_rh_set_port_enable(USB_OHCI_BA,PORT1);
 
-	print_hex_uart(UART0_BA,
-		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT2)));
-*/
+	dump_usb_port_status();
 	
 	/*
 	 * Test Poll for data.

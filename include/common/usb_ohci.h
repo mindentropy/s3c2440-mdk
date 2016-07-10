@@ -225,6 +225,7 @@ enum Ports {
 #define HC_RH_PORT_STATUS_REG(BA,PORTNUM) \
 	HW_REG(BA,(HC_RH_PORT_STATUS_OFF + (PORTNUM<<2)))
 
+
 /*
 #define HC_RH_PORT_STATUS1_OFF 			0x54
 #define HC_RH_PORT_STATUS1_REG(BA) \
@@ -248,6 +249,19 @@ enum Ports {
 #define PSSC 	BIT18
 #define OCIC 	BIT19
 #define PRSC 	BIT20
+
+#define hc_rh_set_port_enable(BA,PORTNUM) \
+	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
+				PES)
+
+#define hc_rh_set_port_suspend(BA,PORTNUM) \
+	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
+				PSS)
+
+#define hc_rh_clear_port_suspend(BA,PORTNUM) \
+	clear_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
+				PSS)
+					
 
 /**** OHCI functionality ****/
 
@@ -292,8 +306,8 @@ struct ed_info {
 #define SPEED_MASK  	BIT13
 #define SPEED_SHIFT 	13
 
-#define SLOW_SPEED 		(0<<SPEED_SHIFT)
-#define HIGH_SPEED 		(1<<SPEED_SHIFT)
+#define SLOW_SPEED 		(1<<SPEED_SHIFT)
+#define HIGH_SPEED 		(0<<SPEED_SHIFT)
 
 #define set_hc_ed_speed(reg,value) \
 	set_regs_value(reg,SPEED_MASK,value)

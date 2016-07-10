@@ -130,13 +130,13 @@ int main(void) {
 /*	putc(UART0_BA,'t');
 	putc(UART0_BA,'\n');*/
 
-	dump_clk();
-	dump_cpu_info();
-	dump_cache_info();
+	//dump_clk();
+	//dump_cpu_info();
+	//dump_cache_info();
 
 
-	dump_nand_dbg();
-	dump_chip_id();
+	//dump_nand_dbg();
+	//dump_chip_id();
 	last_boot_cause();
 	
 
@@ -153,7 +153,7 @@ int main(void) {
 	//
 	//init_ethernet();
 	
-	dump_bank_regs();
+	//dump_bank_regs();
 	//dump_usb_regs();
 	init_ohci();
 

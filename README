@@ -4,8 +4,8 @@ MDK OS and Microcontroller Development Kit
 This project has two goals:
 
 1) To provide a microcontroller development kit which provides a framework for the
-developer for creating different applications. All the internal details of initializing the system and handling
-of peripheral controllers is handled by the system. 
+   developer for creating different applications. All the internal details of initializing 
+   the system and handling of peripheral controllers is handled by the system. 
 2) To provide a working kernel to test the system which is extensible for further customizations.
 
 Hardware
@@ -19,7 +19,8 @@ Environment:
 The OS development is done on a Linux machine (Distro: Ubuntu 15.10+).
 
 Toolchain:
-The tool chain is the cross compiler ARM tool chain provided by Linaro and which is present in the Ubuntu repository.
+The tool chain is the cross compiler ARM tool chain provided by Linaro and which 
+is present in the Ubuntu repository.
 You can fetch the toolchain by doing a apt-get.
 The command line for fetching the needed packages is:
 
@@ -30,7 +31,8 @@ The gnu compiler toolchain needed which is present in the repository are:
 2) gdb-arm-none-eabi
 
 Optional:
-cscope for code indexing. If you do not have cscope then please remove "cscope_create" in the "all" rule and "cscope_clean" in the "cleanall" rule.
+cscope for code indexing. If you do not have cscope then please remove "cscope_create" 
+in the "all" rule and "cscope_clean" in the "cleanall" rule.
 
 Note: 
 	*-arm-linux-gnueabi tools are meant to compile the linux kernel. This toolchain was used in the previous
@@ -61,7 +63,9 @@ Flashing the loader:
    d) If you are using usbpush do a ~/usbpush_src_dir/usbpush bin/mdk_loader.bin
 5) To verify toggle the switch to NAND. A 'ldr' message should appear on your terminal program.
 6) Now to upload the OS on to the RAM use the 'uploader' program in the 'test_uploader' folder.
-7) To use the program type in ./test_uploader/uploader bin/mdk_os.bin. This will start uploading the OS on to the RAM.
+7) To use the program type in ./test_uploader/uploader <serial_device> bin/mdk_os.bin. 
+	This will start uploading the OS on to the RAM. Here serial device is any 
+	ttyUSBx device (for e.g. /dev/ttyUSB0)
 8) After the OS upload is complete it runs the mdk_os automatically.
 
 ------------------------------------------------------------------------------------------------
