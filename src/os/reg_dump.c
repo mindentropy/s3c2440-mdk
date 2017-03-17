@@ -327,6 +327,13 @@ void dump_bank_regs()
 					readreg32(BWSCON_REG(MEM_BA)));
 }
 
+void dump_misccr_regs()
+{
+	uart_puts(UART0_BA,"MISCCR : ");
+	print_hex_uart(UART0_BA,
+					readreg32(MISCCR_REG()));
+}
+
 void dump_usb_regs()
 {
 	uart_puts(UART0_BA,"HcRevision :");
