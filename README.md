@@ -1,0 +1,74 @@
+MDK OS and Microcontroller Development Kit
+==========================================
+
+This project has two goals:
+
+1. To provide a microcontroller development kit which provides a framework for the
+   developer for creating different applications. All the internal details of initializing 
+   the system and handling of peripheral controllers is handled by the system. 
+2. To provide a working kernel to test the system which is extensible for further customizations.
+
+Hardware
+--------
+Presently the OS runs on a FriendlyARM mini2440 board which has an ARM based Samsung S3C2440 CPU.
+
+Building and Testing
+--------------------
+
+Environment:
+The OS development is done on a Linux machine (Distro: Ubuntu 15.10+).
+
+Toolchain:
+The tool chain is the cross compiler ARM tool chain provided by Linaro and which 
+is present in the Ubuntu repository.
+You can fetch the toolchain by doing a apt-get.
+The command line for fetching the needed packages is:
+
+sudo apt-get install gcc-arm-none-eabi gdb-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib 
+
+The gnu compiler toolchain needed which is present in the repository are:
+1. gcc-arm-none-eabi
+2. gdb-arm-none-eabi
+
+Optional:
+cscope for code indexing. If you do not have cscope then please remove "cscope_create" 
+in the "all" rule and "cscope_clean" in the "cleanall" rule.
+
+Note: 
+	*-arm-linux-gnueabi tools are meant to compile the linux kernel. This toolchain was used in the previous
+versions of the code. The problem with using it is that there are problems with lgcc and hence division and multiplication 
+operations i.e. any floating point operations could not be emulated.
+
+
+Building:
+To build the OS and the loader run 'make' in the s3c2440-mdk folder. All binary files will be put in the 'bin' folder.
+In the test_uploader a binary called uploader will be generated which is used to upload the OS binary file to the device.
+
+Flashing:
+A loader needs to be flashed into the NAND memory which later loads the OS.
+
+Flashing the loader:
+1. Toggle the switch to NOR.
+2. Boot the board to supervivi in NOR. In the menu select 'q' to go to 'vivi' shell.
+3. In the command shell type in "load flash 0 <size_of_loader> u". This waits for a USB connection from the host.
+   If a USB connection is established it loads the loader to the NAND at address 0. The size_of_loader will be the
+   size of the mdk_loader.bin file in the bin folder. You can check the size by doing a ls -al mdk_loader.bin
+4. To establish the connection from the host use the program 'dnw' or 'usbpush'.
+   To upload the program using dnw
+  1. unzip dnw. 
+  2. Go to src/driver and compile the linux driver. After the driver is compiled
+   	  do a sudo insmod ./secbulk.ko
+  3. Now from the s3c2440-mdk folder you can do a ../dnw/dnw-linux/src/dnw/dnw bin/mdk_loader.bin. This will start uploading
+      the loader on the the NAND flash.
+  4. If you are using usbpush do a ~/usbpush_src_dir/usbpush bin/mdk_loader.bin
+5. To verify toggle the switch to NAND. A 'ldr' message should appear on your terminal program.
+6. Now to upload the OS on to the RAM use the 'uploader' program in the 'test_uploader' folder.
+7. To use the program type in ./test_uploader/uploader <serial_device> bin/mdk_os.bin. 
+	This will start uploading the OS on to the RAM. Here serial device is any 
+	ttyUSBx device (for e.g. /dev/ttyUSB0)
+8. After the OS upload is complete it runs the mdk_os automatically.
+
+-------------------------------------------------------------------------------------------
+
+Developer diary:
+You can find me blogging about development of this [here](http://thesoulofamachine.blogspot.in)
