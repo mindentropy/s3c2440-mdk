@@ -174,4 +174,6 @@ enum DescriptorType {
 						endpoint,\
 						2)
 
+void init_usb();
+
 #endif

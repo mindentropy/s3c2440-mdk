@@ -130,7 +130,7 @@ int main(void) {
 /*	putc(UART0_BA,'t');
 	putc(UART0_BA,'\n');*/
 
-	//dump_clk();
+	dump_clk();
 	//dump_cpu_info();
 	//dump_cache_info();
 
@@ -155,7 +155,9 @@ int main(void) {
 	
 	//dump_bank_regs();
 	//dump_usb_regs();
+	//init_usb();
 	init_ohci();
+	dump_misccr_regs();
 
 	while(1) {
 
