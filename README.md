@@ -55,12 +55,12 @@ Flashing the loader:
    size of the mdk_loader.bin file in the bin folder. You can check the size by doing a ls -al mdk_loader.bin
 4. To establish the connection from the host use the program 'dnw' or 'usbpush'.
    To upload the program using dnw
-  1. unzip dnw. 
-  2. Go to src/driver and compile the linux driver. After the driver is compiled
+    1. unzip dnw. 
+    2. Go to src/driver and compile the linux driver. After the driver is compiled
    	  do a sudo insmod ./secbulk.ko
-  3. Now from the s3c2440-mdk folder you can do a ../dnw/dnw-linux/src/dnw/dnw bin/mdk_loader.bin. This will start uploading
+    3. Now from the s3c2440-mdk folder you can do a ../dnw/dnw-linux/src/dnw/dnw bin/mdk_loader.bin. This will start uploading
       the loader on the the NAND flash.
-  4. If you are using usbpush do a ~/usbpush_src_dir/usbpush bin/mdk_loader.bin
+    4. If you are using usbpush do a ~/usbpush_src_dir/usbpush bin/mdk_loader.bin
 5. To verify toggle the switch to NAND. A 'ldr' message should appear on your terminal program.
 6. Now to upload the OS on to the RAM use the 'uploader' program in the 'test_uploader' folder.
 7. To use the program type in ./test_uploader/uploader <serial_device> bin/mdk_os.bin. 
