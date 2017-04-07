@@ -27,7 +27,7 @@
 
 #define REV_MASK 	set_bit_range(7,0)
 
-#define HC_CONTROL_OFF 					0x04
+#define HC_CONTROL_OFF 					0x04U
 #define HC_CONTROL_REG(BA) \
 	HW_REG(BA,HC_CONTROL_OFF)
 
@@ -56,7 +56,7 @@
 #define RWE 					BIT10
 
 
-#define HC_COMMAND_STATUS_OFF 			0x08
+#define HC_COMMAND_STATUS_OFF 			0x08U
 #define HC_COMMAND_STATUS_REG(BA) \
 	HW_REG(BA,HC_COMMAND_STATUS_OFF)
 
@@ -67,17 +67,17 @@
 
 #define SOC (BIT17|BIT16)
 
-#define HC_INTERRUPT_STATUS_OFF 		0x0C
+#define HC_INTERRUPT_STATUS_OFF 		0x0CU
 #define HC_INTERRUPT_STATUS_REG(BA) \
 	HW_REG(BA,HC_INTERRUPT_STATUS_OFF)
 
 
-#define HC_INTERRUPT_ENABLE_OFF 		0x10
+#define HC_INTERRUPT_ENABLE_OFF 		0x10U
 #define HC_INTERRUPT_ENABLE_REG(BA) \
 	HW_REG(BA,HC_INTERRUPT_ENABLE_OFF)
 
 
-#define HC_INTERRUPT_DISABLE_OFF 		0x14
+#define HC_INTERRUPT_DISABLE_OFF 		0x14U
 #define HC_INTERRUPT_DISABLE_REG(BA) \
 	HW_REG(BA,HC_INTERRUPT_DISABLE_OFF)
 
@@ -91,7 +91,7 @@
 #define OC 		BIT30
 #define MIE 	BIT31
 
-#define HC_HCCA_OFF 					0x18
+#define HC_HCCA_OFF 					0x18U
 #define HC_HCCA_REG(BA) \
 	HW_REG(BA,HC_HCCA_OFF)
 
@@ -103,25 +103,25 @@ struct __attribute__((packed)) HCCARegion {
 	uint8_t  HccaReserved[116];
 };
 
-#define HC_PERIOD_CURRENT_ED_OFF 		0x1C
+#define HC_PERIOD_CURRENT_ED_OFF 		0x1CU
 #define HC_PERIOD_CURRENT_ED_REG(BA) \
 	HW_REG(BA,HC_PERIOD_CURRENT_ED_OFF)
 
 #define PCED_MASK 	set_bit_range(31,4)
 
-#define HC_CONTROL_HEAD_ED_OFF 			0x20
+#define HC_CONTROL_HEAD_ED_OFF 			0x20U
 #define HC_CONTROL_HEAD_ED_REG(BA) \
 	HW_REG(BA,HC_CONTROL_HEAD_ED_OFF)
 
 #define CHED_MASK 	set_bit_range(31,4)
 
-#define HC_CONTROL_CURRENT_ED_OFF 		0x24
+#define HC_CONTROL_CURRENT_ED_OFF 		0x24U
 #define HC_CONTROL_CURRENT_ED_REG(BA) \
 	HW_REG(BA,HC_CONTROL_CURRENT_ED_OFF)
 
 #define CCED_MASK 	set_bit_range(31,4)
 
-#define HC_BULK_HEAD_ED_OFF 			0x28
+#define HC_BULK_HEAD_ED_OFF 			0x28U
 #define HC_BULK_HEAD_ED_REG(BA) \
 	HW_REG(BA,HC_BULK_HEAD_ED_OFF)
 
@@ -133,13 +133,13 @@ struct __attribute__((packed)) HCCARegion {
 
 #define BCED_MASK 	set_bit_range(31,4)
 
-#define HC_DONE_HEAD_OFF 				0x30
+#define HC_DONE_HEAD_OFF 				0x30U
 #define HC_DONE_HEAD_REG(BA) \
 	HW_REG(BA,HC_DONE_HEAD_OFF)
 
 #define DH_MASK 	set_bit_range(31,4)
 
-#define HC_FM_INTERVAL_OFF 				0x34
+#define HC_FM_INTERVAL_OFF 				0x34U
 #define HC_FM_INTERVAL_REG(BA) \
 	HW_REG(BA,HC_FM_INTERVAL_OFF)
 
@@ -147,32 +147,32 @@ struct __attribute__((packed)) HCCARegion {
 #define FSMPS_MASK 	set_bit_range(30,16)
 #define FIT_MASK 	BIT31
 
-#define HC_FM_REMAINING_OFF 			0x38
+#define HC_FM_REMAINING_OFF 			0x38U
 #define HC_FM_REMAINING_REG(BA) \
 	HW_REG(BA,HC_FM_REMAINING_OFF)
 
 #define FR_MASK 	set_bit_range(13,0)
 #define FRT_MASK 	BIT31
 
-#define HC_FM_NUMBER_OFF 				0x3C
+#define HC_FM_NUMBER_OFF 				0x3CU
 #define HC_FM_NUMBER_REG(BA) \
 	HW_REG(BA,HC_FM_NUMBER_OFF)
 
 #define FN_MASK 	set_bit_range(15,0)
 
-#define HC_PERIODIC_START_OFF 			0x40
+#define HC_PERIODIC_START_OFF 			0x40U
 #define HC_PERIODIC_START_REG(BA) \
 	HW_REG(BA,HC_PERIODIC_START_OFF)
 
 #define PS_MASK 	set_bit_range(13,0)
 
-#define HC_LS_THRESHOLD_OFF 			0x44
+#define HC_LS_THRESHOLD_OFF 			0x44U
 #define HC_LS_THRESHOLD_REG(BA) \
 	HW_REG(BA,HC_LS_THRESHOLD_OFF)
 
 #define LST_MASK 	set_bit_range(11,0)
 
-#define HC_RH_DESCRIPTOR_A_OFF 			0x48
+#define HC_RH_DESCRIPTOR_A_OFF 			0x48U
 #define HC_RH_DESCRIPTOR_A_REG(BA) \
 	HW_REG(BA,HC_RH_DESCRIPTOR_A_OFF)
 
@@ -185,14 +185,14 @@ struct __attribute__((packed)) HCCARegion {
 #define POTPGT 		set_bit_range(31,24)
 
 
-#define HC_RH_DESCRIPTOR_B_OFF 			0x4C
+#define HC_RH_DESCRIPTOR_B_OFF 			0x4CU
 #define HC_RH_DESCRIPTOR_B_REG(BA) \
 	HW_REG(BA,HC_RH_DESCRIPTOR_B_OFF)
 
 #define DR_MASK 	set_bit_range(15,0)
 #define PPCM_MASK 	set_bit_range(31,16)
 
-#define HC_RH_STATUS_OFF 				0x50
+#define HC_RH_STATUS_OFF 				0x50U
 #define HC_RH_STATUS_REG(BA) \
 	HW_REG(BA,HC_RH_STATUS_OFF)
 
@@ -221,7 +221,7 @@ enum Ports {
 	PORT15,
 };
 
-#define HC_RH_PORT_STATUS_OFF 			0x54
+#define HC_RH_PORT_STATUS_OFF 			0x54U
 #define HC_RH_PORT_STATUS_REG(BA,PORTNUM) \
 	HW_REG(BA,(HC_RH_PORT_STATUS_OFF + (PORTNUM<<2)))
 

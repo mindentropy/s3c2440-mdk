@@ -245,6 +245,43 @@ void set_end_point_config(struct ed_info *ed_info,
 {
 }
 
+static void dump_usb_controller_functional_state(const uint8_t control_state)
+{
+	uart_puts(UART0_BA, "USB State : ");
+
+	switch((control_state & HCFS_MASK)>>HCFS_SHIFT){
+		case 0:
+			uart_puts(UART0_BA, "Reset\n");
+			break;
+		case 1:
+			uart_puts(UART0_BA, "Resume\n");
+			break;
+		case 2:
+			uart_puts(UART0_BA, "Operational\n");
+			break;
+		case 3:
+			uart_puts(UART0_BA, "Suspend\n");
+			break;
+	}
+
+	return;
+}
+
+static void dump_control_command_status()
+{
+	uart_puts(UART0_BA,"Command Status Reg: ");
+	print_hex_uart(UART0_BA,
+					readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA))
+					);
+
+	uart_puts(UART0_BA,"Control Reg: ");
+	print_hex_uart(UART0_BA,
+					readreg32(HC_CONTROL_REG(USB_OHCI_BA))
+					);
+
+	dump_usb_controller_functional_state(readreg32(HC_CONTROL_REG(USB_OHCI_BA)));
+
+}
 
 static void dump_usb_port_status()
 {
@@ -270,10 +307,32 @@ static void dump_usb_port_status()
  * 6) Write back the save HcFmInterval register.
  */
 
+static void reset_ohci_controller()
+{
+
+	//dump_control_command_status();
+
+	/*** Reset the Host controller ****/
+	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
+				(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)))
+				|HCR
+				);
+
+	/*** Host controller sets itself to 0 after 10ms ***/
+	while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
+		;
+
+
+	/*
+	 * Host controller will be in suspend state. See Pg 116(131)
+	 */
+	dump_control_command_status();
+}
+
 void init_ohci()
 {
 	
-	struct HCCARegion *hccaregion = 0;
+//	struct HCCARegion *hccaregion = 0;
 
 	//Check alignment. Verified it as 256 bytes.
 /*	
@@ -281,6 +340,8 @@ void init_ohci()
 	print_hex_uart(UART0_BA,readreg32(HC_HCCA_REG(USB_OHCI_BA)));
 */
 	uint32_t HcFmInterval = 0;
+
+	init_usb();
 
 	init_ed(&ed_info,ed_list);
 	init_td(&td_info,td_list);
@@ -295,35 +356,22 @@ void init_ohci()
 	/* Save the HcFmInterval register for later set up. */
 	HcFmInterval = readreg32(HC_FM_INTERVAL_REG(USB_OHCI_BA));
 	
-	/*** Reset the Host controller ****/
-	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
-				(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)))
-				|HCR
-				);
 
-	/*** Host controller sets itself to 0 after 10ms ***/
-	while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
-		;
-
-	/*
-	 * Host controller will be in suspend state. See Pg 116(131) 
-	 */
-
+	reset_ohci_controller();
 
 	/* Write the HcFmInterval register back after reset */
 	writereg32(HC_FM_INTERVAL_REG(USB_OHCI_BA),HcFmInterval);
 
-	uart_puts(UART0_BA,"USB Reset\r\n");
-
+/*
 	hccaregion = (struct HCCARegion *)
 						nbyte_align(((uintptr_t)hcca_region),256);
 	
-/*
 	print_hex_uart(UART0_BA,
 						(uintptr_t)hcca_region);
 	print_hex_uart(UART0_BA,
 		nbyte_align(((uintptr_t) hcca_region),256));
 */
+
 
 	/*** Write the HCCA register. ***/
 	writereg32(HC_HCCA_REG(USB_OHCI_BA),
