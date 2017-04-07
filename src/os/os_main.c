@@ -155,7 +155,7 @@ int main(void) {
 	
 	//dump_bank_regs();
 	//dump_usb_regs();
-	//init_usb();
+	init_usb();
 	init_ohci();
 	dump_misccr_regs();
 
