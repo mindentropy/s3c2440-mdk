@@ -21,12 +21,56 @@ struct ed_info ed_info;
 struct td_info td_info;
 uint32_t HcFmInterval = 0;
 
+static void usb_delay()
+{
+	volatile int i = 0;
+	volatile int j = 0;
+
+	for(i = 0; i< 10000; i++) {
+		for(j = 0; j<100;j++)
+		{
+			;
+		}
+	}
+}
+
+static void dump_td(
+		struct GEN_TRANSFER_DESCRIPTOR *hc_gen_td)
+{
+	uart_puts(UART0_BA,"TD dump\n");
+
+	while(hc_gen_td != 0) {
+		uart_puts(UART0_BA,"\t->");
+		print_hex_uart(UART0_BA,
+						(uint32_t) hc_gen_td);
+		hc_gen_td =
+			(struct GEN_TRANSFER_DESCRIPTOR *)(hc_gen_td->next_td);
+	}
+}
+
 static void dump_ed(
 				struct ed_info *edp_info
 				)
 {
-	uart_puts(UART0_BA,"ED Head :");
-	print_hex_uart(UART0_BA,(uintptr_t)edp_info->hc_ed);
+	struct HC_ENDPOINT_DESCRIPTOR *hc_ed = edp_info->hc_ed;
+
+	print_hex_uart(UART0_BA,(uint32_t)edp_info->hc_ed[0].HeadP);
+
+/*	uart_puts(UART0_BA,"ED size : ");
+	print_hex_uart(UART0_BA,edp_info->size);
+
+	while(hc_ed != 0) {
+		uart_puts(UART0_BA,"->");
+		print_hex_uart(UART0_BA, (uintptr_t)hc_ed);
+
+		uart_puts(UART0_BA,"\tED Ctrl :");
+		print_hex_uart(UART0_BA, hc_ed->endpoint_ctrl);
+
+		//dump_td((struct GEN_TRANSFER_DESCRIPTOR *) hc_ed->HeadP);
+		print_hex_uart(UART0_BA,(uintptr_t)hc_ed->HeadP);
+
+		hc_ed = (struct HC_ENDPOINT_DESCRIPTOR *)hc_ed->NextED;
+	}*/
 }
 
 static void dump_currentED_reg(void)
@@ -119,6 +163,8 @@ static void init_td(struct td_info *td_info,
 		td_info->hc_gen_td[i].current_buffer_pointer = 0;
 		td_info->hc_gen_td[i].next_td = 0;
 		td_info->hc_gen_td[i].buffer_end = 0;
+
+		print_hex_uart(UART0_BA,(uintptr_t)(&(td_info->hc_gen_td[i])));
 	}
 
 //	print_hex_uart(UART0_BA,(uintptr_t)((td_info->hc_gen_td)+i));
@@ -165,8 +211,8 @@ static void
 		);
 
 	//Dump the endpoint_ctrl for verification.
-	uart_puts(UART0_BA,"Endpt ctrl : ");
-	print_hex_uart(UART0_BA,ed_info->hc_ed[0].endpoint_ctrl);
+	/*uart_puts(UART0_BA,"Endpt ctrl : ");
+	print_hex_uart(UART0_BA,ed_info->hc_ed[0].endpoint_ctrl);*/
 
 	ed_info->hc_ed[0].HeadP = 0; //Init to 0.
 	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
@@ -197,8 +243,8 @@ static void
 									  */
 			);
 
-	uart_puts(UART0_BA,"TD0 control :");
-	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);
+/*	uart_puts(UART0_BA,"TD0 control :");
+	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);*/
 	
 	writereg32(
 				&(td_info->hc_gen_td[1].td_control),
@@ -217,8 +263,8 @@ static void
 									  */
 			);
 	
-	uart_puts(UART0_BA,"TD1 control :");
-	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);
+/*	uart_puts(UART0_BA,"TD1 control :");
+	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);*/
 
 	writereg32(
 				&(td_info->hc_gen_td[0].current_buffer_pointer),
@@ -382,8 +428,8 @@ static void reset_ohci_controller()
 	/*
 	 * Host controller will be in suspend state. See Pg 116(131)
 	 */
-	dump_control_command_status();
-	dump_interrupt_register_status();
+	//dump_control_command_status();
+	//dump_interrupt_register_status();
 
 }
 
@@ -439,8 +485,8 @@ static void setup_ohci(void)
 	 * in HcInterruptEnable register.
 	 */
 	/*writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),0xC000007B);*/
-	/*writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),
-					SO|WDH|RD|UE|FNO|RHSC|OC|MIE);*/
+	writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),
+					SO|WDH|RD|UE|FNO|RHSC|OC|MIE);
 	/* Set control registers to enable control queue. */
 	set_reg_bits(
 				HC_CONTROL_REG(USB_OHCI_BA),
@@ -501,19 +547,24 @@ void init_ohci()
 					HCFS_MASK,
 					HCFS_USB_OPERATIONAL<<HCFS_SHIFT
 					);
-
-	dump_usb_port_status();
-	
-	dump_usb_controller_functional_state(readreg32(HC_CONTROL_REG(USB_OHCI_BA)));
-
 	/*
 	 * Test Poll for data.
 	 */
+
+
+	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & WDH)) {
+		;
+	}
+
 	dump_ed(&ed_info);
-	dump_currentED_reg();
-	dump_interrupt_register_status();
 
 	uart_puts(UART0_BA,"HccaDoneHead: ");
 	print_hex_uart(UART0_BA,
 				hccaregion_reg->HccaDoneHead);
+
+	//dump_currentED_reg();
+	//dump_interrupt_register_status();
+
+	//dump_usb_port_status();
+	//dump_usb_controller_functional_state(readreg32(HC_CONTROL_REG(USB_OHCI_BA)));
 }
