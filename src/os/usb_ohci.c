@@ -9,6 +9,7 @@
  */
 
 uint8_t hcca_region[512];
+struct HCCARegion *hccaregion_reg;
 
 uint8_t ed_list[MAX_ED_DESCRIPTORS << ED_SIZE_SHIFT];
 uint8_t td_list[MAX_TD_DESCRIPTORS << TD_SIZE_SHIFT];
@@ -18,17 +19,45 @@ uint8_t usb_buffer_pool[512];
 
 struct ed_info ed_info;
 struct td_info td_info;
+uint32_t HcFmInterval = 0;
 
+static void dump_ed(
+				struct ed_info *edp_info
+				)
+{
+	uart_puts(UART0_BA,"ED Head :");
+	print_hex_uart(UART0_BA,(uintptr_t)edp_info->hc_ed);
+}
 
-static void init_ed(struct ed_info *ed_info, 
+static void dump_currentED_reg(void)
+{
+
+/*	uart_puts(UART0_BA,"PCED :");
+	print_hex_uart(UART0_BA,
+			readreg32(HC_PERIOD_CURRENT_ED_REG(USB_OHCI_BA)));
+*/
+
+	uart_puts(UART0_BA,"CCED :");
+	print_hex_uart(UART0_BA,
+			readreg32(HC_CONTROL_CURRENT_ED_REG(USB_OHCI_BA)));
+
+/*
+	uart_puts(UART0_BA,"BCED :");
+	print_hex_uart(UART0_BA,
+			readreg32(HC_BULK_CURRENT_ED_REG(USB_OHCI_BA)));
+*/
+
+}
+
+static void init_ed(struct ed_info *edp_info,
 						uint8_t *ed_ll)
 {
 	uint32_t i = 0;
-	ed_info->hc_ed = 0;
-	ed_info->size = 0;
+	edp_info->hc_ed = 0;
+	edp_info->size = 0;
 
 
-	ed_info->hc_ed = (struct HC_ENDPOINT_DESCRIPTOR *)
+	edp_info->hc_ed = (struct HC_ENDPOINT_DESCRIPTOR *)
 						nbyte_align(
 							(uintptr_t)ed_ll,
 							HC_ED_ALIGNMENT
@@ -36,25 +65,25 @@ static void init_ed(struct ed_info *ed_info,
 
 
 //	print_hex_uart(UART0_BA,(uintptr_t)ed_ll);
-//	print_hex_uart(UART0_BA,(uintptr_t)ed_info->hc_ed);
+//	print_hex_uart(UART0_BA,(uintptr_t)edp_info->hc_ed);
 
 
-	for(i = 0; ; i++,ed_info->size++) {
+	for(i = 0; ; i++,edp_info->size++) {
 		//If the index + 1 i.e. sizeof the structure crosses the pool size.
-		if(((uintptr_t)((ed_info->hc_ed) + (i+1))) > 
+		if(((uintptr_t)((edp_info->hc_ed) + (i+1))) >
 			((uintptr_t)(ed_ll + ED_TOTAL_SIZE))) {
 			break;
 		}
-		ed_info->hc_ed[i].endpoint_ctrl = 0;
-		ed_info->hc_ed[i].TailP = 0;
-		ed_info->hc_ed[i].HeadP = 0;
-		ed_info->hc_ed[i].NextED = 0;
+		edp_info->hc_ed[i].endpoint_ctrl = 0;
+		edp_info->hc_ed[i].TailP = 0;
+		edp_info->hc_ed[i].HeadP = 0;
+		edp_info->hc_ed[i].NextED = 0;
 	}
 
 
 //	print_hex_uart(UART0_BA,(uintptr_t)(ed_ll+ED_TOTAL_SIZE));
-//	print_hex_uart(UART0_BA,(uintptr_t)(ed_info->hc_ed+i));
-//	print_hex_uart(UART0_BA,(uintptr_t)(ed_info->hc_ed+(i-1)));
+//	print_hex_uart(UART0_BA,(uintptr_t)(edp_info->hc_ed+i));
+//	print_hex_uart(UART0_BA,(uintptr_t)(edp_info->hc_ed+(i-1)));
 
 }
 
@@ -295,6 +324,21 @@ static void dump_usb_port_status()
 		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT2)));
 }
 
+static void dump_interrupt_register_status()
+{
+	uart_puts(UART0_BA,"Interrupt enable status reg :");
+	print_hex_uart(UART0_BA,
+			readreg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA)));
+
+	uart_puts(UART0_BA,"Interrupt disable status reg :");
+	print_hex_uart(UART0_BA,
+			readreg32(HC_INTERRUPT_DISABLE_REG(USB_OHCI_BA)));
+
+	uart_puts(UART0_BA,"Interrupt status reg :");
+	print_hex_uart(UART0_BA,
+			readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)));
+}
+
 /*
  * Setting up USB for getting intial config data.
  * ==============================================
@@ -310,58 +354,53 @@ static void dump_usb_port_status()
 static void reset_ohci_controller()
 {
 
-	//dump_control_command_status();
+	/* Clear the control register */
+	writereg32(HC_CONTROL_REG(USB_OHCI_BA),
+					0x0U);
+	/* Disable all interrupts */
+	writereg32(
+			HC_INTERRUPT_DISABLE_REG(USB_OHCI_BA),
+			MIE|OC|RHSC|FNO|UE|RD|SF|WDH|SO
+			);
 
-	/*** Reset the Host controller ****/
+	/* Reset the Host controller */
 	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
 				(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)))
 				|HCR
 				);
 
-	/*** Host controller sets itself to 0 after 10ms ***/
+	/* Host controller sets itself to 0 after 10ms */
 	while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
 		;
 
+	/* Clear the interrupt status register */
+	writereg32(
+			HC_INTERRUPT_STATUS_REG(USB_OHCI_BA),
+			OC|RHSC|FNO|UE|RD|SF|WDH|SO
+			);
 
 	/*
 	 * Host controller will be in suspend state. See Pg 116(131)
 	 */
 	dump_control_command_status();
+	dump_interrupt_register_status();
+
 }
 
-void init_ohci()
+static void setup_ohci(void)
 {
+	uint16_t i = 0;
 	
-//	struct HCCARegion *hccaregion = 0;
+	/* Clear the hcca_region */
+	for(i = 0; i<512; i++) {
+		hcca_region[i] = 0x0U;
+	}
 
-	//Check alignment. Verified it as 256 bytes.
-/*	
-	writereg32(HC_HCCA_REG(USB_OHCI_BA),0xFFFFFFFF);
-	print_hex_uart(UART0_BA,readreg32(HC_HCCA_REG(USB_OHCI_BA)));
-*/
-	uint32_t HcFmInterval = 0;
+	/* Write the HCCA register. */
+	writereg32(HC_HCCA_REG(USB_OHCI_BA),
+		nbyte_align(((uintptr_t) hcca_region),256));
 
-	init_usb();
-
-	init_ed(&ed_info,ed_list);
-	init_td(&td_info,td_list);
-
-	get_dev_descriptor(&ed_info,&td_info,usb_buffer_pool);
-
-	uart_puts(UART0_BA,"HcRevision :");
-	print_hex_uart(UART0_BA,
-				readreg32(HC_REVISION_REG(USB_OHCI_BA))
-				);
-
-	/* Save the HcFmInterval register for later set up. */
-	HcFmInterval = readreg32(HC_FM_INTERVAL_REG(USB_OHCI_BA));
-	
-
-	reset_ohci_controller();
-
-	/* Write the HcFmInterval register back after reset */
-	writereg32(HC_FM_INTERVAL_REG(USB_OHCI_BA),HcFmInterval);
-
+	hccaregion_reg = (struct HCCARegion *)readreg32(HC_HCCA_REG(USB_OHCI_BA));
 /*
 	hccaregion = (struct HCCARegion *)
 						nbyte_align(((uintptr_t)hcca_region),256);
@@ -372,18 +411,18 @@ void init_ohci()
 		nbyte_align(((uintptr_t) hcca_region),256));
 */
 
-
-	/*** Write the HCCA register. ***/
-	writereg32(HC_HCCA_REG(USB_OHCI_BA),
-		nbyte_align(((uintptr_t) hcca_region),256));
-
+	/*
+     * Write default value to lsthreshold.
+     * See section 7.3.5 of spec
+     */
+	writereg32(HC_LS_THRESHOLD_REG(USB_OHCI_BA),
+					0x628U);
 	
 	/*** Write the ControlED to the HcControlHeadED register. ***/
 	writereg32(
 				HC_CONTROL_HEAD_ED_REG(USB_OHCI_BA),
 				(uintptr_t)ed_info.hc_ed
 			);
-	
 	/*
 	 * Init the HcControlCurrentED register to 0 to indicate
 	 * the end of the control list.
@@ -399,33 +438,82 @@ void init_ohci()
 	 * Enable all interrupts except Start of frame (SOF) 
 	 * in HcInterruptEnable register.
 	 */
-	writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),0xC000007B);
-
+	/*writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),0xC000007B);*/
+	/*writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),
+					SO|WDH|RD|UE|FNO|RHSC|OC|MIE);*/
 	/* Set control registers to enable control queue. */
-	set_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),
-					CLE
-					);
+	set_reg_bits(
+				HC_CONTROL_REG(USB_OHCI_BA),
+				CLE
+				);
 
-	/*** Set to 90% of HcFmInterval. ***/
+	/* Set to 90% of HcFmInterval. */
 	writereg32(HC_PERIODIC_START_REG(USB_OHCI_BA),((uint32_t)(0.9 * HcFmInterval)));
-	//print_hex_uart(UART0_BA,readreg32(HC_CONTROL_REG(USB_OHCI_BA)));
+
+	/*
+	 * Write the HcFmInterval register back after reset with the FSMPS value
+	 * calculated as below.
+     */
+	HcFmInterval |= (((HcFmInterval - MAXIMUM_OVERHEAD) * 6)/7) << 16;
+	writereg32(HC_FM_INTERVAL_REG(USB_OHCI_BA),HcFmInterval);
+	uart_puts(UART0_BA,"HcFmInterval : ");
+	print_hex_uart(UART0_BA,HcFmInterval);
+}
+
+void init_ohci()
+{
 	
-	//Set to USB_OPERATIONAL to start sending SOF.
+/*	struct HCCARegion *hccaregion = 0; */
+
+	/* Check alignment. Verified it as 256 bytes. */
+/*
+	writereg32(HC_HCCA_REG(USB_OHCI_BA),0xFFFFFFFF);
+	print_hex_uart(UART0_BA,readreg32(HC_HCCA_REG(USB_OHCI_BA)));
+*/
+
+	init_usb();
+
+	init_ed(&ed_info,ed_list);
+	init_td(&td_info,td_list);
+
+	get_dev_descriptor(&ed_info,&td_info,usb_buffer_pool);
+
+	uart_puts(UART0_BA,"HcRevision :");
+	print_hex_uart(UART0_BA,
+				readreg32(HC_REVISION_REG(USB_OHCI_BA))
+				);
+
+	/* Save the HcFmInterval register for later set up. */
+	HcFmInterval = readreg32(HC_FM_INTERVAL_REG(USB_OHCI_BA));
+
+	/* Reset the OHCI controller */
+	reset_ohci_controller();
+
+	setup_ohci();
+	
+	/* Set the control list filled. */
+	set_reg_bits(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
+
+	hc_rh_set_port_enable(USB_OHCI_BA,PORT1);
+
+	/* Set to USB_OPERATIONAL to start sending SOF. */
 	set_regs_value(HC_CONTROL_REG(USB_OHCI_BA),
 					HCFS_MASK,
 					HCFS_USB_OPERATIONAL<<HCFS_SHIFT
 					);
 
-
-	//Set the control list filled.
-	set_reg_bits(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
-	
-	hc_rh_set_port_enable(USB_OHCI_BA,PORT1);
-
 	dump_usb_port_status();
 	
+	dump_usb_controller_functional_state(readreg32(HC_CONTROL_REG(USB_OHCI_BA)));
+
 	/*
 	 * Test Poll for data.
 	 */
+	dump_ed(&ed_info);
+	dump_currentED_reg();
+	dump_interrupt_register_status();
 
+	uart_puts(UART0_BA,"HccaDoneHead: ");
+	print_hex_uart(UART0_BA,
+				hccaregion_reg->HccaDoneHead);
 }

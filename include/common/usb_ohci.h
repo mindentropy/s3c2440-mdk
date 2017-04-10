@@ -466,10 +466,11 @@ struct __attribute__((packed)) PACKET_STATUS_WORD
 	uint16_t PSW;
 };
 
-
-
 #define PSW_SIZE_MASK 	set_bit_range(10,0)
 #define PSW_CC 			set_bit_range(15,12)
+
+/* Value as per the spec. See Section 5.4 */
+#define MAXIMUM_OVERHEAD 	210
 
 void init_ohci();
 
