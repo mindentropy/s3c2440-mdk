@@ -34,19 +34,64 @@ static void usb_delay()
 	}
 }
 
+static void dump_error_str(const uint8_t condition_code)
+{
+	switch(condition_code) {
+		case NoError:
+			uart_puts(UART0_BA, "No Err\n");
+			break;
+		case CRC:
+			uart_puts(UART0_BA, "Crc Err\n");
+			break;
+		case DataToggleMismatch:
+			uart_puts(UART0_BA, "DataToggleMismatch\n");
+			break;
+		case Stall:
+			uart_puts(UART0_BA, "Stall\n");
+			break;
+		case DeviceNotResponding:
+			uart_puts(UART0_BA, "Device not responding \n");
+			break;
+		case PIDCheckFailure:
+			uart_puts(UART0_BA, "PID Chk failure\n");
+			break;
+		case UnexpectedPID:
+			uart_puts(UART0_BA, "Unexpected PID\n");
+			break;
+		case DataOverrun:
+			uart_puts(UART0_BA, "Data Overrun\n");
+			break;
+		case DataUnderrun:
+			uart_puts(UART0_BA, "Data Underrun\n");
+			break;
+		case BufferOverrun:
+			uart_puts(UART0_BA, "Buffer Overrun\n");
+			break;
+		case BufferUnderrun:
+			uart_puts(UART0_BA, "Buffer Underrun\n");
+			break;
+		case NotAccessed:
+			uart_puts(UART0_BA, "Not Accessed\n");
+			break;
+	}
+}
+
 static void dump_td(
 		struct GEN_TRANSFER_DESCRIPTOR *hc_gen_td)
 {
-	uart_puts(UART0_BA,"TD dump\n");
+	uart_puts(UART0_BA,"TD addr:");
+	print_hex_uart(UART0_BA,(uintptr_t)hc_gen_td);
 
 	uart_puts(UART0_BA,"TDCTRL : ");
-	print_hex_uart(UART0_BA,(uintptr_t)hc_gen_td->
-td_control);
+	print_hex_uart(UART0_BA,
+			(uintptr_t)hc_gen_td->td_control);
 	uart_puts(UART0_BA,"NXT_TD : ");
 	print_hex_uart(UART0_BA,(uintptr_t)hc_gen_td->next_td);
 
 	uart_puts(UART0_BA,"buffer_end: ");
 	print_hex_uart(UART0_BA,(uintptr_t)hc_gen_td->buffer_end);
+	
+	dump_error_str((hc_gen_td->td_control & CC_MASK) >> CC_SHIFT);
 
 /*	while(hc_gen_td != 0) {
 		uart_puts(UART0_BA,"\t->");
@@ -175,7 +220,7 @@ static void init_td(struct td_info *td_info,
 		td_info->hc_gen_td[i].next_td = 0;
 		td_info->hc_gen_td[i].buffer_end = 0;
 
-		print_hex_uart(UART0_BA,(uintptr_t)(&(td_info->hc_gen_td[i])));
+		//print_hex_uart(UART0_BA,(uintptr_t)(&(td_info->hc_gen_td[i])));
 	}
 
 //	print_hex_uart(UART0_BA,(uintptr_t)((td_info->hc_gen_td)+i));
@@ -254,8 +299,8 @@ static void
 									  */
 			);
 
-/*	uart_puts(UART0_BA,"TD0 control :");
-	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);*/
+	uart_puts(UART0_BA,"TD0 control :");
+	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);
 	
 	writereg32(
 				&(td_info->hc_gen_td[1].td_control),
@@ -274,8 +319,8 @@ static void
 									  */
 			);
 	
-/*	uart_puts(UART0_BA,"TD1 control :");
-	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);*/
+	uart_puts(UART0_BA,"TD1 control :");
+	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);
 
 	writereg32(
 				&(td_info->hc_gen_td[0].current_buffer_pointer),
@@ -352,6 +397,7 @@ static void dump_usb_controller_functional_state(const uint8_t control_state)
 
 	return;
 }
+
 
 static void dump_control_command_status()
 {
@@ -513,8 +559,9 @@ static void setup_ohci(void)
      */
 	HcFmInterval |= (((HcFmInterval - MAXIMUM_OVERHEAD) * 6)/7) << 16;
 	writereg32(HC_FM_INTERVAL_REG(USB_OHCI_BA),HcFmInterval);
-	uart_puts(UART0_BA,"HcFmInterval : ");
-	print_hex_uart(UART0_BA,HcFmInterval);
+
+	/*uart_puts(UART0_BA,"HcFmInterval : ");
+	print_hex_uart(UART0_BA,HcFmInterval);*/
 }
 
 void init_ohci()
@@ -573,7 +620,7 @@ void init_ohci()
 
 	uart_puts(UART0_BA,"HccaDoneHead: ");
 	print_hex_uart(UART0_BA,
-				((hccaregion_reg->HccaDoneHead) & 0xFFFFFFF0));
+					(hccaregion_reg->HccaDoneHead));
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
 	//dump_currentED_reg();
 	//dump_interrupt_register_status();

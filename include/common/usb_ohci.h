@@ -403,7 +403,7 @@ struct td_info {
 #define ERROR_COUNT_MASK		(BIT27|BIT26)
 #define ERROR_COUNT_SHIFT 		(26)
 
-#define CC_MASK 	set_bit_range(31,28)
+#define CC_MASK 	(set_bit_range(31,28))
 #define CC_SHIFT 				(28)
 
 #define CC(CC_CODE) \

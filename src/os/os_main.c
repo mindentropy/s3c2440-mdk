@@ -130,14 +130,14 @@ int main(void) {
 /*	putc(UART0_BA,'t');
 	putc(UART0_BA,'\n');*/
 
-	dump_clk();
+	//dump_clk();
 	//dump_cpu_info();
 	//dump_cache_info();
 
 
 	//dump_nand_dbg();
 	//dump_chip_id();
-	last_boot_cause();
+	//last_boot_cause();
 	
 
 	//init_lcd();
