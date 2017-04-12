@@ -39,14 +39,25 @@ static void dump_td(
 {
 	uart_puts(UART0_BA,"TD dump\n");
 
-	while(hc_gen_td != 0) {
+	uart_puts(UART0_BA,"TDCTRL : ");
+	print_hex_uart(UART0_BA,(uintptr_t)hc_gen_td->
+td_control);
+	uart_puts(UART0_BA,"NXT_TD : ");
+	print_hex_uart(UART0_BA,(uintptr_t)hc_gen_td->next_td);
+
+	uart_puts(UART0_BA,"buffer_end: ");
+	print_hex_uart(UART0_BA,(uintptr_t)hc_gen_td->buffer_end);
+
+/*	while(hc_gen_td != 0) {
 		uart_puts(UART0_BA,"\t->");
 		print_hex_uart(UART0_BA,
 						(uint32_t) hc_gen_td);
 		hc_gen_td =
 			(struct GEN_TRANSFER_DESCRIPTOR *)(hc_gen_td->next_td);
-	}
+	}*/
 }
+
+
 
 static void dump_ed(
 				struct ed_info *edp_info
@@ -54,7 +65,7 @@ static void dump_ed(
 {
 	struct HC_ENDPOINT_DESCRIPTOR *hc_ed = edp_info->hc_ed;
 
-	print_hex_uart(UART0_BA,(uint32_t)edp_info->hc_ed[0].HeadP);
+	print_hex_uart(UART0_BA,(uintptr_t)edp_info->hc_ed[0].HeadP);
 
 /*	uart_puts(UART0_BA,"ED size : ");
 	print_hex_uart(UART0_BA,edp_info->size);
@@ -537,6 +548,8 @@ void init_ohci()
 
 	setup_ohci();
 	
+	dump_ed(&ed_info);
+
 	/* Set the control list filled. */
 	set_reg_bits(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
@@ -560,8 +573,8 @@ void init_ohci()
 
 	uart_puts(UART0_BA,"HccaDoneHead: ");
 	print_hex_uart(UART0_BA,
-				hccaregion_reg->HccaDoneHead);
-
+				((hccaregion_reg->HccaDoneHead) & 0xFFFFFFF0));
+	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
 	//dump_currentED_reg();
 	//dump_interrupt_register_status();
 
