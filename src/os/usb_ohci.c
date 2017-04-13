@@ -266,6 +266,11 @@ static void
 			64U //Set max pkt size to 64.
 		);
 
+	set_hc_ed_toggle_carry(
+			&(ed_info->hc_ed[0].endpoint_ctrl),
+			TOGGLE
+		);
+
 	//Dump the endpoint_ctrl for verification.
 	/*uart_puts(UART0_BA,"Endpt ctrl : ");
 	print_hex_uart(UART0_BA,ed_info->hc_ed[0].endpoint_ctrl);*/
@@ -276,7 +281,7 @@ static void
 	//Setup the td for the ed. I will setup a single td at index 0.
 
 	/* 
-	 * Initialize 3 td's,the first td to send the request,
+	 * Initialize 3 td's, the first td to send the request,
 	 * the second td to receive the response and 
 	 * the last td being the 'terminator' td with
 	 * all 0's
@@ -298,9 +303,12 @@ static void
 					                  * 
 									  */
 			);
-
+/*
 	uart_puts(UART0_BA,"TD0 control :");
 	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);
+*/
+	uart_puts(UART0_BA,"TD0 control :");
+	print_hex_uart(UART0_BA,&(td_info->hc_gen_td[0]));
 	
 	writereg32(
 				&(td_info->hc_gen_td[1].td_control),
@@ -318,9 +326,13 @@ static void
 					                  * 
 									  */
 			);
-	
+/*
 	uart_puts(UART0_BA,"TD1 control :");
 	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);
+*/
+
+	uart_puts(UART0_BA,"TD1 control :");
+	print_hex_uart(UART0_BA,&(td_info->hc_gen_td[1]));
 
 	writereg32(
 				&(td_info->hc_gen_td[0].current_buffer_pointer),
@@ -610,8 +622,7 @@ void init_ohci()
 	/*
 	 * Test Poll for data.
 	 */
-
-
+	//usb_delay();
 	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & WDH)) {
 		;
 	}

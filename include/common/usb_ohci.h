@@ -349,13 +349,14 @@ struct ed_info {
 	set_regs_value(reg,HALT_ED_MASK,(value<<HALT_ED_SHIFT))
 
 #define TOGGLE_CARRY_MASK 	BIT1
-#define TOGGLE_SHIFT 		1
+#define TOGGLE_SHIFT 		1U
+#define TOGGLE 				1U
 
-#define set_hc_ed_toggle(reg,value) \
+#define set_hc_ed_toggle_carry(reg,value) \
 	set_regs_value(reg,TOGGLE_CARRY_MASK,(value<<TOGGLE_SHIFT))
 
 #define NEXT_ED_MASK 	set_bit_range(31,4)
-#define NEXT_ED_SHIFT 	4
+#define NEXT_ED_SHIFT 	(4)
 
 #define set_hc_ed_next_ed(reg,value) \
 	set_regs_value(reg,NEXT_ED_MASK,(value<<NEXT_ED_SHIFT))
@@ -397,7 +398,7 @@ struct td_info {
 #define DATA_TOGGLE_MASK		(BIT25|BIT24)
 #define DATA_TOGGLE_SHIFT 		(24)
 #define DATA_TOGGLE(TOGGLE_VAL) \
-	(TOGGLE_VAL << DATA_TOGGLE_SHIFT)
+	((TOGGLE_VAL) << (DATA_TOGGLE_SHIFT))
 
 
 #define ERROR_COUNT_MASK		(BIT27|BIT26)
@@ -407,7 +408,7 @@ struct td_info {
 #define CC_SHIFT 				(28)
 
 #define CC(CC_CODE) \
-	(CC_CODE<<CC_SHIFT)
+	((CC_CODE)<<(CC_SHIFT))
 
 enum CONDITION_CODE
 {
