@@ -391,22 +391,20 @@ struct td_info {
 #define DP_MASK  				(BIT20|BIT19)
 
 #define DELAY_INTERRUPT_MASK 	(BIT23|BIT22|BIT21)
-#define DELAY_INTERRUPT_SHIFT 	(21)
+#define DELAY_INTERRUPT_SHIFT 	(21U)
 
 #define NO_DELAY_INTERRUPT 		(BIT23|BIT22|BIT21)
 
 #define DATA_TOGGLE_MASK		(BIT25|BIT24)
-#define DATA_TOGGLE_SHIFT 		(24)
+#define DATA_TOGGLE_SHIFT 		(24U)
 #define DATA_TOGGLE(TOGGLE_VAL) \
 	((TOGGLE_VAL) << (DATA_TOGGLE_SHIFT))
 
 
 #define ERROR_COUNT_MASK		(BIT27|BIT26)
-#define ERROR_COUNT_SHIFT 		(26)
+#define ERROR_COUNT_SHIFT 		(26U)
 
-#define CC_MASK 	(set_bit_range(31,28))
-#define CC_SHIFT 				(28)
-
+#define CC_SHIFT 				(28U)
 #define CC(CC_CODE) \
 	((CC_CODE)<<(CC_SHIFT))
 
@@ -445,10 +443,12 @@ struct __attribute__((packed)) ISOCHRONOUS_TRANSFER_DESCRIPTOR
 };
 
 
-#define SF_MASK  		set_bit_range(15,0)
-#define DI_MASK 		set_bit_range(23,21)
-#define FC_MASK 		set_bit_range(26,24)
-#define CC_MASK 		set_bit_range(31,28)
+//#define SF_MASK  		(set_bit_range(15,0))
+//#define DI_MASK 		(set_bit_range(23,21))
+//#define FC_MASK 		(set_bit_range(26,24))
+//#define CC_MASK 		(set_bit_range(31,28))
+#define CC_MASK 		((0xFU) << (CC_SHIFT))
+#define CC_MASK 		((0xFU) << (CC_SHIFT))
 
 #define BP0_MASK 		set_bit_range(31,12)
 #define ISO_NEXT_TD_MASK 	set_bit_range(31,5)
