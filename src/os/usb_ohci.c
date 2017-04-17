@@ -36,6 +36,49 @@ static void usb_delay()
 }
 */
 
+static void dump_rh_desc_ab(void)
+{
+	uart_puts(UART0_BA,"NDP:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & NDP_MASK));
+
+	uart_puts(UART0_BA,"PSM:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & PSM)>>8);
+
+	uart_puts(UART0_BA,"NPS:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & NPS)>>9);
+
+	uart_puts(UART0_BA,"DT:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & DT)>>10);
+
+	uart_puts(UART0_BA,"OCPM:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & OCPM)>>11);
+
+	uart_puts(UART0_BA,"NOCP:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & NOCP)>>12);
+
+	uart_puts(UART0_BA,"POTPGT:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & POTPGT)>>24);
+
+/*	uart_puts(UART0_BA,"RH_B:");
+	print_hex_uart(UART0_BA,
+		readreg32(HC_RH_DESCRIPTOR_B_REG(USB_OHCI_BA)));*/
+/*
+	uart_puts(UART0_BA,"PPCM:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_DESCRIPTOR_B_REG(USB_OHCI_BA)) & 	PPCM_MASK)>>16);
+
+	uart_puts(UART0_BA,"DR:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_DESCRIPTOR_B_REG(USB_OHCI_BA)) & 	DR_MASK)); */
+}
+
 static void dump_error_str(const uint8_t condition_code)
 {
 	switch(condition_code) {
@@ -227,7 +270,7 @@ static void
 				void *usb_buff_pool
 				)
 {
-	struct usb_request *usb_req;
+	struct usb_request *usb_req_buff;
 
 	//Set the function address to 0 initially.
 	set_hc_ed_fa(
@@ -330,18 +373,21 @@ static void
 				(uintptr_t)(usb_buff_pool+31)
 			);
 
-	usb_req = (struct usb_request *)(
+	usb_req_buff = (struct usb_request *)(
 				&(td_info->hc_gen_td[0].current_buffer_pointer));
 
 	/* 
 	 * Set the current buffer pointer for td0 to get device
 	 * descriptor
 	 */ 
-	usb_get_descriptor( 
-			usb_req,
+	usb_get_descriptor(
+			usb_req_buff,
 			DESC_DEVICE,
 			0,
 			18);
+
+	/*usb_get_status(
+			usb_req_buff);*/
 
 
 	/*
@@ -382,8 +428,10 @@ void set_end_point_config(struct ed_info *ed_info,
 {
 }
 
-static void dump_usb_controller_functional_state(const uint8_t control_state)
+static void dump_usb_controller_functional_state()
 {
+	const uint8_t control_state = readreg32(HC_CONTROL_REG(USB_OHCI_BA));
+
 	uart_puts(UART0_BA, "USB State : ");
 
 	switch((control_state & HCFS_MASK)>>HCFS_SHIFT){
@@ -417,13 +465,21 @@ static void dump_control_command_status()
 					readreg32(HC_CONTROL_REG(USB_OHCI_BA))
 					);
 
-	dump_usb_controller_functional_state(readreg32(HC_CONTROL_REG(USB_OHCI_BA)));
+	dump_usb_controller_functional_state();
 
 }
-
+*/
 static void dump_usb_port_status()
 {
-	
+	uint8_t num_ports = readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & NDP_MASK;
+	uint8_t i = 0;
+
+	uart_puts(UART0_BA,"Port status :");
+	for(i = 0; i<num_ports; i++) {
+		print_hex_uart(UART0_BA,
+			readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,i)));
+	}
+/*
 	uart_puts(UART0_BA,"Port1 status :");
 	print_hex_uart(UART0_BA,
 		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT1)));
@@ -431,9 +487,10 @@ static void dump_usb_port_status()
 	uart_puts(UART0_BA,"Port2 status :");
 	print_hex_uart(UART0_BA,
 		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT2)));
+*/
 }
 
-
+/*
 static void dump_interrupt_register_status()
 {
 	uart_puts(UART0_BA,"Interrupt enable status reg :");
@@ -621,15 +678,17 @@ void init_ohci()
 		;
 	}
 
-	uart_puts(UART0_BA,"HccaDoneHead: ");
+	/*uart_puts(UART0_BA,"HccaDoneHead: ");
 	print_hex_uart(UART0_BA,
-					(hccaregion_reg->HccaDoneHead));
+					(hccaregion_reg->HccaDoneHead)); */
 
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
-	dump_ed_desc(&ed_info.hc_ed[0]);
-	//dump_currentED_reg();
-	//dump_interrupt_register_status();
+/*	dump_ed_desc(&ed_info.hc_ed[0]);
 
-	//dump_usb_port_status();
-	//dump_usb_controller_functional_state(readreg32(HC_CONTROL_REG(USB_OHCI_BA)));
+	dump_rh_desc_ab();
+	dump_currentED_reg();
+	dump_interrupt_register_status();
+
+	dump_usb_port_status();
+	dump_usb_controller_functional_state(); */
 }

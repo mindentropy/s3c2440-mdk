@@ -176,21 +176,21 @@ struct __attribute__((packed)) HCCARegion {
 #define HC_RH_DESCRIPTOR_A_REG(BA) \
 	HW_REG(BA,HC_RH_DESCRIPTOR_A_OFF)
 
-#define NDP_MASK 	set_bit_range(7,0)
+#define NDP_MASK 	0xFFU
 #define PSM 		BIT8
 #define NPS 		BIT9
 #define DT 			BIT10
 #define OCPM 		BIT11
 #define NOCP 		BIT12
-#define POTPGT 		set_bit_range(31,24)
+#define POTPGT 		0xFF000000U
 
 
 #define HC_RH_DESCRIPTOR_B_OFF 			0x4CU
 #define HC_RH_DESCRIPTOR_B_REG(BA) \
 	HW_REG(BA,HC_RH_DESCRIPTOR_B_OFF)
 
-#define DR_MASK 	set_bit_range(15,0)
-#define PPCM_MASK 	set_bit_range(31,16)
+#define DR_MASK 	(0xFFU)
+#define PPCM_MASK 	(0xFF000000U)
 
 #define HC_RH_STATUS_OFF 				0x50U
 #define HC_RH_STATUS_REG(BA) \
