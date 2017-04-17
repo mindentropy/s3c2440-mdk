@@ -36,6 +36,7 @@ static void usb_delay()
 }
 */
 
+/*
 static void dump_rh_desc_ab(void)
 {
 	uart_puts(UART0_BA,"NDP:");
@@ -65,7 +66,7 @@ static void dump_rh_desc_ab(void)
 	uart_puts(UART0_BA,"POTPGT:");
 	print_hex_uart(UART0_BA,
 		(readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & POTPGT)>>24);
-
+*/
 /*	uart_puts(UART0_BA,"RH_B:");
 	print_hex_uart(UART0_BA,
 		readreg32(HC_RH_DESCRIPTOR_B_REG(USB_OHCI_BA)));*/
@@ -77,10 +78,14 @@ static void dump_rh_desc_ab(void)
 	uart_puts(UART0_BA,"DR:");
 	print_hex_uart(UART0_BA,
 		(readreg32(HC_RH_DESCRIPTOR_B_REG(USB_OHCI_BA)) & 	DR_MASK)); */
-}
+		/*
+}*/
 
+/*
 static void dump_rh_status(void)
 {
+	//NOTE: The status is all '0' and does not have much significance.
+
 	uart_puts(UART0_BA,"LPS:");
 	print_hex_uart(UART0_BA,
 		(readreg32(HC_RH_STATUS_REG(USB_OHCI_BA)) & LPS));
@@ -105,6 +110,7 @@ static void dump_rh_status(void)
 	print_hex_uart(UART0_BA,
 		(readreg32(HC_RH_STATUS_REG(USB_OHCI_BA)) & CRWE)>>31);
 }
+*/
 
 static void dump_error_str(const uint8_t condition_code)
 {
@@ -157,11 +163,18 @@ static void dump_td(
 	uart_puts(UART0_BA,"TDCTRL : ");
 	print_hex_uart(UART0_BA,
 			(uintptr_t)hc_gen_td->td_control);
+
+	uart_puts(UART0_BA,"CBP : ");
+	print_hex_uart(UART0_BA,
+			(uintptr_t)hc_gen_td->current_buffer_pointer);
+
 	uart_puts(UART0_BA,"NXT_TD : ");
-	print_hex_uart(UART0_BA,(uintptr_t)hc_gen_td->next_td);
+	print_hex_uart(UART0_BA,
+			(uintptr_t)hc_gen_td->next_td);
 
 	uart_puts(UART0_BA,"buffer_end: ");
-	print_hex_uart(UART0_BA,(uintptr_t)hc_gen_td->buffer_end);
+	print_hex_uart(UART0_BA,
+			(uintptr_t)hc_gen_td->buffer_end);
 	
 	dump_error_str(((hc_gen_td->td_control) & (CC_MASK)) >> (CC_SHIFT));
 
@@ -174,26 +187,26 @@ static void dump_td(
 	}*/
 }
 
-
+/*
 static void dump_currentED_reg(void)
-{
+{*/
 
 /*	uart_puts(UART0_BA,"PCED :");
 	print_hex_uart(UART0_BA,
 			readreg32(HC_PERIOD_CURRENT_ED_REG(USB_OHCI_BA)));
 */
-
+/*
 	uart_puts(UART0_BA,"CCED :");
 	print_hex_uart(UART0_BA,
 			readreg32(HC_CONTROL_CURRENT_ED_REG(USB_OHCI_BA)));
-
+*/
 /*
 	uart_puts(UART0_BA,"BCED :");
 	print_hex_uart(UART0_BA,
 			readreg32(HC_BULK_CURRENT_ED_REG(USB_OHCI_BA)));
 */
-
-}
+/*
+}*/
 
 
 static void init_ed(struct ed_info *edp_info,
@@ -277,7 +290,7 @@ static void init_td(struct td_info *td_info,
 
 static void dump_ed_desc(struct HC_ENDPOINT_DESCRIPTOR *hc_ed)
 {
-	uart_puts(UART0_BA,"Endpt ctrl : ");
+	uart_puts(UART0_BA,"Endpt ctrl: ");
 	print_hex_uart(UART0_BA,hc_ed->endpoint_ctrl);
 
 	uart_puts(UART0_BA,"TailP: ");
@@ -297,34 +310,45 @@ static void
 				void *usb_buff_pool
 				)
 {
-	struct usb_request *usb_req_buff;
+	volatile struct usb_request *usb_req_buff;
 
-	//Set the function address to 0 initially.
+	/*
+	 * Set the function address to 0. During initial configuration
+	 * the device will listen to address 0 and endpoint 0.
+	 */
+
 	set_hc_ed_fa(
 			&(ed_info->hc_ed[0].endpoint_ctrl),
 			0
 		);
 
-	//Set the endpoint to 0.
+	/*
+	 * Set the endpoint to 0. During initial configuration the device
+	 * will listen to address 0 and endpoint 0.
+	 */
 	set_hc_ed_en(
 			&(ed_info->hc_ed[0].endpoint_ctrl),
 			0
 		);
 
-	//Get the direction from td and not from ed.
+	/*
+	 * Get the direction from td and not from ed.
+	 */
 	set_hc_ed_dir(
 			&(ed_info->hc_ed[0].endpoint_ctrl),
 			GET_DIR_FROM_TD
 		);
 
+	/* Set to high speed */
 	set_hc_ed_speed(
 			&(ed_info->hc_ed[0].endpoint_ctrl),
-			HIGH_SPEED //Set to high speed.
+			HIGH_SPEED
 		);
 
+	/* Set to max pkt size of 64 bytes */
 	set_hc_ed_mps(
 			&(ed_info->hc_ed[0].endpoint_ctrl),
-			64U //Set max pkt size to 64.
+			64U
 		);
 
 /*	uart_puts(UART0_BA,"Endpt ctrl : ");
@@ -401,20 +425,27 @@ static void
 			);
 
 	usb_req_buff = (struct usb_request *)(
-				&(td_info->hc_gen_td[0].current_buffer_pointer));
+				(td_info->hc_gen_td[0].current_buffer_pointer));
+
+	uart_puts(UART0_BA,"CBP: ");
+	print_hex_uart(UART0_BA,(uintptr_t)(td_info->hc_gen_td[0].current_buffer_pointer));
+
+/*
+	uart_puts(UART0_BA,"req_buff: ");
+	print_hex_uart(UART0_BA,(uintptr_t)usb_buff_pool);
+*/
 
 	/* 
 	 * Set the current buffer pointer for td0 to get device
 	 * descriptor
 	 */ 
-	usb_get_descriptor(
+/*	usb_get_descriptor(
 			usb_req_buff,
 			DESC_DEVICE,
 			0,
-			18);
+			18);*/
 
-	/*usb_get_status(
-			usb_req_buff);*/
+	usb_get_configuration(usb_req_buff);
 
 
 	/*
@@ -436,7 +467,7 @@ static void
 				(uintptr_t)(&(td_info->hc_gen_td[2])));
 
 
-	// Setup the head and tail pointers of ED to point to the TD's.
+	/* Setup the head and tail pointers of ED to point to the TD's. */
 	ed_info->hc_ed[0].HeadP = (uintptr_t)(&(td_info->hc_gen_td[0]));
 
 	/*set_hc_ed_toggle_carry(
@@ -454,7 +485,7 @@ void set_end_point_config(struct ed_info *ed_info,
 								uint32_t ed_idx)
 {
 }
-
+/*
 static void dump_usb_controller_functional_state()
 {
 	const uint8_t control_state = readreg32(HC_CONTROL_REG(USB_OHCI_BA));
@@ -479,7 +510,7 @@ static void dump_usb_controller_functional_state()
 	return;
 }
 
-/*
+
 static void dump_control_command_status()
 {
 	uart_puts(UART0_BA,"Command Status Reg: ");
@@ -495,7 +526,7 @@ static void dump_control_command_status()
 	dump_usb_controller_functional_state();
 
 }
-*/
+
 static void dump_usb_port_status()
 {
 	uint8_t num_ports = readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & NDP_MASK;
@@ -505,7 +536,7 @@ static void dump_usb_port_status()
 	for(i = 0; i<num_ports; i++) {
 		print_hex_uart(UART0_BA,
 			readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,i)));
-	}
+	} */
 /*
 	uart_puts(UART0_BA,"Port1 status :");
 	print_hex_uart(UART0_BA,
@@ -514,8 +545,8 @@ static void dump_usb_port_status()
 	uart_puts(UART0_BA,"Port2 status :");
 	print_hex_uart(UART0_BA,
 		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT2)));
-*/
-}
+*//*
+}*/
 
 /*
 static void dump_interrupt_register_status()
@@ -700,22 +731,21 @@ void init_ohci()
 	/*
 	 * Test Poll for data.
 	 */
-	//usb_delay();
 	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & WDH)) {
 		;
 	}
 
-	/*uart_puts(UART0_BA,"HccaDoneHead: ");
+	/*usb_delay();*/
+
+	uart_puts(UART0_BA,"HccaDoneHead: ");
 	print_hex_uart(UART0_BA,
-					(hccaregion_reg->HccaDoneHead)); */
+					(hccaregion_reg->HccaDoneHead));
 
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
 
-	dump_rh_status();
+	dump_ed_desc(&ed_info.hc_ed[0]);
 
-/*	dump_ed_desc(&ed_info.hc_ed[0]);
-
-	dump_rh_desc_ab();
+/*	dump_rh_desc_ab();
 	dump_currentED_reg();
 	dump_interrupt_register_status();
 
