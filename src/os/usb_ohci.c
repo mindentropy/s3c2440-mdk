@@ -79,6 +79,33 @@ static void dump_rh_desc_ab(void)
 		(readreg32(HC_RH_DESCRIPTOR_B_REG(USB_OHCI_BA)) & 	DR_MASK)); */
 }
 
+static void dump_rh_status(void)
+{
+	uart_puts(UART0_BA,"LPS:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_STATUS_REG(USB_OHCI_BA)) & LPS));
+
+	uart_puts(UART0_BA,"OCI:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_STATUS_REG(USB_OHCI_BA)) & OCI)>>1);
+
+	uart_puts(UART0_BA,"DRWE:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_STATUS_REG(USB_OHCI_BA)) & DRWE)>>15);
+
+	uart_puts(UART0_BA,"LPSC:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_STATUS_REG(USB_OHCI_BA)) & LPSC)>>16);
+
+	uart_puts(UART0_BA,"OCIC:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_STATUS_REG(USB_OHCI_BA)) & OCIC_RH)>>17);
+
+	uart_puts(UART0_BA,"CRWE:");
+	print_hex_uart(UART0_BA,
+		(readreg32(HC_RH_STATUS_REG(USB_OHCI_BA)) & CRWE)>>31);
+}
+
 static void dump_error_str(const uint8_t condition_code)
 {
 	switch(condition_code) {
@@ -683,6 +710,9 @@ void init_ohci()
 					(hccaregion_reg->HccaDoneHead)); */
 
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
+
+	dump_rh_status();
+
 /*	dump_ed_desc(&ed_info.hc_ed[0]);
 
 	dump_rh_desc_ab();
