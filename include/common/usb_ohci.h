@@ -71,7 +71,6 @@
 #define HC_INTERRUPT_STATUS_REG(BA) \
 	HW_REG(BA,HC_INTERRUPT_STATUS_OFF)
 
-
 #define HC_INTERRUPT_ENABLE_OFF 		0x10U
 #define HC_INTERRUPT_ENABLE_REG(BA) \
 	HW_REG(BA,HC_INTERRUPT_ENABLE_OFF)
@@ -226,7 +225,6 @@ enum Ports {
 	HW_REG(BA,(HC_RH_PORT_STATUS_OFF + ((PORTNUM)<<2)))
 
 
-
 #define HC_RH_PORT1_STATUS_OFF 			0x54
 #define HC_RH_PORT1_STATUS_REG(BA) \
 	HW_REG(BA,HC_RH_PORT1_STATUS_OFF)
@@ -265,6 +263,10 @@ enum Ports {
 #define hc_rh_set_port_reset(BA,PORTNUM) \
 	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
 				PRS)
+
+#define hc_rh_set_port_reset_status_change(BA,PORTNUM)	\
+	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
+				PRSC)
 
 /**** OHCI functionality ****/
 
@@ -475,6 +477,9 @@ struct __attribute__((packed)) PACKET_STATUS_WORD
 
 /* Value as per the spec. See Section 5.4 */
 #define MAXIMUM_OVERHEAD 	210
+
+#define USB_PORT1_ADDRESS	0x1U
+#define USB_PORT2_ADDRESS	0x2U
 
 void init_ohci();
 

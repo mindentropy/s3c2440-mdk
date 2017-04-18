@@ -378,7 +378,7 @@ static void
 									 * MSB of dataToggle = 1 for setup
 									 * and LSB of dataToggle = 0 for setup.
 									 */
-					|CC(NotAccessed) /* 
+					|CC(NotAccessed) /*
 					                  * See pg35(50) of spec.
 					                  * 
 									  */
@@ -390,22 +390,23 @@ static void
 /*	uart_puts(UART0_BA,"TD0 addr:");
 	print_hex_uart(UART0_BA,(uintptr_t)&(td_info->hc_gen_td[0]));*/
 	
-	writereg32(
+/*	writereg32(
 				&(td_info->hc_gen_td[1].td_control),
 					BUFFER_ROUND
 					|IN
 					|NO_DELAY_INTERRUPT
-					|DATA_TOGGLE(3) /* 
+					|DATA_TOGGLE(3)*/ /*
 									 * See pg24(39) of spec.
 									 * DATA0 data PID for setup packet, 
 									 * MSB of dataToggle = 1 for status 
 									 * and LSB of dataToggle = 1 for setup.
 									 */
-					|CC(NotAccessed) /* 
+/*					|CC(NotAccessed)*/ /*
 					                  * See pg35(50) of spec.
 					                  * 
 									  */
-			);
+/*			);*/
+
 /*
 	uart_puts(UART0_BA,"TD1 control :");
 	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);
@@ -442,26 +443,28 @@ static void
 			0,
 			18);*/
 
-	usb_get_configuration(usb_req_buff);
-
+/*	usb_get_configuration(usb_req_buff);*/
+	usb_set_address(
+			usb_req_buff,
+			USB_PORT1_ADDRESS);
 
 	/*
 	 * Set the second buffer to 32 bytes from the initial 
 	 * buffer pool 
 	 */
-	writereg32(&(td_info->hc_gen_td[1].current_buffer_pointer),
+/*	writereg32(&(td_info->hc_gen_td[1].current_buffer_pointer),
 				(uintptr_t)usb_buff_pool+32);
 
 	writereg32(&(td_info->hc_gen_td[1].buffer_end),
-				(uintptr_t)usb_buff_pool+63);
+				(uintptr_t)usb_buff_pool+63);*/
 	
-	/* Set the td0 next_td to td1 */
+	/* Set the td0 next_td to td2 */
 	writereg32(&(td_info->hc_gen_td[0].next_td),
-				(uintptr_t)(&(td_info->hc_gen_td[1])));
+				(uintptr_t)(&(td_info->hc_gen_td[2])));
 
 	/* Set the td1 next_td to td2 */
-	writereg32(&(td_info->hc_gen_td[1].next_td),
-				(uintptr_t)(&(td_info->hc_gen_td[2])));
+	/*writereg32(&(td_info->hc_gen_td[1].next_td),
+				(uintptr_t)(&(td_info->hc_gen_td[2])));*/
 
 
 	/* Setup the head and tail pointers of ED to point to the TD's. */
@@ -545,7 +548,7 @@ static void dump_usb_port_status()
 */
 }
 
-/*
+
 static void dump_interrupt_register_status()
 {
 	uart_puts(UART0_BA,"Interrupt enable status reg :");
@@ -560,10 +563,10 @@ static void dump_interrupt_register_status()
 	print_hex_uart(UART0_BA,
 			readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)));
 }
-*/
+
 
 /*
- * Setting up USB for getting intial config data.
+ * Setting up USB for getting initial config data.
  * ==============================================
  * 
  * 1) Initialize ed.
@@ -608,6 +611,29 @@ static void reset_ohci_controller()
 	//dump_control_command_status();
 	//dump_interrupt_register_status();
 
+}
+
+void reset_usb_port(enum Ports port)
+{
+	/* Reset port */
+	hc_rh_set_port_reset(USB_OHCI_BA,port);
+
+	/* port enable bit will be set once the port is reset */
+
+	/* Wait until the port reset signal bit state is set to 0 */
+	while(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & PRS) {
+		;
+	}
+
+	/* Wait until the port reset status change bit is set to 1 */
+	while(!(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & PRSC)) {
+		;
+	}
+
+	/* Clear the PRSC bit */
+	//hc_rh_set_port_reset_status_change(USB_OHCI_BA,port);
+	//dump_usb_port_status();
+	usb_delay();
 }
 
 static void setup_ohci(void)
@@ -663,7 +689,7 @@ static void setup_ohci(void)
 	 */
 	/*writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),0xC000007B);*/
 	writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),
-					SO|WDH|RD|UE|FNO|RHSC|OC|MIE);
+					SO|WDH|SF|RD|UE|FNO|RHSC|OC|MIE);
 	/* Set control registers to enable control queue. */
 	set_reg_bits(
 				HC_CONTROL_REG(USB_OHCI_BA),
@@ -686,7 +712,6 @@ static void setup_ohci(void)
 
 void init_ohci()
 {
-	
 /*	struct HCCARegion *hccaregion = 0; */
 
 	/* Check alignment. Verified it as 256 bytes. */
@@ -713,12 +738,10 @@ void init_ohci()
 	/* Reset the OHCI controller */
 	reset_ohci_controller();
 
-	/* Reset port1 */
-	hc_rh_set_port_reset(USB_OHCI_BA,PORT1);
-	hc_rh_set_port_enable(USB_OHCI_BA,PORT1);
+	/* Reset USB port */
+	reset_usb_port(PORT1);
 
-	usb_delay();
-	dump_usb_port_status();
+	//usb_delay();
 
 	setup_ohci();
 
@@ -732,9 +755,13 @@ void init_ohci()
 					HCFS_MASK,
 					HCFS_USB_OPERATIONAL<<HCFS_SHIFT
 					);
-	/*
-	 * Test Poll for data.
-	 */
+
+	/* Verify is SF generation has started */
+	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & SF)) {
+		;
+	}
+
+	/* Poll for data */
 	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & WDH)) {
 		;
 	}
@@ -751,8 +778,7 @@ void init_ohci()
 
 /*	dump_rh_desc_ab();
 	dump_currentED_reg();
-	dump_interrupt_register_status();*/
-
+	dump_interrupt_register_status(); */
 	dump_usb_port_status();
 /*	dump_usb_controller_functional_state(); */
 }
