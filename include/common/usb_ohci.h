@@ -223,19 +223,19 @@ enum Ports {
 
 #define HC_RH_PORT_STATUS_OFF 			0x54U
 #define HC_RH_PORT_STATUS_REG(BA,PORTNUM) \
-	HW_REG(BA,(HC_RH_PORT_STATUS_OFF + (PORTNUM<<2)))
+	HW_REG(BA,(HC_RH_PORT_STATUS_OFF + ((PORTNUM)<<2)))
 
 
-/*
-#define HC_RH_PORT_STATUS1_OFF 			0x54
-#define HC_RH_PORT_STATUS1_REG(BA) \
-	HW_REG(BA,HC_RH_PORT_STATUS1_OFF)
+
+#define HC_RH_PORT1_STATUS_OFF 			0x54
+#define HC_RH_PORT1_STATUS_REG(BA) \
+	HW_REG(BA,HC_RH_PORT1_STATUS_OFF)
 
 
-#define HC_RH_PORT_STATUS2_OFF 			0x58
-#define HC_RH_PORT_STATUS2_REG(BA) \
-	HW_REG(BA,HC_RH_PORT_STATUS2_OFF)
-*/
+#define HC_RH_PORT2_STATUS_OFF 			0x58
+#define HC_RH_PORT2_STATUS_REG(BA) \
+	HW_REG(BA,HC_RH_PORT2_STATUS_OFF)
+
 
 #define CCS 	BIT0
 #define PES 	BIT1
@@ -262,6 +262,9 @@ enum Ports {
 	clear_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
 				PSS)
 					
+#define hc_rh_set_port_reset(BA,PORTNUM) \
+	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
+				PRS)
 
 /**** OHCI functionality ****/
 

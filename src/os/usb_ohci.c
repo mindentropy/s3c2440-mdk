@@ -21,7 +21,7 @@ struct ed_info ed_info;
 struct td_info td_info;
 uint32_t HcFmInterval = 0;
 
-/*
+
 static void usb_delay()
 {
 	volatile int i = 0;
@@ -34,7 +34,7 @@ static void usb_delay()
 		}
 	}
 }
-*/
+
 
 /*
 static void dump_rh_desc_ab(void)
@@ -427,9 +427,6 @@ static void
 	usb_req_buff = (struct usb_request *)(
 				(td_info->hc_gen_td[0].current_buffer_pointer));
 
-	uart_puts(UART0_BA,"CBP: ");
-	print_hex_uart(UART0_BA,(uintptr_t)(td_info->hc_gen_td[0].current_buffer_pointer));
-
 /*
 	uart_puts(UART0_BA,"req_buff: ");
 	print_hex_uart(UART0_BA,(uintptr_t)usb_buff_pool);
@@ -526,7 +523,7 @@ static void dump_control_command_status()
 	dump_usb_controller_functional_state();
 
 }
-
+*/
 static void dump_usb_port_status()
 {
 	uint8_t num_ports = readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & NDP_MASK;
@@ -536,7 +533,7 @@ static void dump_usb_port_status()
 	for(i = 0; i<num_ports; i++) {
 		print_hex_uart(UART0_BA,
 			readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,i)));
-	} */
+	}
 /*
 	uart_puts(UART0_BA,"Port1 status :");
 	print_hex_uart(UART0_BA,
@@ -545,8 +542,8 @@ static void dump_usb_port_status()
 	uart_puts(UART0_BA,"Port2 status :");
 	print_hex_uart(UART0_BA,
 		readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT2)));
-*//*
-}*/
+*/
+}
 
 /*
 static void dump_interrupt_register_status()
@@ -716,12 +713,19 @@ void init_ohci()
 	/* Reset the OHCI controller */
 	reset_ohci_controller();
 
+	/* Reset port1 */
+	hc_rh_set_port_reset(USB_OHCI_BA,PORT1);
+	hc_rh_set_port_enable(USB_OHCI_BA,PORT1);
+
+	usb_delay();
+	dump_usb_port_status();
+
 	setup_ohci();
+
 
 	/* Set the control list filled. */
 	set_reg_bits(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
-	hc_rh_set_port_enable(USB_OHCI_BA,PORT1);
 
 	/* Set to USB_OPERATIONAL to start sending SOF. */
 	set_regs_value(HC_CONTROL_REG(USB_OHCI_BA),
@@ -747,8 +751,8 @@ void init_ohci()
 
 /*	dump_rh_desc_ab();
 	dump_currentED_reg();
-	dump_interrupt_register_status();
+	dump_interrupt_register_status();*/
 
 	dump_usb_port_status();
-	dump_usb_controller_functional_state(); */
+/*	dump_usb_controller_functional_state(); */
 }
