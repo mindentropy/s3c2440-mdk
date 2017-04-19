@@ -28,13 +28,20 @@ static void usb_delay()
 	volatile int j = 0;
 
 	for(i = 0; i< 10000; i++) {
-		for(j = 0; j<100;j++)
-		{
+		for(j = 0; j< 100; j++) {
 			;
 		}
 	}
 }
 
+static void usb_short_delay()
+{
+	volatile int i = 0;
+
+	for(i = 0; i< 10000; i++) {
+
+	}
+}
 
 /*
 static void dump_rh_desc_ab(void)
@@ -310,7 +317,6 @@ static void
 				void *usb_buff_pool
 				)
 {
-	volatile struct usb_request *usb_req_buff;
 
 	/*
 	 * Set the function address to 0. During initial configuration
@@ -351,9 +357,6 @@ static void
 			64U
 		);
 
-/*	uart_puts(UART0_BA,"Endpt ctrl : ");
-	print_hex_uart(UART0_BA,(uintptr_t)(ed_info->hc_ed[0].endpoint_ctrl));*/
-
 
 	ed_info->hc_ed[0].HeadP = 0; //Init to 0.
 	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
@@ -361,9 +364,8 @@ static void
 	//Setup the td for the ed. I will setup a single td at index 0.
 
 	/* 
-	 * Initialize 3 td's, the first td to send the request,
-	 * the second td to receive the response and 
-	 * the last td being the 'terminator' td with
+	 * Initialize 2 td's, the first td to send the request,
+	 * the second td being the 'terminator' td with
 	 * all 0's
 	 */
 
@@ -389,31 +391,37 @@ static void
 */
 /*	uart_puts(UART0_BA,"TD0 addr:");
 	print_hex_uart(UART0_BA,(uintptr_t)&(td_info->hc_gen_td[0]));*/
-	
-/*	writereg32(
-				&(td_info->hc_gen_td[1].td_control),
-					BUFFER_ROUND
-					|IN
-					|NO_DELAY_INTERRUPT
-					|DATA_TOGGLE(3)*/ /*
-									 * See pg24(39) of spec.
-									 * DATA0 data PID for setup packet, 
-									 * MSB of dataToggle = 1 for status 
-									 * and LSB of dataToggle = 1 for setup.
-									 */
-/*					|CC(NotAccessed)*/ /*
-					                  * See pg35(50) of spec.
-					                  * 
-									  */
-/*			);*/
 
-/*
-	uart_puts(UART0_BA,"TD1 control :");
-	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);
-*/
 
-/*	uart_puts(UART0_BA,"TD1 addr :");
-	print_hex_uart(UART0_BA,(uintptr_t)&(td_info->hc_gen_td[1]));*/
+	/* Write RequestType */
+	writereg8(
+			(usb_buff_pool+USB_REQ_TYPE_OFFSET),
+			REQ_TYPE_SET_ADDRESS);
+
+	/* Write Request */
+	writereg8(
+			(usb_buff_pool+USB_REQ_OFFSET),
+			REQ_SET_ADDRESS);
+
+	/* Write Value */
+	writereg16(
+			(usb_buff_pool+USB_VALUE_OFFSET),
+			0U);
+
+	/* Write Index */
+	writereg16(
+			(usb_buff_pool+USB_INDEX_OFFSET),
+			0U);
+
+	/* Write Length */
+	writereg16(
+			(usb_buff_pool+USB_LENGTH_OFFSET),
+			0U);
+
+	/*
+	 * Set the current buffer pointer for td0 to get device
+	 * descriptor
+	 */
 
 	writereg32(
 				&(td_info->hc_gen_td[0].current_buffer_pointer),
@@ -422,70 +430,36 @@ static void
 
 	writereg32(
 				&(td_info->hc_gen_td[0].buffer_end),
-				(uintptr_t)(usb_buff_pool+31)
+				(uintptr_t)(usb_buff_pool+USB_DESC_SIZE)
 			);
-
-	usb_req_buff = (struct usb_request *)(
-				(td_info->hc_gen_td[0].current_buffer_pointer));
 
 /*
 	uart_puts(UART0_BA,"req_buff: ");
 	print_hex_uart(UART0_BA,(uintptr_t)usb_buff_pool);
 */
 
-	/* 
-	 * Set the current buffer pointer for td0 to get device
-	 * descriptor
-	 */ 
-/*	usb_get_descriptor(
-			usb_req_buff,
-			DESC_DEVICE,
-			0,
-			18);*/
 
-/*	usb_get_configuration(usb_req_buff);*/
-	usb_set_address(
-			usb_req_buff,
-			USB_PORT1_ADDRESS);
-
-	/*
-	 * Set the second buffer to 32 bytes from the initial 
-	 * buffer pool 
-	 */
-/*	writereg32(&(td_info->hc_gen_td[1].current_buffer_pointer),
-				(uintptr_t)usb_buff_pool+32);
-
-	writereg32(&(td_info->hc_gen_td[1].buffer_end),
-				(uintptr_t)usb_buff_pool+63);*/
-	
-	/* Set the td0 next_td to td2 */
+	/* Set the td0 next_td to td1 */
 	writereg32(&(td_info->hc_gen_td[0].next_td),
-				(uintptr_t)(&(td_info->hc_gen_td[2])));
-
-	/* Set the td1 next_td to td2 */
-	/*writereg32(&(td_info->hc_gen_td[1].next_td),
-				(uintptr_t)(&(td_info->hc_gen_td[2])));*/
+				(uintptr_t)(&(td_info->hc_gen_td[1])));
 
 
 	/* Setup the head and tail pointers of ED to point to the TD's. */
-	ed_info->hc_ed[0].HeadP = (uintptr_t)(&(td_info->hc_gen_td[0]));
+	writereg32(&(ed_info->hc_ed[0].HeadP),
+						(uintptr_t)(&(td_info->hc_gen_td[0])));
+	writereg32(&(ed_info->hc_ed[0].TailP),
+						(uintptr_t)(&(td_info->hc_gen_td[1])));
 
 	/*set_hc_ed_toggle_carry(
 							&(ed_info->hc_ed[0].HeadP),
 							TOGGLE
 							);*/
-
-	ed_info->hc_ed[0].TailP = (uintptr_t)(&(td_info->hc_gen_td[2]));
 	
 	//Dump the endpoint_ctrl for verification.
 	dump_ed_desc(&(ed_info->hc_ed[0]));
 }
 
-void set_end_point_config(struct ed_info *ed_info,
-								uint32_t ed_idx)
-{
-}
-/*
+
 static void dump_usb_controller_functional_state()
 {
 	const uint8_t control_state = readreg32(HC_CONTROL_REG(USB_OHCI_BA));
@@ -510,7 +484,7 @@ static void dump_usb_controller_functional_state()
 	return;
 }
 
-
+/*
 static void dump_control_command_status()
 {
 	uart_puts(UART0_BA,"Command Status Reg: ");
@@ -605,6 +579,20 @@ static void reset_ohci_controller()
 			OC|RHSC|FNO|UE|RD|SF|WDH|SO
 			);
 
+/*********** Repeat reset starts ***********/
+
+	/* Reset the Host controller */
+	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
+				(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)))
+				|HCR
+				);
+
+	/* Host controller sets itself to 0 after 10ms */
+	while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
+		;
+
+/*********** Repeat reset ends ***********/
+
 	/*
 	 * Host controller will be in suspend state. See Pg 116(131)
 	 */
@@ -613,8 +601,14 @@ static void reset_ohci_controller()
 
 }
 
-void reset_usb_port(enum Ports port)
+static void reset_usb_port(enum Ports port)
 {
+
+	hc_rh_port_clear_power(USB_OHCI_BA,port);
+	usb_short_delay();
+	hc_rh_port_set_power(USB_OHCI_BA,port);
+	usb_short_delay();
+
 	/* Reset port */
 	hc_rh_set_port_reset(USB_OHCI_BA,port);
 
@@ -666,6 +660,9 @@ static void setup_ohci(void)
      */
 	writereg32(HC_LS_THRESHOLD_REG(USB_OHCI_BA),
 					0x628U);
+
+	/* Setup device descriptor buffer pool */
+	get_dev_descriptor(&ed_info,&td_info,usb_buffer_pool);
 	
 	/*** Write the ControlED to the HcControlHeadED register. ***/
 	writereg32(
@@ -682,14 +679,14 @@ static void setup_ohci(void)
 	writereg32(HC_CONTROL_CURRENT_ED_REG(USB_OHCI_BA),0);
 
 	//TODO:Set the ControlBulkED to an ED.
-	
+
 	/*
 	 * Enable all interrupts except Start of frame (SOF) 
 	 * in HcInterruptEnable register.
 	 */
-	/*writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),0xC000007B);*/
 	writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),
 					SO|WDH|SF|RD|UE|FNO|RHSC|OC|MIE);
+
 	/* Set control registers to enable control queue. */
 	set_reg_bits(
 				HC_CONTROL_REG(USB_OHCI_BA),
@@ -725,8 +722,6 @@ void init_ohci()
 	init_ed(&ed_info,ed_list);
 	init_td(&td_info,td_list);
 
-	get_dev_descriptor(&ed_info,&td_info,usb_buffer_pool);
-
 	uart_puts(UART0_BA,"HcRevision :");
 	print_hex_uart(UART0_BA,
 				readreg32(HC_REVISION_REG(USB_OHCI_BA))
@@ -734,6 +729,7 @@ void init_ohci()
 
 	/* Save the HcFmInterval register for later set up. */
 	HcFmInterval = readreg32(HC_FM_INTERVAL_REG(USB_OHCI_BA));
+
 
 	/* Reset the OHCI controller */
 	reset_ohci_controller();
@@ -745,7 +741,6 @@ void init_ohci()
 
 	setup_ohci();
 
-
 	/* Set the control list filled. */
 	set_reg_bits(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
@@ -755,6 +750,8 @@ void init_ohci()
 					HCFS_MASK,
 					HCFS_USB_OPERATIONAL<<HCFS_SHIFT
 					);
+
+	dump_usb_controller_functional_state();
 
 	/* Verify is SF generation has started */
 	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & SF)) {
@@ -772,13 +769,15 @@ void init_ohci()
 	print_hex_uart(UART0_BA,
 					(hccaregion_reg->HccaDoneHead));
 
-	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
+	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)
+				((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
 
 	dump_ed_desc(&ed_info.hc_ed[0]);
 
 /*	dump_rh_desc_ab();
 	dump_currentED_reg();
-	dump_interrupt_register_status(); */
-	dump_usb_port_status();
+	dump_interrupt_register_status();*/
+/*	dump_usb_port_status();*/
 /*	dump_usb_controller_functional_state(); */
+/*	dump_rh_status();*/
 }

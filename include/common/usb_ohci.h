@@ -264,6 +264,14 @@ enum Ports {
 	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
 				PRS)
 
+#define hc_rh_port_clear_power(BA,PORTNUM) \
+	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM),\
+				LSDA);
+
+#define hc_rh_port_set_power(BA,PORTNUM) \
+	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM),\
+				PPS);
+
 #define hc_rh_set_port_reset_status_change(BA,PORTNUM)	\
 	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
 				PRSC)

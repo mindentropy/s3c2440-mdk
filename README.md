@@ -31,8 +31,8 @@ The gnu compiler toolchain needed which is present in the repository are:
 2. gdb-arm-none-eabi
 
 Optional:
-cscope for code indexing. If you do not have cscope then please remove "cscope_create" 
-in the "all" rule and "cscope_clean" in the "cleanall" rule.
+cscope for code indexing. If you do not have cscope then please remove "cscope\_create"
+in the "all" rule and "cscope\_clean" in the "cleanall" rule.
 
 Note: 
 	*-arm-linux-gnueabi tools are meant to compile the linux kernel. This toolchain was used in the previous
@@ -42,7 +42,7 @@ operations i.e. any floating point operations could not be emulated.
 
 Building:
 To build the OS and the loader run 'make' in the s3c2440-mdk folder. All binary files will be put in the 'bin' folder.
-In the test_uploader a binary called uploader will be generated which is used to upload the OS binary file to the device.
+In the test\_uploader a binary called uploader will be generated which is used to upload the OS binary file to the device.
 
 Flashing:
 A loader needs to be flashed into the NAND memory which later loads the OS.
@@ -51,22 +51,22 @@ Flashing the loader:
 1. Toggle the switch to NOR.
 2. Boot the board to supervivi in NOR. In the menu select 'q' to go to 'vivi' shell.
 3. In the command shell type in "load flash 0 <size_of_loader> u". This waits for a USB connection from the host.
-   If a USB connection is established it loads the loader to the NAND at address 0. The size_of_loader will be the
-   size of the mdk_loader.bin file in the bin folder. You can check the size by doing a ls -al mdk_loader.bin
+   If a USB connection is established it loads the loader to the NAND at address 0. The size\_of\_loader will be the
+   size of the mdk\_loader.bin file in the bin folder. You can check the size by doing a ls -al mdk\_loader.bin
 4. To establish the connection from the host use the program 'dnw' or 'usbpush'.
    To upload the program using dnw
     1. unzip dnw. 
     2. Go to src/driver and compile the linux driver. After the driver is compiled
    	  do a sudo insmod ./secbulk.ko
-    3. Now from the s3c2440-mdk folder you can do a ../dnw/dnw-linux/src/dnw/dnw bin/mdk_loader.bin. This will start uploading
+    3. Now from the s3c2440-mdk folder you can do a ../dnw/dnw-linux/src/dnw/dnw bin/mdk\_loader.bin. This will start uploading
       the loader on the the NAND flash.
-    4. If you are using usbpush do a ~/usbpush_src_dir/usbpush bin/mdk_loader.bin
+    4. If you are using usbpush do a ~/usbpush\_src\_dir/usbpush bin/mdk\_loader.bin
 5. To verify toggle the switch to NAND. A 'ldr' message should appear on your terminal program.
-6. Now to upload the OS on to the RAM use the 'uploader' program in the 'test_uploader' folder.
-7. To use the program type in ./test_uploader/uploader <serial_device> bin/mdk_os.bin. 
+6. Now to upload the OS on to the RAM use the 'uploader' program in the 'test\_uploader' folder.
+7. To use the program type in ./test\_uploader/uploader <serial_device> bin/mdk\_os.bin.
 	This will start uploading the OS on to the RAM. Here serial device is any 
 	ttyUSBx device (for e.g. /dev/ttyUSB0)
-8. After the OS upload is complete it runs the mdk_os automatically.
+8. After the OS upload is complete it runs the mdk\_os automatically.
 
 -------------------------------------------------------------------------------------------
 
