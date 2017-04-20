@@ -183,6 +183,11 @@ struct __attribute__((packed)) HCCARegion {
 #define NOCP 		BIT12
 #define POTPGT 		0xFF000000U
 
+#define hc_rh_a_clear_nps(BA) \
+	clear_reg_bits(HC_RH_DESCRIPTOR_A_REG(BA),NPS);
+
+#define hc_rh_a_set_nps(BA) \
+	set_reg_bits(HC_RH_DESCRIPTOR_A_REG(BA),NPS);
 
 #define HC_RH_DESCRIPTOR_B_OFF 			0x4CU
 #define HC_RH_DESCRIPTOR_B_REG(BA) \
@@ -201,6 +206,12 @@ struct __attribute__((packed)) HCCARegion {
 #define LPSC 			BIT16
 #define OCIC_RH 		BIT17
 #define CRWE 			BIT31
+
+#define hc_rh_set_lps(BA) 	\
+	set_reg_bits(HC_RH_STATUS_REG(BA),LPS)
+
+#define hc_rh_set_lpsc(BA)	\
+	set_reg_bits(HC_RH_STATUS_REG(BA),LPSC)
 
 enum Ports {
 	PORT1 = 0,
@@ -275,6 +286,10 @@ enum Ports {
 #define hc_rh_set_port_reset_status_change(BA,PORTNUM)	\
 	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
 				PRSC)
+
+#define hc_rh_set_connect_status_change(BA,PORTNUM)	\
+	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM),	\
+				CSC)
 
 /**** OHCI functionality ****/
 

@@ -46,6 +46,10 @@ static void usb_short_delay()
 /*
 static void dump_rh_desc_ab(void)
 {
+	uart_puts(UART0_BA,"RH_A:");
+	print_hex_uart(UART0_BA,
+		readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)));*/
+/*
 	uart_puts(UART0_BA,"NDP:");
 	print_hex_uart(UART0_BA,
 		(readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & NDP_MASK));
@@ -74,9 +78,11 @@ static void dump_rh_desc_ab(void)
 	print_hex_uart(UART0_BA,
 		(readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & POTPGT)>>24);
 */
-/*	uart_puts(UART0_BA,"RH_B:");
+/*
+	uart_puts(UART0_BA,"RH_B:");
 	print_hex_uart(UART0_BA,
-		readreg32(HC_RH_DESCRIPTOR_B_REG(USB_OHCI_BA)));*/
+		readreg32(HC_RH_DESCRIPTOR_B_REG(USB_OHCI_BA)));
+*/
 /*
 	uart_puts(UART0_BA,"PPCM:");
 	print_hex_uart(UART0_BA,
@@ -84,8 +90,9 @@ static void dump_rh_desc_ab(void)
 
 	uart_puts(UART0_BA,"DR:");
 	print_hex_uart(UART0_BA,
-		(readreg32(HC_RH_DESCRIPTOR_B_REG(USB_OHCI_BA)) & 	DR_MASK)); */
-		/*
+		(readreg32(HC_RH_DESCRIPTOR_B_REG(USB_OHCI_BA)) & 	DR_MASK));
+*/
+/*
 }*/
 
 /*
@@ -121,6 +128,7 @@ static void dump_rh_status(void)
 
 static void dump_error_str(const uint8_t condition_code)
 {
+	uart_puts(UART0_BA, "ERROR Status-> ");
 	switch(condition_code) {
 		case NoError:
 			uart_puts(UART0_BA, "No Err\n");
@@ -501,6 +509,7 @@ static void dump_control_command_status()
 
 }
 */
+
 static void dump_usb_port_status()
 {
 	uint8_t num_ports = readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & NDP_MASK;
@@ -522,7 +531,7 @@ static void dump_usb_port_status()
 */
 }
 
-
+/*
 static void dump_interrupt_register_status()
 {
 	uart_puts(UART0_BA,"Interrupt enable status reg :");
@@ -537,7 +546,7 @@ static void dump_interrupt_register_status()
 	print_hex_uart(UART0_BA,
 			readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)));
 }
-
+*/
 
 /*
  * Setting up USB for getting initial config data.
@@ -582,14 +591,14 @@ static void reset_ohci_controller()
 /*********** Repeat reset starts ***********/
 
 	/* Reset the Host controller */
-	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
+/*	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
 				(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)))
 				|HCR
-				);
+				);*/
 
 	/* Host controller sets itself to 0 after 10ms */
-	while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
-		;
+/*	while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
+		;*/
 
 /*********** Repeat reset ends ***********/
 
@@ -604,10 +613,23 @@ static void reset_ohci_controller()
 static void reset_usb_port(enum Ports port)
 {
 
-	hc_rh_port_clear_power(USB_OHCI_BA,port);
+/*
+	hc_rh_a_clear_nps(USB_OHCI_BA);
+
+	hc_rh_set_lps(USB_OHCI_BA); //Power OFF all the ports.
 	usb_short_delay();
-	hc_rh_port_set_power(USB_OHCI_BA,port);
+	hc_rh_set_lpsc(USB_OHCI_BA); //Power ON all the ports.
+
 	usb_short_delay();
+
+	if((readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port))) & CSC) {
+		hc_rh_set_connect_status_change(USB_OHCI_BA,port);
+	}
+
+	dump_usb_port_status();*/
+
+/*	hc_rh_port_set_power(USB_OHCI_BA,port);
+	usb_short_delay();*/
 
 	/* Reset port */
 	hc_rh_set_port_reset(USB_OHCI_BA,port);
@@ -625,9 +647,14 @@ static void reset_usb_port(enum Ports port)
 	}
 
 	/* Clear the PRSC bit */
-	//hc_rh_set_port_reset_status_change(USB_OHCI_BA,port);
-	//dump_usb_port_status();
+//	hc_rh_set_port_reset_status_change(USB_OHCI_BA, port);
+	hc_rh_set_port_enable(USB_OHCI_BA, port);
+
+	dump_usb_port_status();
+
+
 	usb_delay();
+
 }
 
 static void setup_ohci(void)
@@ -774,10 +801,10 @@ void init_ohci()
 
 	dump_ed_desc(&ed_info.hc_ed[0]);
 
-/*	dump_rh_desc_ab();
-	dump_currentED_reg();
+/*	dump_rh_desc_ab();*/
+/*	dump_currentED_reg();
 	dump_interrupt_register_status();*/
-/*	dump_usb_port_status();*/
+	dump_usb_port_status();
 /*	dump_usb_controller_functional_state(); */
 /*	dump_rh_status();*/
 }
