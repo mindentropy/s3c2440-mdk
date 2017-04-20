@@ -260,7 +260,7 @@ enum Ports {
 #define PRSC 	BIT20
 
 #define hc_rh_set_port_enable(BA,PORTNUM) \
-	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
+	writereg32((HC_RH_PORT_STATUS_REG(BA,PORTNUM)), \
 				PES)
 
 #define hc_rh_set_port_suspend(BA,PORTNUM) \
@@ -272,7 +272,7 @@ enum Ports {
 				PSS)
 					
 #define hc_rh_set_port_reset(BA,PORTNUM) \
-	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
+	writereg32((HC_RH_PORT_STATUS_REG(BA,PORTNUM)), \
 				PRS)
 
 #define hc_rh_port_clear_power(BA,PORTNUM) \
@@ -284,11 +284,11 @@ enum Ports {
 				PPS);
 
 #define hc_rh_set_port_reset_status_change(BA,PORTNUM)	\
-	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM), \
+	writereg32((HC_RH_PORT_STATUS_REG(BA,PORTNUM)), \
 				PRSC)
 
-#define hc_rh_set_connect_status_change(BA,PORTNUM)	\
-	set_reg_bits(HC_RH_PORT_STATUS_REG(BA,PORTNUM),	\
+#define hc_rh_clear_connect_status_change(BA,PORTNUM)	\
+	writereg32((HC_RH_PORT_STATUS_REG(BA,PORTNUM)),	\
 				CSC)
 
 /**** OHCI functionality ****/

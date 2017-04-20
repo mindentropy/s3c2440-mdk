@@ -43,6 +43,18 @@ static void usb_short_delay()
 	}
 }
 
+static void dump_buff(uint8_t *buff, uint8_t len)
+{
+	uint8_t i =  0;
+
+	uart_puts(UART0_BA, "D:");
+	for(i = 0; i<len; i++) {
+		print_hex_uart_ch(UART0_BA,buff[i]);
+		uart_puts(UART0_BA," ");
+	}
+	uart_puts(UART0_BA, "\n");
+}
+
 /*
 static void dump_rh_desc_ab(void)
 {
@@ -393,10 +405,10 @@ static void
 					                  * 
 									  */
 			);
-/*
+
 	uart_puts(UART0_BA,"TD0 control :");
 	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);
-*/
+
 /*	uart_puts(UART0_BA,"TD0 addr:");
 	print_hex_uart(UART0_BA,(uintptr_t)&(td_info->hc_gen_td[0]));*/
 
@@ -414,7 +426,7 @@ static void
 	/* Write Value */
 	writereg16(
 			(usb_buff_pool+USB_VALUE_OFFSET),
-			0U);
+			USB_PORT1_ADDRESS);
 
 	/* Write Index */
 	writereg16(
@@ -430,6 +442,8 @@ static void
 	 * Set the current buffer pointer for td0 to get device
 	 * descriptor
 	 */
+
+	dump_buff(usb_buff_pool, USB_DESC_SIZE);
 
 	writereg32(
 				&(td_info->hc_gen_td[0].current_buffer_pointer),
@@ -647,8 +661,12 @@ static void reset_usb_port(enum Ports port)
 	}
 
 	/* Clear the PRSC bit */
-//	hc_rh_set_port_reset_status_change(USB_OHCI_BA, port);
+	hc_rh_set_port_reset_status_change(USB_OHCI_BA, port);
 	hc_rh_set_port_enable(USB_OHCI_BA, port);
+
+	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & CSC) {
+		hc_rh_clear_connect_status_change(USB_OHCI_BA,port);
+	}
 
 	dump_usb_port_status();
 
@@ -801,10 +819,10 @@ void init_ohci()
 
 	dump_ed_desc(&ed_info.hc_ed[0]);
 
-/*	dump_rh_desc_ab();*/
-/*	dump_currentED_reg();
-	dump_interrupt_register_status();*/
+/*	dump_rh_desc_ab();
+	dump_currentED_reg();
+	dump_interrupt_register_status();
 	dump_usb_port_status();
-/*	dump_usb_controller_functional_state(); */
-/*	dump_rh_status();*/
+	dump_usb_controller_functional_state(); 
+	dump_rh_status();*/
 }
