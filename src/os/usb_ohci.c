@@ -21,7 +21,7 @@ struct ed_info ed_info;
 struct td_info td_info;
 uint32_t HcFmInterval = 0;
 
-
+/*
 static void usb_delay()
 {
 	volatile int i = 0;
@@ -42,6 +42,7 @@ static void usb_short_delay()
 
 	}
 }
+*/
 
 static void dump_buff(uint8_t *buff, uint8_t len)
 {
@@ -329,6 +330,16 @@ static void dump_ed_desc(struct HC_ENDPOINT_DESCRIPTOR *hc_ed)
 	uart_puts(UART0_BA,"NextED: ");
 	print_hex_uart(UART0_BA,hc_ed->NextED);
 }
+/*
+static void set_ed_desc(
+			struct HC_ENDPOINT_DESCRIPTOR *ed_desc
+			uint32_t ed_cntrl_mask
+			)
+{
+	writereg32(&(ed_desc->endpoint_ctrl),
+					ed_cntrl_mask);
+}
+*/
 
 static void 
 		get_dev_descriptor(
@@ -406,8 +417,19 @@ static void
 									  */
 			);
 
-	uart_puts(UART0_BA,"TD0 control :");
-	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);
+	writereg32(
+			&(td_info->hc_gen_td[1].td_control),
+			DP_IN
+			|NO_DELAY_INTERRUPT
+			|DATA_TOGGLE(3) /*
+							 * Status packet should have MSB of dataToggle = 1 and
+			                 * LSB of dataToggle = 1. See pg24(39) of the spec
+							 */
+			|CC(NotAccessed)
+			);
+
+	uart_puts(UART0_BA,"TD1 control :");
+	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);
 
 /*	uart_puts(UART0_BA,"TD0 addr:");
 	print_hex_uart(UART0_BA,(uintptr_t)&(td_info->hc_gen_td[0]));*/
@@ -438,13 +460,13 @@ static void
 			(usb_buff_pool+USB_LENGTH_OFFSET),
 			0U);
 
+
+	dump_buff(usb_buff_pool, USB_DESC_SIZE);
+
 	/*
 	 * Set the current buffer pointer for td0 to get device
 	 * descriptor
 	 */
-
-	dump_buff(usb_buff_pool, USB_DESC_SIZE);
-
 	writereg32(
 				&(td_info->hc_gen_td[0].current_buffer_pointer),
 				(uintptr_t)usb_buff_pool
@@ -471,11 +493,6 @@ static void
 						(uintptr_t)(&(td_info->hc_gen_td[0])));
 	writereg32(&(ed_info->hc_ed[0].TailP),
 						(uintptr_t)(&(td_info->hc_gen_td[1])));
-
-	/*set_hc_ed_toggle_carry(
-							&(ed_info->hc_ed[0].HeadP),
-							TOGGLE
-							);*/
 	
 	//Dump the endpoint_ctrl for verification.
 	dump_ed_desc(&(ed_info->hc_ed[0]));
@@ -671,7 +688,7 @@ static void reset_usb_port(enum Ports port)
 	dump_usb_port_status();
 
 
-	usb_delay();
+//	usb_delay();
 
 }
 

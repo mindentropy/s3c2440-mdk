@@ -207,11 +207,11 @@ struct __attribute__((packed)) HCCARegion {
 #define OCIC_RH 		BIT17
 #define CRWE 			BIT31
 
-#define hc_rh_set_lps(BA) 	\
-	set_reg_bits(HC_RH_STATUS_REG(BA),LPS)
+#define hc_rh_clear_global_power(BA) 	\
+	writereg32(HC_RH_STATUS_REG(BA),LPS)
 
-#define hc_rh_set_lpsc(BA)	\
-	set_reg_bits(HC_RH_STATUS_REG(BA),LPSC)
+#define hc_rh_set_global_power(BA)	\
+	writereg32(HC_RH_STATUS_REG(BA),LPSC)
 
 enum Ports {
 	PORT1 = 0,
@@ -352,11 +352,11 @@ struct ed_info {
 #define set_hc_ed_format(reg,value) \
 	set_regs_value(reg,FORMAT_MASK,(value<<FORMAT_SHIFT))
 
-#define MPS_MASK  		set_bit_range(26,16)
-#define MPS_SHIFT 		16
+#define MPS_MASK  		(0x7FF0000U)
+#define MPS_SHIFT 		(16U)
 
 #define set_hc_ed_mps(reg,value) \
-	set_regs_value(reg,MPS_MASK,(value<<MPS_SHIFT))
+	set_regs_value(reg,MPS_MASK,((value)<<(MPS_SHIFT)))
 
 #define TAILP_MASK  	set_bit_range(31,4)
 #define TAILP_SHIFT 	4
