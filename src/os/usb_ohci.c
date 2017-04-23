@@ -21,7 +21,7 @@ struct ed_info ed_info;
 struct td_info td_info;
 uint32_t HcFmInterval = 0;
 
-/*
+
 static void usb_delay()
 {
 	volatile int i = 0;
@@ -34,6 +34,7 @@ static void usb_delay()
 	}
 }
 
+
 static void usb_short_delay()
 {
 	volatile int i = 0;
@@ -42,7 +43,7 @@ static void usb_short_delay()
 
 	}
 }
-*/
+
 
 static void dump_buff(uint8_t *buff, uint8_t len)
 {
@@ -382,10 +383,10 @@ static void
 			HIGH_SPEED
 		);
 
-	/* Set to max pkt size of 64 bytes */
+	/* Set to max pkt size of 8 bytes */
 	set_hc_ed_mps(
 			&(ed_info->hc_ed[0].endpoint_ctrl),
-			64U
+			8U
 		);
 
 
@@ -402,8 +403,8 @@ static void
 
 	writereg32(
 				&(td_info->hc_gen_td[0].td_control),
-					BUFFER_ROUND
-					|DP_SETUP
+					/*BUFFER_ROUND
+					|*/DP_SETUP
 					|NO_DELAY_INTERRUPT
 					|DATA_TOGGLE(2) /* 
 									 * See pg24(39) of spec. 
@@ -420,7 +421,7 @@ static void
 	writereg32(
 			&(td_info->hc_gen_td[1].td_control),
 			DP_IN
-			|NO_DELAY_INTERRUPT
+			/*|NO_DELAY_INTERRUPT*/
 			|DATA_TOGGLE(3) /*
 							 * Status packet should have MSB of dataToggle = 1 and
 			                 * LSB of dataToggle = 1. See pg24(39) of the spec
@@ -428,13 +429,13 @@ static void
 			|CC(NotAccessed)
 			);
 
-	uart_puts(UART0_BA,"TD1 control :");
+/*
+	uart_puts(UART0_BA,"TD0 ctrl:");
+	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);
+
+	uart_puts(UART0_BA,"TD1 ctrl :");
 	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);
-
-/*	uart_puts(UART0_BA,"TD0 addr:");
-	print_hex_uart(UART0_BA,(uintptr_t)&(td_info->hc_gen_td[0]));*/
-
-
+*/
 	/* Write RequestType */
 	writereg8(
 			(usb_buff_pool+USB_REQ_TYPE_OFFSET),
@@ -461,7 +462,7 @@ static void
 			0U);
 
 
-	dump_buff(usb_buff_pool, USB_DESC_SIZE);
+	//dump_buff(usb_buff_pool, USB_DESC_SIZE);
 
 	/*
 	 * Set the current buffer pointer for td0 to get device
@@ -496,6 +497,10 @@ static void
 	
 	//Dump the endpoint_ctrl for verification.
 	dump_ed_desc(&(ed_info->hc_ed[0]));
+
+	//Dump the tds.
+	dump_td(&(td_info->hc_gen_td[0]));
+	dump_td(&(td_info->hc_gen_td[1]));
 }
 
 
@@ -644,17 +649,17 @@ static void reset_ohci_controller()
 static void reset_usb_port(enum Ports port)
 {
 
-/*
-	hc_rh_a_clear_nps(USB_OHCI_BA);
 
-	hc_rh_set_lps(USB_OHCI_BA); //Power OFF all the ports.
+/*	hc_rh_a_clear_nps(USB_OHCI_BA);
+
+	hc_rh_clear_global_power(USB_OHCI_BA); //Power OFF all the ports.
 	usb_short_delay();
-	hc_rh_set_lpsc(USB_OHCI_BA); //Power ON all the ports.
+	hc_rh_set_global_power(USB_OHCI_BA); //Power ON all the ports.
 
 	usb_short_delay();
 
 	if((readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port))) & CSC) {
-		hc_rh_set_connect_status_change(USB_OHCI_BA,port);
+		hc_rh_clear_connect_status_change(USB_OHCI_BA,port);
 	}
 
 	dump_usb_port_status();*/
@@ -687,9 +692,7 @@ static void reset_usb_port(enum Ports port)
 
 	dump_usb_port_status();
 
-
-//	usb_delay();
-
+	usb_delay();
 }
 
 static void setup_ohci(void)
@@ -834,7 +837,7 @@ void init_ohci()
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)
 				((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
 
-	dump_ed_desc(&ed_info.hc_ed[0]);
+//	dump_ed_desc(&ed_info.hc_ed[0]);
 
 /*	dump_rh_desc_ab();
 	dump_currentED_reg();
