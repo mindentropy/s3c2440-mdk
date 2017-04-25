@@ -207,6 +207,10 @@ static void dump_td(
 	
 	dump_error_str(((hc_gen_td->td_control) & (CC_MASK)) >> (CC_SHIFT));
 
+	if(hc_gen_td->current_buffer_pointer) {
+		dump_buff((uint8_t *)hc_gen_td->current_buffer_pointer, USB_DESC_SIZE);
+	}
+
 	uart_puts(UART0_BA,"\n");
 /*	while(hc_gen_td != 0) {
 		uart_puts(UART0_BA,"\t->");
@@ -423,7 +427,7 @@ static void
 	writereg32(
 			&(td_info->hc_gen_td[1].td_control),
 			DP_IN
-			/*|NO_DELAY_INTERRUPT*/
+			|NO_DELAY_INTERRUPT
 			|DATA_TOGGLE(3) /*
 							 * Status packet should have MSB of dataToggle = 1 and
 			                 * LSB of dataToggle = 1. See pg24(39) of the spec
@@ -474,9 +478,10 @@ static void
 				(uintptr_t)usb_buff_pool
 			);
 
+	/* buffer_end is the last byte to send. Hence subtract by 1 */
 	writereg32(
 				&(td_info->hc_gen_td[0].buffer_end),
-				(uintptr_t)(usb_buff_pool+USB_DESC_SIZE)
+				(uintptr_t)(usb_buff_pool+USB_DESC_SIZE-1)
 			);
 
 /*
@@ -493,15 +498,18 @@ static void
 	/* Setup the head and tail pointers of ED to point to the TD's. */
 	writereg32(&(ed_info->hc_ed[0].HeadP),
 						(uintptr_t)(&(td_info->hc_gen_td[0])));
-	writereg32(&(ed_info->hc_ed[0].TailP),
-						(uintptr_t)(&(td_info->hc_gen_td[1])));
+
+	/* Set the TailP to 0. When HeadP == TailP the OHCI stops processing*/
+	writereg32(&(ed_info->hc_ed[0].TailP),0);
+
+	/*writereg32(&(ed_info->hc_ed[0].TailP),
+						(uintptr_t)(&(td_info->hc_gen_td[1])));*/
 	
 	//Dump the endpoint_ctrl for verification.
 	dump_ed_desc(&(ed_info->hc_ed[0]));
 
 	//Dump the tds.
 	dump_td(&(td_info->hc_gen_td[0]));
-	dump_buff(td_info->hc_gen_td[0].current_buffer_pointer, USB_DESC_SIZE);
 	dump_td(&(td_info->hc_gen_td[1]));
 }
 
@@ -558,6 +566,7 @@ static void dump_usb_port_status()
 		print_hex_uart(UART0_BA,
 			readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,i)));
 	}
+	uart_puts(UART0_BA,"\n");
 /*
 	uart_puts(UART0_BA,"Port1 status :");
 	print_hex_uart(UART0_BA,
