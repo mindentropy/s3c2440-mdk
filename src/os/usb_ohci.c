@@ -207,6 +207,7 @@ static void dump_td(
 	
 	dump_error_str(((hc_gen_td->td_control) & (CC_MASK)) >> (CC_SHIFT));
 
+	uart_puts(UART0_BA,"\n");
 /*	while(hc_gen_td != 0) {
 		uart_puts(UART0_BA,"\t->");
 		print_hex_uart(UART0_BA,
@@ -330,6 +331,7 @@ static void dump_ed_desc(struct HC_ENDPOINT_DESCRIPTOR *hc_ed)
 
 	uart_puts(UART0_BA,"NextED: ");
 	print_hex_uart(UART0_BA,hc_ed->NextED);
+	uart_puts(UART0_BA,"\n");
 }
 /*
 static void set_ed_desc(
@@ -462,7 +464,6 @@ static void
 			0U);
 
 
-	//dump_buff(usb_buff_pool, USB_DESC_SIZE);
 
 	/*
 	 * Set the current buffer pointer for td0 to get device
@@ -500,6 +501,7 @@ static void
 
 	//Dump the tds.
 	dump_td(&(td_info->hc_gen_td[0]));
+	dump_buff(td_info->hc_gen_td[0].current_buffer_pointer, USB_DESC_SIZE);
 	dump_td(&(td_info->hc_gen_td[1]));
 }
 
@@ -672,11 +674,6 @@ static void reset_usb_port(enum Ports port)
 
 	/* port enable bit will be set once the port is reset */
 
-	/* Wait until the port reset signal bit state is set to 0 */
-	while(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & PRS) {
-		;
-	}
-
 	/* Wait until the port reset status change bit is set to 1 */
 	while(!(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & PRSC)) {
 		;
@@ -684,6 +681,12 @@ static void reset_usb_port(enum Ports port)
 
 	/* Clear the PRSC bit */
 	hc_rh_set_port_reset_status_change(USB_OHCI_BA, port);
+
+	/* Wait until the port reset signal bit state is set to 0 */
+	while(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & PRS) {
+		;
+	}
+
 	hc_rh_set_port_enable(USB_OHCI_BA, port);
 
 	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & CSC) {
@@ -692,7 +695,7 @@ static void reset_usb_port(enum Ports port)
 
 	dump_usb_port_status();
 
-	usb_delay();
+	usb_short_delay();
 }
 
 static void setup_ohci(void)
