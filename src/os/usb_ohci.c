@@ -383,11 +383,18 @@ static void
 			GET_DIR_FROM_TD
 		);
 
-	/* Set to high speed */
-	set_hc_ed_speed(
-			&(ed_info->hc_ed[0].endpoint_ctrl),
-			HIGH_SPEED
-		);
+	/* Set the speed */
+	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT1)) & LSDA) {
+		set_hc_ed_speed(
+				&(ed_info->hc_ed[0].endpoint_ctrl),
+				SLOW_SPEED
+			);
+	} else {
+		set_hc_ed_speed(
+				&(ed_info->hc_ed[0].endpoint_ctrl),
+				HIGH_SPEED
+			);
+	}
 
 	/* Set to max pkt size of 8 bytes */
 	set_hc_ed_mps(
@@ -677,6 +684,12 @@ static void reset_usb_port(enum Ports port)
 
 /*	hc_rh_port_set_power(USB_OHCI_BA,port);
 	usb_short_delay();*/
+
+	dump_usb_port_status();
+
+	if((readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port))) & CSC) {
+		hc_rh_clear_connect_status_change(USB_OHCI_BA,port);
+	}
 
 	/* Reset port */
 	hc_rh_set_port_reset(USB_OHCI_BA,port);
