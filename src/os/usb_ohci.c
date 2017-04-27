@@ -352,7 +352,8 @@ static void
 		get_dev_descriptor(
 				struct ed_info *ed_info,
 				struct td_info *td_info,
-				void *usb_buff_pool
+				void *usb_buff_pool,
+				enum Ports port
 				)
 {
 
@@ -384,7 +385,7 @@ static void
 		);
 
 	/* Set the speed */
-	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,PORT1)) & LSDA) {
+	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & LSDA) {
 		set_hc_ed_speed(
 				&(ed_info->hc_ed[0].endpoint_ctrl),
 				SLOW_SPEED
@@ -434,7 +435,7 @@ static void
 	writereg32(
 			&(td_info->hc_gen_td[1].td_control),
 			DP_IN
-			|NO_DELAY_INTERRUPT
+			/*|NO_DELAY_INTERRUPT*/ /* No Delay interrupt for status TD */
 			|DATA_TOGGLE(3) /*
 							 * Status packet should have MSB of dataToggle = 1 and
 			                 * LSB of dataToggle = 1. See pg24(39) of the spec
@@ -687,9 +688,9 @@ static void reset_usb_port(enum Ports port)
 
 	dump_usb_port_status();
 
-	if((readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port))) & CSC) {
+/*	if((readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port))) & CSC) {
 		hc_rh_clear_connect_status_change(USB_OHCI_BA,port);
-	}
+	}*/
 
 	/* Reset port */
 	hc_rh_set_port_reset(USB_OHCI_BA,port);
@@ -709,14 +710,23 @@ static void reset_usb_port(enum Ports port)
 		;
 	}
 
-	hc_rh_set_port_enable(USB_OHCI_BA, port);
-
+	/*
+	 * Clear connect status change to clear the notification of the status change
+	 */
 	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & CSC) {
 		hc_rh_clear_connect_status_change(USB_OHCI_BA,port);
 	}
 
-	dump_usb_port_status();
+	/*
+	 * If there is a device attached the port only then enable the port.
+	 * The port anyway cannot be set if the CCS (CurrentConnectStatus) bit is
+	 * cleared.
+	 */
+	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & CCS) {
+		hc_rh_set_port_enable(USB_OHCI_BA, port);
+	}
 
+	dump_usb_port_status();
 	usb_short_delay();
 }
 
@@ -752,7 +762,7 @@ static void setup_ohci(void)
 					0x628U);
 
 	/* Setup device descriptor buffer pool */
-	get_dev_descriptor(&ed_info,&td_info,usb_buffer_pool);
+	get_dev_descriptor(&ed_info,&td_info,usb_buffer_pool,PORT1);
 	
 	/*** Write the ControlED to the HcControlHeadED register. ***/
 	writereg32(
