@@ -330,10 +330,10 @@ struct ed_info {
 	set_regs_value(reg,DIR_MASK,(value))
 
 #define SPEED_MASK  	BIT13
-#define SPEED_SHIFT 	13
+#define SPEED_SHIFT 	(13U)
 
 #define SLOW_SPEED 		(1<<SPEED_SHIFT)
-#define HIGH_SPEED 		(0<<SPEED_SHIFT)
+#define FULL_SPEED 		(0<<SPEED_SHIFT)
 
 #define set_hc_ed_speed(reg,value) \
 	set_regs_value(reg,SPEED_MASK,value)

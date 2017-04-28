@@ -380,18 +380,18 @@ static void get_ed_descriptor(
 
 		set_hc_ed_mps(
 				&(ed_info->hc_ed[0].endpoint_ctrl),
-				FULL_SPEED_MAXIMUM_PACKET_SIZE
+				SLOW_SPEED_MAXIMUM_PACKET_SIZE
 			);
 	} else {
 		set_hc_ed_speed(
 				&(ed_info->hc_ed[0].endpoint_ctrl),
-				HIGH_SPEED
+				FULL_SPEED
 			);
 
 		/* Set to max pkt size of 8 bytes */
 		set_hc_ed_mps(
 				&(ed_info->hc_ed[0].endpoint_ctrl),
-				SLOW_SPEED_MAXIMUM_PACKET_SIZE
+				FULL_SPEED_MAXIMUM_PACKET_SIZE
 			);
 	}
 
@@ -408,59 +408,7 @@ static void
 				)
 {
 
-	/*
-	 * Set the function address to 0. During initial configuration
-	 * the device will listen to address 0 and endpoint 0.
-	 */
-
-	set_hc_ed_FA(
-			&(ed_info->hc_ed[0].endpoint_ctrl),
-			0
-		);
-
-	/*
-	 * Set the endpoint to 0. During initial configuration the device
-	 * will listen to address 0 and endpoint 0.
-	 */
-	set_hc_ed_EN(
-			&(ed_info->hc_ed[0].endpoint_ctrl),
-			0
-		);
-
-	/*
-	 * Get the direction from td and not from ed.
-	 */
-	set_hc_ed_D(
-			&(ed_info->hc_ed[0].endpoint_ctrl),
-			GET_DIR_FROM_TD
-		);
-
-	/* Set the speed */
-	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & LSDA) {
-		set_hc_ed_speed(
-				&(ed_info->hc_ed[0].endpoint_ctrl),
-				SLOW_SPEED
-			);
-
-		set_hc_ed_mps(
-				&(ed_info->hc_ed[0].endpoint_ctrl),
-				FULL_SPEED_MAXIMUM_PACKET_SIZE
-			);
-	} else {
-		set_hc_ed_speed(
-				&(ed_info->hc_ed[0].endpoint_ctrl),
-				HIGH_SPEED
-			);
-
-		/* Set to max pkt size of 8 bytes */
-		set_hc_ed_mps(
-				&(ed_info->hc_ed[0].endpoint_ctrl),
-				SLOW_SPEED_MAXIMUM_PACKET_SIZE
-			);
-	}
-
-	ed_info->hc_ed[0].HeadP = 0; //Init to 0.
-	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
+	get_ed_descriptor(ed_info,0,0,PORT1);
 
 	//Setup the td for the ed. I will setup a single td at index 0.
 
