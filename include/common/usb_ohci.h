@@ -233,18 +233,16 @@ enum Ports {
 
 #define HC_RH_PORT_STATUS_OFF 			0x54U
 #define HC_RH_PORT_STATUS_REG(BA,PORTNUM) \
-	HW_REG(BA,(HC_RH_PORT_STATUS_OFF + ((PORTNUM)<<2)))
-
+	(HW_REG(BA,(HC_RH_PORT_STATUS_OFF + ((PORTNUM)<<2))))
 
 #define HC_RH_PORT1_STATUS_OFF 			0x54
 #define HC_RH_PORT1_STATUS_REG(BA) \
-	HW_REG(BA,HC_RH_PORT1_STATUS_OFF)
+	(HW_REG(BA,HC_RH_PORT1_STATUS_OFF))
 
 
 #define HC_RH_PORT2_STATUS_OFF 			0x58
 #define HC_RH_PORT2_STATUS_REG(BA) \
-	HW_REG(BA,HC_RH_PORT2_STATUS_OFF)
-
+	(HW_REG(BA,HC_RH_PORT2_STATUS_OFF))
 
 #define CCS 	BIT0
 #define PES 	BIT1
@@ -309,15 +307,15 @@ struct ed_info {
 };
 
 #define FA_SHIFT  		0
-#define FA_MASK 		set_bit_range(6,0)
+#define FA_MASK 		0x3F
 
-#define set_hc_ed_fa(reg,value) \
+#define set_hc_ed_FA(reg,value) \
 	set_regs_value(reg,FA_MASK,(value<<FA_SHIFT))
 
-#define EN_MASK 		set_bit_range(10,7)
+#define EN_MASK 		0xF
 #define EN_SHIFT  		7
 
-#define set_hc_ed_en(reg,value) \
+#define set_hc_ed_EN(reg,value) \
 	set_regs_value(reg,EN_MASK,(value<<EN_SHIFT))
 
 #define DIR_MASK  		(BIT12|BIT11)
@@ -328,7 +326,7 @@ struct ed_info {
 #define IN 					(2<<DIR_SHIFT)
 #define GET_DIR_FROM_TD1 	(3<<DIR_SHIFT)
 
-#define set_hc_ed_dir(reg,value) \
+#define set_hc_ed_D(reg,value) \
 	set_regs_value(reg,DIR_MASK,(value))
 
 #define SPEED_MASK  	BIT13
@@ -358,14 +356,14 @@ struct ed_info {
 #define set_hc_ed_mps(reg,value) \
 	set_regs_value(reg,MPS_MASK,((value)<<(MPS_SHIFT)))
 
-#define TAILP_MASK  	set_bit_range(31,4)
-#define TAILP_SHIFT 	4
+#define TAILP_MASK  	(0xFFFFFFFU)
+#define TAILP_SHIFT 	(4U)
 
 #define set_hc_ed_tailp(reg,value) \
 	set_regs_value(reg,TAILP_MASK,(value<<TAILP_SHIFT))
 
-#define HEADP_MASK  	set_bit_range(31,4)
-#define HEADP_SHIFT 	4
+#define HEADP_MASK  	(0xFFFFFFFU)
+#define HEADP_SHIFT 	(4U)
 
 #define set_hc_ed_headp(reg,value) \
 	set_regs_value(reg,HEADP_MASK,(value<<HEADP_SHIFT))
@@ -383,7 +381,7 @@ struct ed_info {
 #define set_hc_ed_toggle_carry(reg,value) \
 	set_regs_value(reg,TOGGLE_CARRY_MASK,(value<<TOGGLE_SHIFT))
 
-#define NEXT_ED_MASK 	set_bit_range(31,4)
+#define NEXT_ED_MASK 	(0xFFFFFFFU)
 #define NEXT_ED_SHIFT 	(4)
 
 #define set_hc_ed_next_ed(reg,value) \
@@ -503,6 +501,9 @@ struct __attribute__((packed)) PACKET_STATUS_WORD
 
 #define USB_PORT1_ADDRESS	0x1U
 #define USB_PORT2_ADDRESS	0x2U
+
+#define SLOW_SPEED_MAXIMUM_PACKET_SIZE 0x8U
+#define FULL_SPEED_MAXIMUM_PACKET_SIZE 0x40U
 
 void init_ohci();
 

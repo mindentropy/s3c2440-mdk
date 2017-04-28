@@ -348,6 +348,57 @@ static void set_ed_desc(
 }
 */
 
+static void get_ed_descriptor(
+		struct ed_info *ed_info,
+		uint8_t fa,
+		uint8_t en,
+		enum Ports port
+		)
+{
+
+	/* Set the function address and endpoint address */
+
+	writereg32(&(ed_info->hc_ed[0].endpoint_ctrl),
+				(fa<<FA_SHIFT)
+				|(en<<EN_SHIFT)
+				);
+	/*
+	 * Set the direction. Currently take the direction from TD
+	 * and not ED.
+	 */
+	set_hc_ed_D(
+			&(ed_info->hc_ed[0].endpoint_ctrl),
+			GET_DIR_FROM_TD
+		);
+
+	/* Set the speed */
+	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & LSDA) {
+		set_hc_ed_speed(
+				&(ed_info->hc_ed[0].endpoint_ctrl),
+				SLOW_SPEED
+			);
+
+		set_hc_ed_mps(
+				&(ed_info->hc_ed[0].endpoint_ctrl),
+				FULL_SPEED_MAXIMUM_PACKET_SIZE
+			);
+	} else {
+		set_hc_ed_speed(
+				&(ed_info->hc_ed[0].endpoint_ctrl),
+				HIGH_SPEED
+			);
+
+		/* Set to max pkt size of 8 bytes */
+		set_hc_ed_mps(
+				&(ed_info->hc_ed[0].endpoint_ctrl),
+				SLOW_SPEED_MAXIMUM_PACKET_SIZE
+			);
+	}
+
+	ed_info->hc_ed[0].HeadP = 0; //Init to 0.
+	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
+}
+
 static void 
 		get_dev_descriptor(
 				struct ed_info *ed_info,
@@ -362,7 +413,7 @@ static void
 	 * the device will listen to address 0 and endpoint 0.
 	 */
 
-	set_hc_ed_fa(
+	set_hc_ed_FA(
 			&(ed_info->hc_ed[0].endpoint_ctrl),
 			0
 		);
@@ -371,7 +422,7 @@ static void
 	 * Set the endpoint to 0. During initial configuration the device
 	 * will listen to address 0 and endpoint 0.
 	 */
-	set_hc_ed_en(
+	set_hc_ed_EN(
 			&(ed_info->hc_ed[0].endpoint_ctrl),
 			0
 		);
@@ -379,7 +430,7 @@ static void
 	/*
 	 * Get the direction from td and not from ed.
 	 */
-	set_hc_ed_dir(
+	set_hc_ed_D(
 			&(ed_info->hc_ed[0].endpoint_ctrl),
 			GET_DIR_FROM_TD
 		);
@@ -390,19 +441,23 @@ static void
 				&(ed_info->hc_ed[0].endpoint_ctrl),
 				SLOW_SPEED
 			);
+
+		set_hc_ed_mps(
+				&(ed_info->hc_ed[0].endpoint_ctrl),
+				FULL_SPEED_MAXIMUM_PACKET_SIZE
+			);
 	} else {
 		set_hc_ed_speed(
 				&(ed_info->hc_ed[0].endpoint_ctrl),
 				HIGH_SPEED
 			);
+
+		/* Set to max pkt size of 8 bytes */
+		set_hc_ed_mps(
+				&(ed_info->hc_ed[0].endpoint_ctrl),
+				SLOW_SPEED_MAXIMUM_PACKET_SIZE
+			);
 	}
-
-	/* Set to max pkt size of 8 bytes */
-	set_hc_ed_mps(
-			&(ed_info->hc_ed[0].endpoint_ctrl),
-			8U
-		);
-
 
 	ed_info->hc_ed[0].HeadP = 0; //Init to 0.
 	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
@@ -566,7 +621,7 @@ static void dump_control_command_status()
 
 static void dump_usb_port_status()
 {
-	uint8_t num_ports = readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA)) & NDP_MASK;
+	uint8_t num_ports = ((readreg32(HC_RH_DESCRIPTOR_A_REG(USB_OHCI_BA))) & NDP_MASK);
 	uint8_t i = 0;
 
 	uart_puts(UART0_BA,"Port status :");
@@ -665,23 +720,22 @@ static void reset_ohci_controller()
 
 }
 
-static void reset_usb_port(enum Ports port)
+static void toggle_usb_global_power()
 {
 
-
-/*	hc_rh_a_clear_nps(USB_OHCI_BA);
+	hc_rh_a_clear_nps(USB_OHCI_BA);
 
 	hc_rh_clear_global_power(USB_OHCI_BA); //Power OFF all the ports.
 	usb_short_delay();
 	hc_rh_set_global_power(USB_OHCI_BA); //Power ON all the ports.
-
 	usb_short_delay();
 
-	if((readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port))) & CSC) {
-		hc_rh_clear_connect_status_change(USB_OHCI_BA,port);
-	}
+	dump_usb_port_status();
+}
 
-	dump_usb_port_status();*/
+static void reset_usb_port(enum Ports port)
+{
+
 
 /*	hc_rh_port_set_power(USB_OHCI_BA,port);
 	usb_short_delay();*/
@@ -863,7 +917,7 @@ void init_ohci()
 		;
 	}
 
-	/*usb_delay();*/
+	/* usb_delay(); */
 
 	uart_puts(UART0_BA,"HccaDoneHead: ");
 	print_hex_uart(UART0_BA,
