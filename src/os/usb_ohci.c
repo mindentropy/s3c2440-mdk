@@ -399,6 +399,54 @@ static void get_ed_descriptor(
 	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
 }
 
+static void set_setup_descriptor(
+				uint8_t *usb_buff_pool,
+				enum Request request,
+				uint16_t wValue,
+				uint16_t wIndex,
+				uint16_t wLength
+			)
+{
+
+	/* Write Request */
+	writereg8(
+			(usb_buff_pool+USB_REQ_OFFSET),
+			request);
+
+	/* Write Value */
+	writereg16(
+			(usb_buff_pool+USB_VALUE_OFFSET),
+			wValue);
+
+	/* Write Index */
+	writereg16(
+			(usb_buff_pool+USB_INDEX_OFFSET),
+			wIndex);
+
+	/* Write Length */
+	writereg16(
+			(usb_buff_pool+USB_LENGTH_OFFSET),
+			wLength);
+
+	/* Write RequestType */
+	switch(request) {
+		case REQ_SET_ADDRESS:
+			writereg8(
+				(usb_buff_pool+USB_REQ_TYPE_OFFSET),
+				REQ_TYPE_SET_ADDRESS);
+
+			break;
+		case REQ_GET_DESCRIPTOR:
+			writereg8(
+				(usb_buff_pool+USB_REQ_TYPE_OFFSET),
+				REQ_TYPE_GET_DESCRIPTOR);
+
+			break;
+		default:
+			break;
+	}
+}
+
 static void 
 		get_dev_descriptor(
 				struct ed_info *ed_info,
@@ -446,6 +494,13 @@ static void
 			|CC(NotAccessed)
 			);
 
+	set_setup_descriptor(
+						usb_buff_pool,
+						REQ_SET_ADDRESS,
+						USB_PORT1_ADDRESS,
+						0U,
+						0U
+						);
 /*
 	uart_puts(UART0_BA,"TD0 ctrl:");
 	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);
@@ -453,32 +508,6 @@ static void
 	uart_puts(UART0_BA,"TD1 ctrl :");
 	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);
 */
-	/* Write RequestType */
-	writereg8(
-			(usb_buff_pool+USB_REQ_TYPE_OFFSET),
-			REQ_TYPE_SET_ADDRESS);
-
-	/* Write Request */
-	writereg8(
-			(usb_buff_pool+USB_REQ_OFFSET),
-			REQ_SET_ADDRESS);
-
-	/* Write Value */
-	writereg16(
-			(usb_buff_pool+USB_VALUE_OFFSET),
-			USB_PORT1_ADDRESS);
-
-	/* Write Index */
-	writereg16(
-			(usb_buff_pool+USB_INDEX_OFFSET),
-			0U);
-
-	/* Write Length */
-	writereg16(
-			(usb_buff_pool+USB_LENGTH_OFFSET),
-			0U);
-
-
 
 	/*
 	 * Set the current buffer pointer for td0 to get device
