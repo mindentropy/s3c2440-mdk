@@ -456,7 +456,7 @@ static void
 				)
 {
 
-	get_ed_descriptor(ed_info,0,0,PORT1);
+	get_ed_descriptor(ed_info,0,0,port);
 
 	//Setup the td for the ed. I will setup a single td at index 0.
 
