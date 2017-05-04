@@ -21,7 +21,7 @@ struct ed_info ed_info;
 struct td_info td_info;
 uint32_t HcFmInterval = 0;
 
-
+/*
 static void usb_delay()
 {
 	volatile int i = 0;
@@ -33,7 +33,7 @@ static void usb_delay()
 		}
 	}
 }
-
+*/
 
 static void usb_short_delay()
 {
@@ -348,16 +348,46 @@ static void set_ed_desc(
 }
 */
 
-static void get_ed_descriptor(
+static int16_t get_free_ed_index(
+			struct ed_info *ed_info)
+{
+	int16_t idx = 0;
+
+	while(1)
+	{
+		if((ed_info->hc_ed[idx].HeadP == 0) &&
+				(ed_info->hc_ed[idx].TailP == 0)) {
+			/*
+			 * If the HeadP and TailP equals fixed physical address 0 then the
+			 * controller has stopped processing and the data is processed by
+			 * the HCD. This means that the ED is free for reuse.
+			 */
+			return idx;
+		}
+
+		if(idx == (ed_info->size)) {
+			/* We have reached the end of the ED and there is no more EDs.*/
+			return -1;
+		}
+
+		idx++;
+	}
+
+	// We should not reach here.
+	return -1;
+}
+
+
+static void set_ed_descriptor(
 		struct ed_info *ed_info,
 		uint8_t fa,
 		uint8_t en,
+		int16_t idx,
 		enum Ports port
 		)
 {
 
 	/* Set the function address and endpoint address */
-
 	writereg32(&(ed_info->hc_ed[0].endpoint_ctrl),
 				(fa<<FA_SHIFT)
 				|(en<<EN_SHIFT)
@@ -400,6 +430,7 @@ static void get_ed_descriptor(
 }
 
 static void set_setup_descriptor(
+				struct td_info *td_info,
 				uint8_t *usb_buff_pool,
 				enum Request request,
 				uint16_t wValue,
@@ -435,6 +466,39 @@ static void set_setup_descriptor(
 				(usb_buff_pool+USB_REQ_TYPE_OFFSET),
 				REQ_TYPE_SET_ADDRESS);
 
+			/*
+			 * Initialize 2 td's, the first td to send the request,
+			 * the second td being the 'terminator' td with
+			 * all 0's
+			 */
+			writereg32(
+						&(td_info->hc_gen_td[0].td_control),
+							/*BUFFER_ROUND
+							|*/DP_SETUP
+							|NO_DELAY_INTERRUPT
+							|DATA_TOGGLE(2) /*
+											 * See pg24(39) of spec.
+											 * DATA0 data PID for setup packet,
+											 * MSB of dataToggle = 1 for setup
+											 * and LSB of dataToggle = 0 for setup.
+											 */
+							|CC(NotAccessed) /*
+							                  * See pg35(50) of spec.
+							                  *
+											  */
+					);
+
+			writereg32(
+					&(td_info->hc_gen_td[1].td_control),
+					DP_IN
+					/*|NO_DELAY_INTERRUPT*/ /* No Delay interrupt for status TD */
+					|DATA_TOGGLE(3) /*
+									 * Status packet should have MSB of dataToggle = 1 and
+					                 * LSB of dataToggle = 1. See pg24(39) of the spec
+									 */
+					|CC(NotAccessed)
+					);
+
 			break;
 		case REQ_GET_DESCRIPTOR:
 			writereg8(
@@ -447,7 +511,7 @@ static void set_setup_descriptor(
 	}
 }
 
-static void 
+static int16_t
 		get_dev_descriptor(
 				struct ed_info *ed_info,
 				struct td_info *td_info,
@@ -455,46 +519,19 @@ static void
 				enum Ports port
 				)
 {
+	int16_t ed_idx = 0;
 
-	get_ed_descriptor(ed_info,0,0,port);
+	if((ed_idx = get_free_ed_index(ed_info)) == -1) {
+		return -1;
+	}
+
+	set_ed_descriptor(ed_info,0,0,ed_idx,port);
 
 	//Setup the td for the ed. I will setup a single td at index 0.
 
-	/* 
-	 * Initialize 2 td's, the first td to send the request,
-	 * the second td being the 'terminator' td with
-	 * all 0's
-	 */
-
-	writereg32(
-				&(td_info->hc_gen_td[0].td_control),
-					/*BUFFER_ROUND
-					|*/DP_SETUP
-					|NO_DELAY_INTERRUPT
-					|DATA_TOGGLE(2) /* 
-									 * See pg24(39) of spec. 
-									 * DATA0 data PID for setup packet, 
-									 * MSB of dataToggle = 1 for setup
-									 * and LSB of dataToggle = 0 for setup.
-									 */
-					|CC(NotAccessed) /*
-					                  * See pg35(50) of spec.
-					                  * 
-									  */
-			);
-
-	writereg32(
-			&(td_info->hc_gen_td[1].td_control),
-			DP_IN
-			/*|NO_DELAY_INTERRUPT*/ /* No Delay interrupt for status TD */
-			|DATA_TOGGLE(3) /*
-							 * Status packet should have MSB of dataToggle = 1 and
-			                 * LSB of dataToggle = 1. See pg24(39) of the spec
-							 */
-			|CC(NotAccessed)
-			);
 
 	set_setup_descriptor(
+						td_info,
 						usb_buff_pool,
 						REQ_SET_ADDRESS,
 						USB_PORT1_ADDRESS,
@@ -551,6 +588,8 @@ static void
 	//Dump the tds.
 	dump_td(&(td_info->hc_gen_td[0]));
 	dump_td(&(td_info->hc_gen_td[1]));
+
+	return 0;
 }
 
 
@@ -697,6 +736,7 @@ static void reset_ohci_controller()
 
 }
 
+/*
 static void toggle_usb_global_power()
 {
 
@@ -709,6 +749,7 @@ static void toggle_usb_global_power()
 
 	dump_usb_port_status();
 }
+*/
 
 static void reset_usb_port(enum Ports port)
 {
