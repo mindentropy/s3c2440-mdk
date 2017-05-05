@@ -798,8 +798,9 @@ static void reset_usb_port(enum Ports port)
 		hc_rh_set_port_enable(USB_OHCI_BA, port);
 	}
 
-	dump_usb_port_status();
 	usb_short_delay();
+
+	dump_usb_port_status();
 }
 
 static void setup_ohci(void)
