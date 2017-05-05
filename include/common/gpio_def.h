@@ -54,7 +54,7 @@
 		((GPIO_BA) + MISCCR_OFF)
 
 /***** Clock GPIO Settings *****/
-#define CLK_SEL1 		(BIT10|BIT9|BIT8)
+#define CLK_SEL1_MASK	(BIT10|BIT9|BIT8)
 #define CLK_SEL1_MPLL  	(0)
 #define CLK_SEL1_UPLL  	(BIT8)
 #define CLK_SEL1_RTC 	(BIT9)
@@ -62,6 +62,7 @@
 #define CLK_SEL1_PCLK 	(BIT10)
 #define CLK_SEL1_DCLK1 	(BIT10|BIT8)
 
+#define CLK_SEL0_MASK				(BIT6|BIT5|BIT4)
 #define CLK_SEL0_MPLL_INPUT_XTAL  	(0)
 #define CLK_SEL0_UPLL_OUTPUT  		(BIT4)
 #define CLK_SEL0_FCLK 				(BIT5)

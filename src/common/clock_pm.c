@@ -7,13 +7,8 @@
 void set_clk_dbg_port()
 {
 	set_gpio_clk_dbg();
-	//set_reg_bits(MISCCR,(CLK_SEL1_HCLK|CLK_SEL0_MPLL_INPUT_XTAL));
-	
-	/*set_reg_bits(MISCCR,BIT8);
-	clear_reg_bits(MISCCR,BIT10|BIT9);*/
-	//set_reg_bits(MISCCR,BIT5|BIT4);
-	set_reg_bits(MISCCR_REG(),(BIT5|BIT4));
-	clear_reg_bits(MISCCR_REG(),(BIT6));
+	set_regs_value(MISCCR_REG(),CLK_SEL0_MASK,
+							CLK_SEL0_FCLK);
 }
 
 
@@ -167,7 +162,7 @@ void init_clock()
 
 	/* Set upll first, use 7 "nops" delay and then set mpll */
 
-	set_clk_upll(CLK_BASE_ADDR,0x38,0x2,0x2); //48 MHz.
+	set_clk_upll(CLK_BASE_ADDR,0x38U,0x2U,0x2U); //48 MHz.
     
 	__asm__ __volatile__(
 			"mov r0,r0\n\t"
@@ -183,7 +178,7 @@ void init_clock()
 		);
 
 	
-	set_clk_mpll(CLK_BASE_ADDR,0x7f,0x2,0x1); //405 MHz
+	set_clk_mpll(CLK_BASE_ADDR,0x7FU,0x2U,0x1U); //405 MHz
 
 	__asm__ __volatile__(
 			"mov r0,r0\n\t"
