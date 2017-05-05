@@ -21,7 +21,7 @@ struct ed_info ed_info;
 struct td_info td_info;
 uint32_t HcFmInterval = 0;
 
-/*
+
 static void usb_delay()
 {
 	volatile int i = 0;
@@ -33,7 +33,7 @@ static void usb_delay()
 		}
 	}
 }
-*/
+
 
 static void usb_short_delay()
 {
