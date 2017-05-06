@@ -4,17 +4,17 @@
 
 #include "common.h"
 
-#define GPIO_BA 	0x56000000
+#define GPIO_BA 	0x56000000U
 
-#define GPA_OFF 	0x00
-#define GPB_OFF 	0x10
-#define GPC_OFF 	0x20
-#define GPD_OFF 	0x30
-#define GPE_OFF 	0x40
-#define GPF_OFF 	0x50
-#define GPG_OFF 	0x60
-#define GPH_OFF 	0x70
-#define GPJ_OFF 	0xD0
+#define GPA_OFF 	(0x00U)
+#define GPB_OFF 	(0x10U)
+#define GPC_OFF 	(0x20U)
+#define GPD_OFF 	(0x30U)
+#define GPE_OFF 	(0x40U)
+#define GPF_OFF 	(0x50U)
+#define GPG_OFF 	(0x60U)
+#define GPH_OFF 	(0x70U)
+#define GPJ_OFF 	(0xD0U)
 
 #define GPA_BA  HW_REG(GPIO_BA,GPA_OFF)
 #define GPB_BA  HW_REG(GPIO_BA,GPB_OFF)
@@ -26,16 +26,16 @@
 #define GPH_BA  HW_REG(GPIO_BA,GPH_OFF)
 #define GPJ_BA  HW_REG(GPIO_BA,GPJ_OFF)
 
-#define GPCON   	0x00
-#define GPDAT   	0x04
-#define GPUP    	0x08
-#define MISCCR_OFF 	0x80
+#define GPCON   	0x00U
+#define GPDAT   	0x04U
+#define GPUP    	0x08U
+#define MISCCR_OFF 	0x80U
 
-#define GSTATUS0 	0xAC
-#define GSTATUS1 	0xB0
-#define GSTATUS2 	0xB4
-#define GSTATUS3 	0xB8
-#define GSTATUS4 	0xBC
+#define GSTATUS0 	0xACU
+#define GSTATUS1 	0xB0U
+#define GSTATUS2 	0xB4U
+#define GSTATUS3 	0xB8U
+#define GSTATUS4 	0xBCU
 
 #define GSTATUS_REG(STATUS_OFF) \
 	HW_REG(GPIO_BA,STATUS_OFF)
@@ -98,6 +98,9 @@
 #endif //MINI2440
 /*****************************/
 
+/***** USB Device Settings  ******/
+#define USB_EN_GPIO 		(BIT5) //GPC5
+/*********************************/
 
 /***** Speaker GPIO Settings *****/
 #define SPKR_GPIO_OUT ((~BIT1) & (BIT0)) //GPB0

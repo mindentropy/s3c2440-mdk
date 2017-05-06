@@ -21,7 +21,7 @@ struct ed_info ed_info;
 struct td_info td_info;
 uint32_t HcFmInterval = 0;
 
-
+/*
 static void usb_delay()
 {
 	volatile int i = 0;
@@ -33,7 +33,7 @@ static void usb_delay()
 		}
 	}
 }
-
+*/
 
 static void usb_short_delay()
 {
@@ -698,15 +698,23 @@ static void reset_ohci_controller()
 			MIE|OC|RHSC|FNO|UE|RD|SF|WDH|SO
 			);
 
+
 	/* Reset the Host controller */
-	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
-				(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)))
-				|HCR
-				);
+
+	/*
+	 * Note: HC_COMMAND_STATUS register is a write to set register by the HCD.
+	 * It is cleared by the HC register. Any 0 written to the register by the HCD
+	 * does not get affected. --> Need to be verified.
+	 */
+
+	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),HCR);
 
 	/* Host controller sets itself to 0 after 10ms */
 	while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
 		;
+
+	usb_short_delay();
+	dump_usb_port_status();
 
 	/* Clear the interrupt status register */
 	writereg32(
@@ -717,13 +725,10 @@ static void reset_ohci_controller()
 /*********** Repeat reset starts ***********/
 
 	/* Reset the Host controller */
-/*	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),
-				(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)))
-				|HCR
-				);*/
+	/*writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),HCR);*/
 
 	/* Host controller sets itself to 0 after 10ms */
-/*	while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
+	/*while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
 		;*/
 
 /*********** Repeat reset ends ***********/
@@ -757,8 +762,6 @@ static void reset_usb_port(enum Ports port)
 
 /*	hc_rh_port_set_power(USB_OHCI_BA,port);
 	usb_short_delay();*/
-
-	dump_usb_port_status();
 
 /*	if((readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port))) & CSC) {
 		hc_rh_clear_connect_status_change(USB_OHCI_BA,port);
@@ -900,6 +903,7 @@ void init_ohci()
 				readreg32(HC_REVISION_REG(USB_OHCI_BA))
 				);
 
+
 	/* Save the HcFmInterval register for later set up. */
 	HcFmInterval = readreg32(HC_FM_INTERVAL_REG(USB_OHCI_BA));
 
@@ -915,7 +919,7 @@ void init_ohci()
 	setup_ohci();
 
 	/* Set the control list filled. */
-	set_reg_bits(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
+	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
 
 	/* Set to USB_OPERATIONAL to start sending SOF. */

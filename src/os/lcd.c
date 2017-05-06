@@ -13,7 +13,9 @@ void config_lcd_gpio()
 	writereg32(GPUP_REG(GPC_BA),0xFFFFFFFFU);
 	writereg32(GPUP_REG(GPD_BA),0xFFFFFFFFU);
 	/* Set the control registers to LCD function */
-	writereg32(GPCON_REG(GPC_BA),0xAAAAAAAAU);
+
+	/* GPCCON for GPC5 set to output for USB_EN control */
+	writereg32(GPCON_REG(GPC_BA),0xAAAAA6AAU);
 	writereg32(GPCON_REG(GPD_BA),0xAAAAAAAAU);
 	
 }
