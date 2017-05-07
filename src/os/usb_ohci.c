@@ -525,29 +525,31 @@ static void set_setup_descriptor(
 
 			break;
 		case REQ_GET_DESCRIPTOR:
+
 			writereg8(
 				(usb_buff_pool+USB_REQ_TYPE_OFFSET),
 				REQ_TYPE_GET_DESCRIPTOR);
+
 			/*
 			 * Initialize 3 td's,the first td to send the request,
 			 * the second td to receive the response and
 			 * the last td being the service td.
 			 */
 			writereg32(
-						&(td_info->hc_gen_td[0].td_control),
-							DP_SETUP
-							|NO_DELAY_INTERRUPT
-							|DATA_TOGGLE(2) /*
-											 * See pg24(39) of spec.
-											 * DATA0 data PID for setup packet,
-											 * MSB of dataToggle = 1 for setup
-											 * and LSB of dataToggle = 0 for setup.
-											 */
-							|CC(NotAccessed) /*
-							                  * See pg35(50) of spec.
-							                  *
-											  */
-					);
+					&(td_info->hc_gen_td[0].td_control),
+					DP_SETUP
+					|NO_DELAY_INTERRUPT
+					|DATA_TOGGLE(2) /*
+									 * See pg24(39) of spec.
+									 * DATA0 data PID for setup packet,
+									 * MSB of dataToggle = 1 for setup
+									 * and LSB of dataToggle = 0 for setup.
+									 */
+					|CC(NotAccessed) /*
+					                  * See pg35(50) of spec.
+					                  *
+									  */
+				);
 
 			writereg32(
 					&(td_info->hc_gen_td[1].td_control),
@@ -555,7 +557,7 @@ static void set_setup_descriptor(
 					/*|NO_DELAY_INTERRUPT*/ /* No Delay interrupt for status TD */
 					|DATA_TOGGLE(3)
 					|CC(NotAccessed)
-					);
+				);
 
 			writereg32(
 					&(td_info->hc_gen_td[2].td_control),
@@ -563,7 +565,7 @@ static void set_setup_descriptor(
 					/*|NO_DELAY_INTERRUPT*/
 					|DATA_TOGGLE(3)
 					|CC(NotAccessed)
-					);
+				);
 
 			/*
 			 * Set the current buffer pointer for td0 to get device
@@ -580,16 +582,16 @@ static void set_setup_descriptor(
 						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE-1)
 					);
 
-			writereg32(&(td_info->hc_gen_td[0].next_td),
-						(uintptr_t)(&(td_info->hc_gen_td[1])));
-
 			writereg32(
 						&(td_info->hc_gen_td[1].current_buffer_pointer),
 						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE));
 
 			writereg32(
 						&(td_info->hc_gen_td[1].current_buffer_pointer),
-						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE+8));
+						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE+7));
+
+			writereg32(&(td_info->hc_gen_td[0].next_td),
+						(uintptr_t)(&(td_info->hc_gen_td[1])));
 
 			writereg32(&(td_info->hc_gen_td[1].next_td),
 						(uintptr_t)(&(td_info->hc_gen_td[2])));
@@ -618,10 +620,19 @@ static int16_t
 
 	//Setup the td for the ed. I will setup a single td at index 0.
 
-	set_setup_descriptor(
+	/*set_setup_descriptor(
 						td_info,
 						usb_buff_pool,
 						REQ_SET_ADDRESS,
+						USB_PORT1_ADDRESS,
+						0U,
+						0U
+						);*/
+
+	set_setup_descriptor(
+						td_info,
+						usb_buff_pool,
+						REQ_GET_DESCRIPTOR,
 						USB_PORT1_ADDRESS,
 						0U,
 						0U
