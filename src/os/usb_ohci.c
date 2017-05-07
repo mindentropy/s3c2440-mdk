@@ -478,16 +478,16 @@ static void set_setup_descriptor(
 			 * not have queried the supported MPS.
 			 */
 			writereg32(
-						&(td_info->hc_gen_td[0].td_control),
-							DP_SETUP
-							|NO_DELAY_INTERRUPT
-							|DATA_TOGGLE(2) /*
+					&(td_info->hc_gen_td[0].td_control),
+					DP_SETUP
+					|NO_DELAY_INTERRUPT
+					|DATA_TOGGLE(2) /*
 											 * See pg24(39) of spec.
 											 * DATA0 data PID for setup packet,
 											 * MSB of dataToggle = 1 for setup
 											 * and LSB of dataToggle = 0 for setup.
 											 */
-							|CC(NotAccessed) /*
+					|CC(NotAccessed) /*
 							                  * See pg35(50) of spec.
 							                  *
 											  */
@@ -582,6 +582,14 @@ static void set_setup_descriptor(
 
 			writereg32(&(td_info->hc_gen_td[0].next_td),
 						(uintptr_t)(&(td_info->hc_gen_td[1])));
+
+			writereg32(
+						&(td_info->hc_gen_td[1].current_buffer_pointer),
+						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE));
+
+			writereg32(
+						&(td_info->hc_gen_td[1].current_buffer_pointer),
+						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE+8));
 
 			writereg32(&(td_info->hc_gen_td[1].next_td),
 						(uintptr_t)(&(td_info->hc_gen_td[2])));
