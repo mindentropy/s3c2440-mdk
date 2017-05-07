@@ -34,7 +34,7 @@ static void usb_delay()
 	}
 }
 */
-
+/*
 static void usb_short_delay()
 {
 	volatile int i = 0;
@@ -43,7 +43,7 @@ static void usb_short_delay()
 
 	}
 }
-
+*/
 
 static void dump_buff(uint8_t *buff, uint8_t len)
 {
@@ -462,6 +462,7 @@ static void set_setup_descriptor(
 	/* Write RequestType */
 	switch(request) {
 		case REQ_SET_ADDRESS:
+
 			writereg8(
 				(usb_buff_pool+USB_REQ_TYPE_OFFSET),
 				REQ_TYPE_SET_ADDRESS);
@@ -471,10 +472,14 @@ static void set_setup_descriptor(
 			 * the second td being the 'terminator' td with
 			 * all 0's
 			 */
+			/*
+			 * Disabled Buffer rounding as the MPS is initially
+			 * set to 8 bytes. This is a safe value as we would
+			 * not have queried the supported MPS.
+			 */
 			writereg32(
 						&(td_info->hc_gen_td[0].td_control),
-							/*BUFFER_ROUND
-							|*/DP_SETUP
+							DP_SETUP
 							|NO_DELAY_INTERRUPT
 							|DATA_TOGGLE(2) /*
 											 * See pg24(39) of spec.
@@ -499,11 +504,87 @@ static void set_setup_descriptor(
 					|CC(NotAccessed)
 					);
 
+			/*
+			 * Set the current buffer pointer for td0 to get device
+			 * descriptor
+			 */
+			writereg32(
+						&(td_info->hc_gen_td[0].current_buffer_pointer),
+						(uintptr_t)usb_buff_pool
+					);
+
+			/* buffer_end is the last byte to send. Hence subtract by 1 */
+			writereg32(
+						&(td_info->hc_gen_td[0].buffer_end),
+						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE-1)
+					);
+
+			/* Set the td0 next_td to td1 */
+			writereg32(&(td_info->hc_gen_td[0].next_td),
+						(uintptr_t)(&(td_info->hc_gen_td[1])));
+
 			break;
 		case REQ_GET_DESCRIPTOR:
 			writereg8(
 				(usb_buff_pool+USB_REQ_TYPE_OFFSET),
 				REQ_TYPE_GET_DESCRIPTOR);
+			/*
+			 * Initialize 3 td's,the first td to send the request,
+			 * the second td to receive the response and
+			 * the last td being the service td.
+			 */
+			writereg32(
+						&(td_info->hc_gen_td[0].td_control),
+							DP_SETUP
+							|NO_DELAY_INTERRUPT
+							|DATA_TOGGLE(2) /*
+											 * See pg24(39) of spec.
+											 * DATA0 data PID for setup packet,
+											 * MSB of dataToggle = 1 for setup
+											 * and LSB of dataToggle = 0 for setup.
+											 */
+							|CC(NotAccessed) /*
+							                  * See pg35(50) of spec.
+							                  *
+											  */
+					);
+
+			writereg32(
+					&(td_info->hc_gen_td[1].td_control),
+					DP_IN
+					/*|NO_DELAY_INTERRUPT*/ /* No Delay interrupt for status TD */
+					|DATA_TOGGLE(3)
+					|CC(NotAccessed)
+					);
+
+			writereg32(
+					&(td_info->hc_gen_td[2].td_control),
+					DP_IN
+					/*|NO_DELAY_INTERRUPT*/
+					|DATA_TOGGLE(3)
+					|CC(NotAccessed)
+					);
+
+			/*
+			 * Set the current buffer pointer for td0 to get device
+			 * descriptor
+			 */
+			writereg32(
+						&(td_info->hc_gen_td[0].current_buffer_pointer),
+						(uintptr_t)usb_buff_pool
+					);
+
+			/* buffer_end is the last byte to send. Hence subtract by 1 */
+			writereg32(
+						&(td_info->hc_gen_td[0].buffer_end),
+						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE-1)
+					);
+
+			writereg32(&(td_info->hc_gen_td[0].next_td),
+						(uintptr_t)(&(td_info->hc_gen_td[1])));
+
+			writereg32(&(td_info->hc_gen_td[1].next_td),
+						(uintptr_t)(&(td_info->hc_gen_td[2])));
 
 			break;
 		default:
@@ -525,10 +606,9 @@ static int16_t
 		return -1;
 	}
 
-	set_ed_descriptor(ed_info,0,0,ed_idx,port);
+	set_ed_descriptor(ed_info,0U,0U,ed_idx,port);
 
 	//Setup the td for the ed. I will setup a single td at index 0.
-
 
 	set_setup_descriptor(
 						td_info,
@@ -538,49 +618,13 @@ static int16_t
 						0U,
 						0U
 						);
-/*
-	uart_puts(UART0_BA,"TD0 ctrl:");
-	print_hex_uart(UART0_BA,td_info->hc_gen_td[0].td_control);
-
-	uart_puts(UART0_BA,"TD1 ctrl :");
-	print_hex_uart(UART0_BA,td_info->hc_gen_td[1].td_control);
-*/
-
-	/*
-	 * Set the current buffer pointer for td0 to get device
-	 * descriptor
-	 */
-	writereg32(
-				&(td_info->hc_gen_td[0].current_buffer_pointer),
-				(uintptr_t)usb_buff_pool
-			);
-
-	/* buffer_end is the last byte to send. Hence subtract by 1 */
-	writereg32(
-				&(td_info->hc_gen_td[0].buffer_end),
-				(uintptr_t)(usb_buff_pool+USB_DESC_SIZE-1)
-			);
-
-/*
-	uart_puts(UART0_BA,"req_buff: ");
-	print_hex_uart(UART0_BA,(uintptr_t)usb_buff_pool);
-*/
-
-
-	/* Set the td0 next_td to td1 */
-	writereg32(&(td_info->hc_gen_td[0].next_td),
-				(uintptr_t)(&(td_info->hc_gen_td[1])));
-
 
 	/* Setup the head and tail pointers of ED to point to the TD's. */
 	writereg32(&(ed_info->hc_ed[0].HeadP),
 						(uintptr_t)(&(td_info->hc_gen_td[0])));
 
-	/* Set the TailP to 0. When HeadP == TailP the OHCI stops processing*/
+	/* Set the TailP to 0. When HeadP == TailP the OHCI stops processing */
 	writereg32(&(ed_info->hc_ed[0].TailP),0);
-
-	/*writereg32(&(ed_info->hc_ed[0].TailP),
-						(uintptr_t)(&(td_info->hc_gen_td[1])));*/
 	
 	//Dump the endpoint_ctrl for verification.
 	dump_ed_desc(&(ed_info->hc_ed[0]));
@@ -713,7 +757,7 @@ static void reset_ohci_controller()
 	while(readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)) & HCR)
 		;
 
-	usb_short_delay();
+	/*usb_short_delay();*/
 	dump_usb_port_status();
 
 	/* Clear the interrupt status register */
@@ -801,7 +845,7 @@ static void reset_usb_port(enum Ports port)
 		hc_rh_set_port_enable(USB_OHCI_BA, port);
 	}
 
-	usb_short_delay();
+	/*usb_short_delay();*/
 
 	dump_usb_port_status();
 }
