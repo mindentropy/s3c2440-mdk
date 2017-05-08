@@ -587,7 +587,7 @@ static void set_setup_descriptor(
 						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE));
 
 			writereg32(
-						&(td_info->hc_gen_td[1].current_buffer_pointer),
+						&(td_info->hc_gen_td[1].buffer_end),
 						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE+7));
 
 			writereg32(&(td_info->hc_gen_td[0].next_td),
@@ -630,13 +630,13 @@ static int16_t
 						);*/
 
 	set_setup_descriptor(
-						td_info,
-						usb_buff_pool,
-						REQ_GET_DESCRIPTOR,
-						USB_PORT1_ADDRESS,
-						0U,
-						0U
-						);
+			td_info,
+			usb_buff_pool,
+			REQ_GET_DESCRIPTOR,
+			frmt_get_desc_wvalue(DESC_DEVICE,0),
+			0U,
+			8U
+		);
 
 	/* Setup the head and tail pointers of ED to point to the TD's. */
 	writereg32(&(ed_info->hc_ed[0].HeadP),
@@ -651,6 +651,7 @@ static int16_t
 	//Dump the tds.
 	dump_td(&(td_info->hc_gen_td[0]));
 	dump_td(&(td_info->hc_gen_td[1]));
+	dump_td(&(td_info->hc_gen_td[2]));
 
 	return 0;
 }

@@ -79,6 +79,9 @@ enum DescriptorType {
 #define FEATURE_SELECTOR_DEVICE_REMOTE_WAKEUP 	1
 #define FEATURE_SELECTOR_ENDPOINT_HALT 			0
 
+#define frmt_get_desc_wvalue(desc_type,desc_index) \
+			((desc_type)<<8) | ((desc_index))
+
 #define set_usb_req_parameters(usb_req_ptr, \
 		RequestType, \
 		Request, \
