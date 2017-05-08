@@ -551,6 +551,14 @@ static void set_setup_descriptor(
 									  */
 				);
 
+			/*
+			 * Note: The DP_IN and DP_OUT settings are according to the USB1.1 spec
+			 * Pg 165 (181) Figure 8-12.
+			 *
+			 * Since we do a control read the status stage should have DP_OUT.
+			 * If we do a control write the status staghe should have  DP_IN.
+			 * Failure to do this will cause a STALL error.
+			 */
 			writereg32(
 					&(td_info->hc_gen_td[1].td_control),
 					DP_IN
@@ -561,7 +569,7 @@ static void set_setup_descriptor(
 
 			writereg32(
 					&(td_info->hc_gen_td[2].td_control),
-					DP_IN
+					DP_OUT
 					/*|NO_DELAY_INTERRUPT*/
 					|DATA_TOGGLE(3)
 					|CC(NotAccessed)
@@ -1012,6 +1020,9 @@ void init_ohci()
 
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)
 				((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
+
+
+	dump_buff(usb_buffer_pool+USB_DESC_SIZE,8);
 
 //	dump_ed_desc(&ed_info.hc_ed[0]);
 
