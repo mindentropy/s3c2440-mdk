@@ -556,7 +556,7 @@ static void set_setup_descriptor(
 			 * Pg 165 (181) Figure 8-12.
 			 *
 			 * Since we do a control read the status stage should have DP_OUT.
-			 * If we do a control write the status staghe should have  DP_IN.
+			 * If we do a control write the status stage should have  DP_IN.
 			 * Failure to do this will cause a STALL error.
 			 */
 			writereg32(
