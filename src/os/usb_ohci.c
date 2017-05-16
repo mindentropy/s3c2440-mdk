@@ -438,6 +438,7 @@ static void set_setup_descriptor(
 				uint16_t wLength
 			)
 {
+	uint32_t i = 0, idx = 0, max_packets = 0;
 
 	/* Write Request */
 	writereg8(
@@ -525,7 +526,7 @@ static void set_setup_descriptor(
 
 			break;
 		case REQ_GET_DESCRIPTOR:
-
+			max_packets = 2;
 			writereg8(
 				(usb_buff_pool+USB_REQ_TYPE_OFFSET),
 				REQ_TYPE_GET_DESCRIPTOR);
@@ -567,6 +568,8 @@ static void set_setup_descriptor(
 					|CC(NotAccessed)
 				);
 
+/**************** Status packet **********************/
+
 			writereg32(
 					&(td_info->hc_gen_td[2].td_control),
 					DP_OUT
@@ -574,35 +577,27 @@ static void set_setup_descriptor(
 					|DATA_TOGGLE(3)
 					|CC(NotAccessed)
 				);
+/*****************************************************/
 
-			/*
-			 * Set the current buffer pointer for td0 to get device
-			 * descriptor
-			 */
-			writereg32(
-						&(td_info->hc_gen_td[0].current_buffer_pointer),
-						(uintptr_t)usb_buff_pool
-					);
+			for(i = 0; i<max_packets; i++) {
 
-			/* buffer_end is the last byte to send. Hence subtract by 1 */
-			writereg32(
-						&(td_info->hc_gen_td[0].buffer_end),
-						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE-1)
-					);
+				writereg32(
+							&(td_info->hc_gen_td[i].current_buffer_pointer),
+							(uintptr_t)usb_buff_pool + idx
+						);
 
-			writereg32(
-						&(td_info->hc_gen_td[1].current_buffer_pointer),
-						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE));
+				/* buffer_end is the last byte to send. Hence subtract by 1 */
+				writereg32(
+							&(td_info->hc_gen_td[i].buffer_end),
+							(uintptr_t)(usb_buff_pool+ idx + USB_DESC_SIZE - 1)
+						);
 
-			writereg32(
-						&(td_info->hc_gen_td[1].buffer_end),
-						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE+7));
+				writereg32(&(td_info->hc_gen_td[i].next_td),
+						(uintptr_t)(&(td_info->hc_gen_td[i+1])));
 
-			writereg32(&(td_info->hc_gen_td[0].next_td),
-						(uintptr_t)(&(td_info->hc_gen_td[1])));
+				idx = idx + USB_DESC_SIZE;
 
-			writereg32(&(td_info->hc_gen_td[1].next_td),
-						(uintptr_t)(&(td_info->hc_gen_td[2])));
+			}
 
 			break;
 		default:
