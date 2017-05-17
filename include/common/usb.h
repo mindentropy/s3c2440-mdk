@@ -43,6 +43,52 @@
 
 #define USB_DESC_SIZE		(USB_LENGTH_OFFSET + USB_LENGTH_SIZE)
 
+
+struct __attribute__((packed)) desc_dev
+{
+	uint8_t bLength;
+	uint8_t bDescriptorType;
+	uint16_t bcdUsb;
+	uint8_t bDeviceClass;
+	uint8_t bDeviceSubClass;
+	uint8_t bDeviceProtocol;
+	uint8_t bMaxPacketSize0;
+	uint16_t idVendor;
+	uint16_t idProduct;
+	uint16_t bcdDevice;
+	uint8_t iManufacturer;
+	uint8_t iProduct;
+	uint8_t iSerialNumber;
+	uint8_t bNumConfigurations;
+};
+
+
+#define DESC_DEV_Length_SIZE				(1U)
+#define DESC_DEV_DescriptorType_SIZE		(1U)
+#define DESC_DEV_bcdUSB_SIZE				(2U)
+#define DESC_DEV_DeviceClass_SIZE			(1U)
+#define DESC_DEV_DeviceSubClass_SIZE		(1U)
+#define DESC_DEV_DeviceProtocol_SIZE		(1U)
+#define DESC_DEV_MaxPacketSize0_SIZE		(1U)
+#define DESC_DEV_idVendor_SIZE				(2U)
+#define DESC_DEV_idProduct_SIZE				(2U)
+#define DESC_DEV_bcdDevice_SIZE				(2U)
+#define DESC_DEV_Manufacturer_SIZE			(1U)
+#define DESC_DEV_Product_SIZE				(1U)
+#define DESC_DEV_SerialNumber_SIZE			(1U)
+#define DESC_DEV_NumConfigs_SIZE			(1U)
+
+
+#define DESC_DEV_bLength_OFFSET		(0U)
+
+enum USB_TD_max_packet_size {
+	MPS_8 = 8U,
+	MPS_16 = 16U,
+	MPS_32 = 32U,
+	MPS_64 = 32U,
+};
+
+
 struct __attribute__((packed)) usb_request
 {
 	uint8_t bmRequestType;

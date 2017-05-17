@@ -208,7 +208,7 @@ static void dump_td(
 	dump_error_str(((hc_gen_td->td_control) & (CC_MASK)) >> (CC_SHIFT));
 
 	if(hc_gen_td->current_buffer_pointer) {
-		dump_buff((uint8_t *)hc_gen_td->current_buffer_pointer, USB_DESC_SIZE);
+		dump_buff((uint8_t *)hc_gen_td->current_buffer_pointer, MPS_8);
 	}
 
 	uart_puts(UART0_BA,"\n");
@@ -517,7 +517,7 @@ static void set_setup_descriptor(
 			/* buffer_end is the last byte to send. Hence subtract by 1 */
 			writereg32(
 						&(td_info->hc_gen_td[0].buffer_end),
-						(uintptr_t)(usb_buff_pool+USB_DESC_SIZE-1)
+						(uintptr_t)(usb_buff_pool + MPS_8 - 1)
 					);
 
 			/* Set the td0 next_td to td1 */
@@ -526,7 +526,9 @@ static void set_setup_descriptor(
 
 			break;
 		case REQ_GET_DESCRIPTOR:
-			max_packets = 2;
+
+			max_packets = 4;
+
 			writereg8(
 				(usb_buff_pool+USB_REQ_TYPE_OFFSET),
 				REQ_TYPE_GET_DESCRIPTOR);
@@ -568,15 +570,34 @@ static void set_setup_descriptor(
 					|CC(NotAccessed)
 				);
 
+			writereg32(
+					&(td_info->hc_gen_td[2].td_control),
+					DP_IN
+					/*|NO_DELAY_INTERRUPT*/ /* No Delay interrupt for status TD */
+					|DATA_TOGGLE(2)
+					|CC(NotAccessed)
+				);
+
+			//TODO: Check for rounding.
+			writereg32(
+					&(td_info->hc_gen_td[3].td_control),
+					DP_IN
+					|BUFFER_ROUND
+					/*|NO_DELAY_INTERRUPT*/ /* No Delay interrupt for status TD */
+					|DATA_TOGGLE(3)
+					|CC(NotAccessed)
+				);
+
 /**************** Status packet **********************/
 
 			writereg32(
-					&(td_info->hc_gen_td[2].td_control),
+					&(td_info->hc_gen_td[4].td_control),
 					DP_OUT
 					/*|NO_DELAY_INTERRUPT*/
 					|DATA_TOGGLE(3)
 					|CC(NotAccessed)
 				);
+
 /*****************************************************/
 
 			for(i = 0; i<max_packets; i++) {
@@ -589,14 +610,13 @@ static void set_setup_descriptor(
 				/* buffer_end is the last byte to send. Hence subtract by 1 */
 				writereg32(
 							&(td_info->hc_gen_td[i].buffer_end),
-							(uintptr_t)(usb_buff_pool+ idx + USB_DESC_SIZE - 1)
+							(uintptr_t)(usb_buff_pool+ idx + MPS_8 - 1)
 						);
 
 				writereg32(&(td_info->hc_gen_td[i].next_td),
 						(uintptr_t)(&(td_info->hc_gen_td[i+1])));
 
-				idx = idx + USB_DESC_SIZE;
-
+				idx = idx + MPS_8;
 			}
 
 			break;
@@ -638,7 +658,7 @@ static int16_t
 			REQ_GET_DESCRIPTOR,
 			frmt_get_desc_wvalue(DESC_DEVICE,0),
 			0U,
-			8U
+			sizeof(struct desc_dev)
 		);
 
 	/* Setup the head and tail pointers of ED to point to the TD's. */
@@ -655,6 +675,8 @@ static int16_t
 	dump_td(&(td_info->hc_gen_td[0]));
 	dump_td(&(td_info->hc_gen_td[1]));
 	dump_td(&(td_info->hc_gen_td[2]));
+	dump_td(&(td_info->hc_gen_td[3]));
+	dump_td(&(td_info->hc_gen_td[4]));
 
 	return 0;
 }
@@ -781,7 +803,7 @@ static void reset_ohci_controller()
 		;
 
 	/*usb_short_delay();*/
-	dump_usb_port_status();
+	/*dump_usb_port_status();*/
 
 	/* Clear the interrupt status register */
 	writereg32(
@@ -1017,7 +1039,9 @@ void init_ohci()
 				((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
 
 
-	dump_buff(usb_buffer_pool+USB_DESC_SIZE,8);
+	dump_buff(usb_buffer_pool+MPS_8, 8);
+	dump_buff(usb_buffer_pool+(MPS_8<<1), 8);
+	dump_buff(usb_buffer_pool+((MPS_8<<1) + (MPS_8)), 8);
 
 //	dump_ed_desc(&ed_info.hc_ed[0]);
 
