@@ -531,13 +531,10 @@ static void set_setup_descriptor(
 
 			writereg8(
 				(usb_buff_pool+USB_REQ_TYPE_OFFSET),
-				REQ_TYPE_GET_DESCRIPTOR);
+				REQ_TYPE_GET_DESCRIPTOR
+				);
 
-			/*
-			 * Initialize 3 td's,the first td to send the request,
-			 * the second td to receive the response and
-			 * the last td being the service td.
-			 */
+			/* First TD to send request */
 			writereg32(
 					&(td_info->hc_gen_td[0].td_control),
 					DP_SETUP
@@ -558,14 +555,13 @@ static void set_setup_descriptor(
 			 * Note: The DP_IN and DP_OUT settings are according to the USB1.1 spec
 			 * Pg 165 (181) Figure 8-12.
 			 *
-			 * Since we do a control read the status stage should have DP_OUT.
+			 * Since we do a "control read" the status stage should have DP_OUT.
 			 * If we do a control write the status stage should have  DP_IN.
 			 * Failure to do this will cause a STALL error.
 			 */
 			writereg32(
 					&(td_info->hc_gen_td[1].td_control),
 					DP_IN
-					/*|NO_DELAY_INTERRUPT*/ /* No Delay interrupt for status TD */
 					|DATA_TOGGLE(3)
 					|CC(NotAccessed)
 				);
@@ -573,17 +569,14 @@ static void set_setup_descriptor(
 			writereg32(
 					&(td_info->hc_gen_td[2].td_control),
 					DP_IN
-					/*|NO_DELAY_INTERRUPT*/ /* No Delay interrupt for status TD */
 					|DATA_TOGGLE(2)
 					|CC(NotAccessed)
 				);
 
-			//TODO: Check for rounding.
 			writereg32(
 					&(td_info->hc_gen_td[3].td_control),
 					DP_IN
 					|BUFFER_ROUND
-					/*|NO_DELAY_INTERRUPT*/ /* No Delay interrupt for status TD */
 					|DATA_TOGGLE(3)
 					|CC(NotAccessed)
 				);
@@ -593,13 +586,13 @@ static void set_setup_descriptor(
 			writereg32(
 					&(td_info->hc_gen_td[4].td_control),
 					DP_OUT
-					/*|NO_DELAY_INTERRUPT*/
 					|DATA_TOGGLE(3)
 					|CC(NotAccessed)
 				);
 
 /*****************************************************/
 
+			/* Setup the buffer pointers and chain the TDs */
 			for(i = 0; i<max_packets; i++) {
 
 				writereg32(
@@ -1007,8 +1000,6 @@ void init_ohci()
 
 	setup_ohci();
 
-	/* Set the control list filled. */
-	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
 
 	/* Set to USB_OPERATIONAL to start sending SOF. */
@@ -1023,6 +1014,9 @@ void init_ohci()
 	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & SF)) {
 		;
 	}
+
+	/* Set the control list filled. */
+	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
 	/* Poll for data */
 	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & WDH)) {
