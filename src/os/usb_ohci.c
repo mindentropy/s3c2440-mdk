@@ -21,6 +21,8 @@ struct ed_info ed_info;
 struct td_info td_info;
 uint32_t HcFmInterval = 0;
 
+uint8_t desc_dev_buff[18];
+
 /*
 static void usb_delay()
 {
@@ -45,6 +47,16 @@ static void usb_short_delay()
 }
 */
 
+void memcpy(uint8_t *dest,
+				uint8_t *src,
+				unsigned int len
+				)
+{
+	while(len--) {
+		*dest++ = *src++;
+	}
+}
+
 static void dump_buff(uint8_t *buff, uint8_t len)
 {
 	uint8_t i =  0;
@@ -54,6 +66,61 @@ static void dump_buff(uint8_t *buff, uint8_t len)
 		print_hex_uart_ch(UART0_BA,buff[i]);
 		uart_puts(UART0_BA," ");
 	}
+	uart_puts(UART0_BA, "\n");
+}
+
+static void dump_dev_desc(struct desc_dev *desc_dev)
+{
+	uart_puts(UART0_BA, "Len: ");
+	print_hex_uart_ch(UART0_BA, desc_dev->bLength);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "DT: ");
+	print_hex_uart_ch(UART0_BA, desc_dev->bDescriptorType);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "USB: ");
+	print_hex_uart_short(UART0_BA, desc_dev->bcdUsb);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "DC: ");
+	print_hex_uart_ch(UART0_BA, desc_dev->bDeviceClass);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "SC: ");
+	print_hex_uart_ch(UART0_BA, desc_dev->bDeviceSubClass);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "DP: ");
+	print_hex_uart_ch(UART0_BA, desc_dev->bDeviceProtocol);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "MPS: ");
+	print_hex_uart_ch(UART0_BA, desc_dev->bMaxPacketSize0);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "idV: ");
+	print_hex_uart_short(UART0_BA, desc_dev->idVendor);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "idP: ");
+	print_hex_uart_short(UART0_BA, desc_dev->idProduct);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "MF: ");
+	print_hex_uart_ch(UART0_BA, desc_dev->iManufacturer);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "PD: ");
+	print_hex_uart_ch(UART0_BA, desc_dev->iProduct);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "SN: ");
+	print_hex_uart_ch(UART0_BA, desc_dev->iSerialNumber);
+	uart_puts(UART0_BA, "\n");
+
+	uart_puts(UART0_BA, "NC: ");
+	print_hex_uart_ch(UART0_BA, desc_dev->bNumConfigurations);
 	uart_puts(UART0_BA, "\n");
 }
 
@@ -967,6 +1034,7 @@ static void setup_ohci(void)
 
 void init_ohci()
 {
+
 /*	struct HCCARegion *hccaregion = 0; */
 
 	/* Check alignment. Verified it as 256 bytes. */
@@ -1000,8 +1068,6 @@ void init_ohci()
 
 	setup_ohci();
 
-
-
 	/* Set to USB_OPERATIONAL to start sending SOF. */
 	set_regs_value(HC_CONTROL_REG(USB_OHCI_BA),
 					HCFS_MASK,
@@ -1032,10 +1098,12 @@ void init_ohci()
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)
 				((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
 
+	memcpy(desc_dev_buff, usb_buffer_pool+MPS_8, sizeof(struct desc_dev));
 
-	dump_buff(usb_buffer_pool+MPS_8, 8);
-	dump_buff(usb_buffer_pool+(MPS_8<<1), 8);
-	dump_buff(usb_buffer_pool+((MPS_8<<1) + (MPS_8)), 8);
+	dump_dev_desc((struct desc_dev *)desc_dev_buff);
+
+	/*dump_buff(desc_dev_buff,18);
+	dump_buff(usb_buffer_pool+MPS_8, 18);*/
 
 //	dump_ed_desc(&ed_info.hc_ed[0]);
 

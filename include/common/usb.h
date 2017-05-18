@@ -62,7 +62,6 @@ struct __attribute__((packed)) desc_dev
 	uint8_t bNumConfigurations;
 };
 
-
 #define DESC_DEV_Length_SIZE				(1U)
 #define DESC_DEV_DescriptorType_SIZE		(1U)
 #define DESC_DEV_bcdUSB_SIZE				(2U)
@@ -80,6 +79,7 @@ struct __attribute__((packed)) desc_dev
 
 
 #define DESC_DEV_bLength_OFFSET		(0U)
+
 
 enum USB_TD_max_packet_size {
 	MPS_8 = 8U,

@@ -126,7 +126,17 @@ void print_hex_uart(uint32_t UART_BA,uint32_t num)
 	uart_puts(UART_BA,"\r\n");
 }
 
+void print_hex_uart_short(uint32_t UART_BA, uint16_t num)
+{
+	unsigned int i = 0;
 
+	uart_puts(UART_BA,"0x");
+
+	for(i = 0; i<4; i++) {
+		putc(UART_BA,hexchar[(num & 0xF000) >> 12]);
+		num<<=4;
+	}
+}
 
 void print_hex_uart_ch(uint32_t UART_BA, uint8_t num)
 {

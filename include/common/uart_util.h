@@ -30,6 +30,7 @@ void uart0_interrupt_handler(void);
 
 void print_hex_uart(uint32_t UART_BA,uint32_t num);
 void print_hex_uart_ch(uint32_t UART_BA,uint8_t num);
+void print_hex_uart_short(uint32_t UART_BA, uint16_t num);
 
 //Bit will be set if buffer is empty.
 uint32_t isTxBuffEmpty(uint32_t channel);
