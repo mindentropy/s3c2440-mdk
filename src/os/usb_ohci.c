@@ -21,7 +21,8 @@ struct ed_info ed_info;
 struct td_info td_info;
 uint32_t HcFmInterval = 0;
 
-uint8_t desc_dev_buff[18];
+uint8_t usb_req_header[USB_DESC_SIZE];
+uint8_t desc_dev_buff[sizeof(struct desc_dev)];
 
 /*
 static void usb_delay()
