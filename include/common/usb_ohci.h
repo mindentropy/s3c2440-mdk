@@ -426,6 +426,9 @@ struct td_info {
 #define DATA_TOGGLE(TOGGLE_VAL) \
 	((TOGGLE_VAL) << (DATA_TOGGLE_SHIFT))
 
+#define TOGGLE_DATA(prev_toggle_val) \
+	(((prev_toggle_val) & (~0x3)) ^ (0x1U))
+
 
 #define ERROR_COUNT_MASK		(BIT27|BIT26)
 #define ERROR_COUNT_SHIFT 		(26U)

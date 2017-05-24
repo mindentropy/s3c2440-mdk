@@ -486,7 +486,6 @@ static void set_ed_descriptor(
 				FULL_SPEED
 			);
 
-		/* Set to max pkt size of 8 bytes */
 		set_hc_ed_mps(
 				&(ed_info->hc_ed[0].endpoint_ctrl),
 				FULL_SPEED_MAXIMUM_PACKET_SIZE
@@ -497,8 +496,17 @@ static void set_ed_descriptor(
 	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
 }
 
+/*
+ * Idea of the below function is take in different types of descriptors.
+ * Based on the descriptors the TD chain will be setup for a request.
+ * This is only for setup and enumeration of the USB and NOT for data
+ * transfer.
+ *
+ */
+
 static void set_setup_descriptor(
 				struct td_info *td_info,
+				uint8_t *usb_req_header,
 				uint8_t *usb_buff_pool,
 				enum Request request,
 				uint16_t wValue,
@@ -506,26 +514,28 @@ static void set_setup_descriptor(
 				uint16_t wLength
 			)
 {
-	uint32_t i = 0, idx = 0, max_packets = 0;
+	uint32_t i = 0, idx = 0;
+	uint8_t max_packets = 0;
+	uint8_t data_toggle = 0;
 
 	/* Write Request */
 	writereg8(
-			(usb_buff_pool+USB_REQ_OFFSET),
+			(usb_req_header + USB_REQ_OFFSET),
 			request);
 
 	/* Write Value */
 	writereg16(
-			(usb_buff_pool+USB_VALUE_OFFSET),
+			(usb_req_header + USB_VALUE_OFFSET),
 			wValue);
 
 	/* Write Index */
 	writereg16(
-			(usb_buff_pool+USB_INDEX_OFFSET),
+			(usb_req_header + USB_INDEX_OFFSET),
 			wIndex);
 
 	/* Write Length */
 	writereg16(
-			(usb_buff_pool+USB_LENGTH_OFFSET),
+			(usb_req_header + USB_LENGTH_OFFSET),
 			wLength);
 
 	/* Write RequestType */
@@ -533,7 +543,7 @@ static void set_setup_descriptor(
 		case REQ_SET_ADDRESS:
 
 			writereg8(
-				(usb_buff_pool+USB_REQ_TYPE_OFFSET),
+				(usb_req_header + USB_REQ_TYPE_OFFSET),
 				REQ_TYPE_SET_ADDRESS);
 
 			/*
@@ -595,14 +605,14 @@ static void set_setup_descriptor(
 			break;
 		case REQ_GET_DESCRIPTOR:
 
-			max_packets = 4;
+			max_packets = get_max_packets(wLength,MPS_8) + 1;
 
 			writereg8(
-				(usb_buff_pool+USB_REQ_TYPE_OFFSET),
+				(usb_req_header + USB_REQ_TYPE_OFFSET),
 				REQ_TYPE_GET_DESCRIPTOR
 				);
 
-			/* First TD to send request */
+			/**** Request TD ****/
 			writereg32(
 					&(td_info->hc_gen_td[0].td_control),
 					DP_SETUP
@@ -619,6 +629,8 @@ static void set_setup_descriptor(
 									  */
 				);
 
+			/**** Data TD's ****/
+
 			/*
 			 * Note: The DP_IN and DP_OUT settings are according to the USB1.1 spec
 			 * Pg 165 (181) Figure 8-12.
@@ -627,13 +639,29 @@ static void set_setup_descriptor(
 			 * If we do a control write the status stage should have  DP_IN.
 			 * Failure to do this will cause a STALL error.
 			 */
-			writereg32(
-					&(td_info->hc_gen_td[1].td_control),
-					DP_IN
-					|DATA_TOGGLE(3)
-					|CC(NotAccessed)
-				);
 
+			data_toggle = 3;
+
+			for(i = 1; i<max_packets; i++) {
+				writereg32(
+						&(td_info->hc_gen_td[i].td_control),
+						DP_IN
+						|DATA_TOGGLE(data_toggle)
+						|CC(NotAccessed)
+					);
+				data_toggle = TOGGLE_DATA(data_toggle);
+			}
+
+			/*
+			 * If the final data packet is not modulo 0 of the MPS then buffer is not
+			 * rounded. Set the BUFFER_ROUND option.
+			 */
+			if(mod_power_of_two(wLength,MPS_8) && i > 1) {
+				set_reg_bits(
+							&(td_info->hc_gen_td[i-1].td_control),
+							BUFFER_ROUND);
+			}
+/*
 			writereg32(
 					&(td_info->hc_gen_td[2].td_control),
 					DP_IN
@@ -648,20 +676,37 @@ static void set_setup_descriptor(
 					|DATA_TOGGLE(3)
 					|CC(NotAccessed)
 				);
+*/
 
 /**************** Status packet **********************/
 
 			writereg32(
-					&(td_info->hc_gen_td[4].td_control),
+					&(td_info->hc_gen_td[i].td_control),
 					DP_OUT
 					|DATA_TOGGLE(3)
 					|CC(NotAccessed)
 				);
 
 /*****************************************************/
+			i = 0;
+
+			writereg32(
+					&(td_info->hc_gen_td[i].current_buffer_pointer),
+					(uintptr_t)usb_req_header
+					);
+
+			writereg32(
+					&(td_info->hc_gen_td[i].buffer_end),
+					(uintptr_t) (usb_req_header + MPS_8 - 1)
+					);
+
+			writereg32(&(td_info->hc_gen_td[i].next_td),
+					(uintptr_t)(&(td_info->hc_gen_td[i+1])));
+
+			i++;
 
 			/* Setup the buffer pointers and chain the TDs */
-			for(i = 0; i<max_packets; i++) {
+			for(; i<max_packets; i++) {
 
 				writereg32(
 							&(td_info->hc_gen_td[i].current_buffer_pointer),
@@ -671,7 +716,7 @@ static void set_setup_descriptor(
 				/* buffer_end is the last byte to send. Hence subtract by 1 */
 				writereg32(
 							&(td_info->hc_gen_td[i].buffer_end),
-							(uintptr_t)(usb_buff_pool+ idx + MPS_8 - 1)
+							(uintptr_t)(usb_buff_pool + idx + MPS_8 - 1)
 						);
 
 				writereg32(&(td_info->hc_gen_td[i].next_td),
@@ -715,6 +760,7 @@ static int16_t
 
 	set_setup_descriptor(
 			td_info,
+			usb_req_header,
 			usb_buff_pool,
 			REQ_GET_DESCRIPTOR,
 			frmt_get_desc_wvalue(DESC_DEVICE,0),
@@ -1099,7 +1145,7 @@ void init_ohci()
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)
 				((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
 
-	memcpy(desc_dev_buff, usb_buffer_pool+MPS_8, sizeof(struct desc_dev));
+	memcpy(desc_dev_buff, usb_buffer_pool, sizeof(struct desc_dev));
 
 	dump_dev_desc((struct desc_dev *)desc_dev_buff);
 

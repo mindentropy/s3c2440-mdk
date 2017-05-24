@@ -81,6 +81,9 @@ struct __attribute__((packed)) desc_dev
 
 #define DESC_DEV_bLength_OFFSET		(0U)
 
+#define get_max_packets(length,MPS) \
+	(mod_power_of_two(length,MPS) == 0) ? ((length) >> 3) : (((length) >> 3) + 1)
+
 
 enum USB_TD_max_packet_size {
 	MPS_8 = 8U,
@@ -128,6 +131,9 @@ enum DescriptorType {
 
 #define frmt_get_desc_wvalue(desc_type,desc_index) \
 			((desc_type)<<8) | ((desc_index))
+
+#define get_desc_type_from_wvalue(wvalue) \
+		(((wvalue) & (0xFF00U)) >> 8)
 
 #define set_usb_req_parameters(usb_req_ptr, \
 		RequestType, \

@@ -141,4 +141,7 @@
 #define nbyte_align(offset,byte_align) \
 	((offset + byte_align - 1) & (~(byte_align - 1)))
 
+#define mod_power_of_two(num,power_of_two) \
+		((num) & ((power_of_two) - 1))
+
 #endif
