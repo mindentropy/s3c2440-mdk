@@ -139,17 +139,6 @@ static void init_td(struct td_info *td_info,
 //	print_hex_uart(UART0_BA,(uintptr_t)(td_ll+TD_TOTAL_SIZE));
 }
 
-/*
-static void set_ed_desc(
-			struct HC_ENDPOINT_DESCRIPTOR *ed_desc
-			uint32_t ed_cntrl_mask
-			)
-{
-	writereg32(&(ed_desc->endpoint_ctrl),
-					ed_cntrl_mask);
-}
-*/
-
 static int16_t get_free_ed_index(
 			struct ed_info *ed_info)
 {
@@ -230,6 +219,48 @@ static void set_ed_descriptor(
 	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
 }
 
+static void
+	set_usb_desc_req_buffer(
+		uint8_t *usb_buff_pool,
+		enum Request request,
+		uint16_t wValue,
+		uint16_t wIndex,
+		uint16_t wLength
+	)
+{
+
+	writereg8(
+			(usb_req_header + USB_REQ_OFFSET),
+			request);
+	writereg16(
+			(usb_req_header + USB_VALUE_OFFSET),
+			wValue);
+	writereg16(
+			(usb_req_header + USB_INDEX_OFFSET),
+			wIndex);
+	writereg16(
+			(usb_req_header + USB_LENGTH_OFFSET),
+			wLength);
+
+	switch(request) {
+		case REQ_SET_ADDRESS:
+
+			writereg8(
+				(usb_req_header + USB_REQ_TYPE_OFFSET),
+				REQ_TYPE_SET_ADDRESS);
+			break;
+		case REQ_GET_DESCRIPTOR:
+
+			writereg8(
+				(usb_req_header + USB_REQ_TYPE_OFFSET),
+				REQ_TYPE_GET_DESCRIPTOR
+				);
+			break;
+		default:
+			break;
+	}
+}
+
 /*
  * Idea of the below function is take in different types of descriptors.
  * Based on the descriptors the TD chain will be setup for a request.
@@ -237,8 +268,9 @@ static void set_ed_descriptor(
  * transfer.
  *
  */
-
-static void set_setup_descriptor(
+static
+	void
+	set_setup_descriptor(
 				struct td_info *td_info,
 				uint8_t *usb_req_header,
 				uint8_t *usb_buff_pool,
@@ -246,33 +278,28 @@ static void set_setup_descriptor(
 				uint16_t wValue,
 				uint16_t wIndex,
 				uint16_t wLength
-			)
+		)
 {
 	uint32_t i = 0, idx = 0;
 	uint8_t max_packets = 0;
 	uint8_t data_toggle = 0;
 
-	/* Write Request */
+
 	writereg8(
 			(usb_req_header + USB_REQ_OFFSET),
 			request);
-
-	/* Write Value */
 	writereg16(
 			(usb_req_header + USB_VALUE_OFFSET),
 			wValue);
-
-	/* Write Index */
 	writereg16(
 			(usb_req_header + USB_INDEX_OFFSET),
 			wIndex);
-
-	/* Write Length */
 	writereg16(
 			(usb_req_header + USB_LENGTH_OFFSET),
 			wLength);
 
-/**** Setup Request TD ****/
+
+/**** SETUP Request TD ****/
 	writereg32(
 			&(td_info->hc_gen_td[0].td_control),
 			DP_SETUP
@@ -653,15 +680,6 @@ static void setup_ohci(void)
 		nbyte_align(((uintptr_t) hcca_region),256));
 
 	hccaregion_reg = (struct HCCARegion *)readreg32(HC_HCCA_REG(USB_OHCI_BA));
-/*
-	hccaregion = (struct HCCARegion *)
-						nbyte_align(((uintptr_t)hcca_region),256);
-	
-	print_hex_uart(UART0_BA,
-						(uintptr_t)hcca_region);
-	print_hex_uart(UART0_BA,
-		nbyte_align(((uintptr_t) hcca_region),256));
-*/
 
 	/*
      * Write default value to lsthreshold.
@@ -718,14 +736,6 @@ static void setup_ohci(void)
 
 void init_ohci()
 {
-
-/*	struct HCCARegion *hccaregion = 0; */
-
-	/* Check alignment. Verified it as 256 bytes. */
-/*
-	writereg32(HC_HCCA_REG(USB_OHCI_BA),0xFFFFFFFF);
-	print_hex_uart(UART0_BA,readreg32(HC_HCCA_REG(USB_OHCI_BA)));
-*/
 
 	init_usb();
 
