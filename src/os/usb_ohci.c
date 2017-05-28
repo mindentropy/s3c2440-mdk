@@ -210,7 +210,7 @@ static void set_ed_descriptor(
 	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
 }
 
-static void
+/*static void
 	set_usb_desc_req_buffer(
 		uint8_t *usb_req_header,
 		enum Request request,
@@ -236,7 +236,7 @@ static void
 	writereg16(
 			(usb_req_header + USB_LENGTH_OFFSET),
 			wLength);
-}
+}*/
 
 /*
  * Idea of the below function is take in different types of descriptors.
@@ -250,39 +250,17 @@ static
 	set_setup_descriptor(
 				struct td_info *td_info,
 				uint8_t *usb_req_header,
-				uint8_t *usb_buff_pool,
+				uint8_t *usb_buff_pool,/*
+				uint8_t requestType, */
 				enum Request request,
-				uint8_t requestType,
-				uint16_t wValue,
-				uint16_t wIndex,
+				/*uint16_t wValue,
+				uint16_t wIndex,*/
 				uint16_t wLength
 		)
 {
 	uint32_t i = 0, idx = 0;
 	uint8_t max_packets = 0;
 	uint8_t data_toggle = 0;
-
-
-	set_usb_desc_req_buffer(
-					usb_req_header,
-					request,
-					requestType,
-					wValue,
-					wIndex,
-					wLength);
-
-/* 	writereg8(
-			(usb_req_header + USB_REQ_OFFSET),
-			request);
-	writereg16(
-			(usb_req_header + USB_VALUE_OFFSET),
-			wValue);
-	writereg16(
-			(usb_req_header + USB_INDEX_OFFSET),
-			wIndex);
-	writereg16(
-			(usb_req_header + USB_LENGTH_OFFSET),
-			wLength);*/
 
 
 /**** SETUP Request TD ****/
@@ -488,14 +466,23 @@ static int16_t
 						0U
 						);*/
 
+	set_usb_desc_req_buff(
+				usb_req_header,
+				REQ_TYPE_GET_DESCRIPTOR,
+				REQ_GET_DESCRIPTOR,
+				frmt_get_desc_wvalue(DESC_DEVICE,0),
+				0U,
+				sizeof(struct desc_dev)
+			);
+
 	set_setup_descriptor(
 			td_info,
 			usb_req_header,
-			usb_buff_pool,
+			usb_buff_pool,/*
+			REQ_TYPE_GET_DESCRIPTOR,*/
 			REQ_GET_DESCRIPTOR,
-			REQ_TYPE_GET_DESCRIPTOR,
-			frmt_get_desc_wvalue(DESC_DEVICE,0),
-			0U,
+			/*frmt_get_desc_wvalue(DESC_DEVICE,0),
+			0U,*/
 			sizeof(struct desc_dev)
 		);
 
