@@ -109,7 +109,8 @@ static void init_td(struct td_info *td_info,
 //	print_hex_uart(UART0_BA,(uintptr_t)td_info->hc_gen_td);
 
 
-	for(i = 0; ; i++,td_info->size++) {
+	for(i = 0; ; i++,td_info->size++)
+	{
 		//If the index + 1 i.e. sizeof the structure crosses the pool size.
 		if(((uintptr_t)((td_info->hc_gen_td) + (i+1)))  > 
 					((uintptr_t)(td_ll+TD_TOTAL_SIZE)))
@@ -250,11 +251,8 @@ static
 	set_setup_descriptor(
 				struct td_info *td_info,
 				uint8_t *usb_req_header,
-				uint8_t *usb_buff_pool,/*
-				uint8_t requestType, */
+				uint8_t *usb_buff_pool,
 				enum Request request,
-				/*uint16_t wValue,
-				uint16_t wIndex,*/
 				uint16_t wLength
 		)
 {
@@ -293,150 +291,72 @@ static
 	writereg32(&(td_info->hc_gen_td[0].next_td),
 			(uintptr_t)(&(td_info->hc_gen_td[0+1])));
 
-	/* Write RequestType */
-	switch(request) {
-		case REQ_SET_ADDRESS:
-
-			writereg8(
-				(usb_req_header + USB_REQ_TYPE_OFFSET),
-				REQ_TYPE_SET_ADDRESS);
-
-			/*
-			 * Initialize 2 td's, the first td to send the request,
-			 * the second td being the 'terminator' td with
-			 * all 0's
-			 */
-			/*
-			 * Disabled Buffer rounding as the MPS is initially
-			 * set to 8 bytes. This is a safe value as we would
-			 * not have queried the supported MPS.
-			 */
-			writereg32(
-					&(td_info->hc_gen_td[0].td_control),
-					DP_SETUP
-					|NO_DELAY_INTERRUPT
-					|DATA_TOGGLE(2) /*
-											 * See pg24(39) of spec.
-											 * DATA0 data PID for setup packet,
-											 * MSB of dataToggle = 1 for setup
-											 * and LSB of dataToggle = 0 for setup.
-											 */
-					|CC(NotAccessed) /*
-							                  * See pg35(50) of spec.
-							                  *
-											  */
-					);
-
-			writereg32(
-					&(td_info->hc_gen_td[1].td_control),
-					DP_IN
-					/*|NO_DELAY_INTERRUPT*/ /* No Delay interrupt for status TD */
-					|DATA_TOGGLE(3) /*
-									 * Status packet should have MSB of dataToggle = 1 and
-					                 * LSB of dataToggle = 1. See pg24(39) of the spec
-									 */
-					|CC(NotAccessed)
-					);
-
-			/*
-			 * Set the current buffer pointer for td0 to get device
-			 * descriptor
-			 */
-			writereg32(
-						&(td_info->hc_gen_td[0].current_buffer_pointer),
-						(uintptr_t)usb_buff_pool
-					);
-
-			/* buffer_end is the last byte to send. Hence subtract by 1 */
-			writereg32(
-						&(td_info->hc_gen_td[0].buffer_end),
-						(uintptr_t)(usb_buff_pool + MPS_8 - 1)
-					);
-
-			/* Set the td0 next_td to td1 */
-			writereg32(&(td_info->hc_gen_td[0].next_td),
-						(uintptr_t)(&(td_info->hc_gen_td[1])));
-
-			break;
-		case REQ_GET_DESCRIPTOR:
-
-			max_packets = get_max_packets(wLength,MPS_8) + 1;
-
-/*			writereg8(
-				(usb_req_header + USB_REQ_TYPE_OFFSET),
-				REQ_TYPE_GET_DESCRIPTOR
-				);*/
+	max_packets = get_max_packets(wLength,MPS_8) + 1;
 
 
-			/**** Data TD's ****/
+	/**** Data TD's ****/
 
-			/*
-			 * Note: The DP_IN and DP_OUT settings are according to the USB1.1 spec
-			 * Pg 165 (181) Figure 8-12.
-			 *
-			 * Since we do a "control read" the status stage should have DP_OUT.
-			 * If we do a control write the status stage should have  DP_IN.
-			 * Failure to do this will cause a STALL error.
-			 */
+	/*
+	 * Note: The DP_IN and DP_OUT settings are according to the USB1.1 spec
+	 * Pg 165 (181) Figure 8-12.
+	 *
+	 * Since we do a "control read" the status stage should have DP_OUT.
+	 * If we do a control write the status stage should have  DP_IN.
+	 * Failure to do this will cause a STALL error.
+	 */
 
-			data_toggle = 3;
+	data_toggle = 3;
 
-			for(i = 1; i<max_packets; i++) {
-				writereg32(
-						&(td_info->hc_gen_td[i].td_control),
-						DP_IN
-						|DATA_TOGGLE(data_toggle)
-						|CC(NotAccessed)
-					);
-				data_toggle = TOGGLE_DATA(data_toggle);
-			}
-
-			/*
-			 * If the final data packet is not modulo 0 of the MPS then buffer is not
-			 * rounded. Set the BUFFER_ROUND option.
-			 */
-			if(mod_power_of_two(wLength,MPS_8) && (i > 1)) {
-				set_reg_bits(
-							&(td_info->hc_gen_td[i-1].td_control),
-							BUFFER_ROUND);
-			}
-
-/**************** Set Status packet **********************/
-
-			writereg32(
-					&(td_info->hc_gen_td[i].td_control),
-					DP_OUT
-					|DATA_TOGGLE(3)
-					|CC(NotAccessed)
+	for(i = 1; i<max_packets; i++) {
+		writereg32(
+				&(td_info->hc_gen_td[i].td_control),
+				DP_IN
+				|DATA_TOGGLE(data_toggle)
+				|CC(NotAccessed)
 			);
-
-/*****************************************************/
-
-			/* Setup the buffer pointers and chain the TDs */
-			for(i = 1; i<max_packets; i++) {
-
-				writereg32(
-							&(td_info->hc_gen_td[i].current_buffer_pointer),
-							(uintptr_t)usb_buff_pool + idx
-						);
-
-				/* buffer_end is the last byte to send. Hence subtract by 1 */
-				writereg32(
-							&(td_info->hc_gen_td[i].buffer_end),
-							(uintptr_t)(usb_buff_pool + idx + MPS_8 - 1)
-						);
-
-				writereg32(&(td_info->hc_gen_td[i].next_td),
-						(uintptr_t)(&(td_info->hc_gen_td[i+1])));
-
-				idx = idx + MPS_8;
-			}
-
-			break;
-		default:
-			break;
+		data_toggle = TOGGLE_DATA(data_toggle);
 	}
 
+	/*
+	 * If the final data packet is not modulo 0 of the MPS then buffer is not
+	 * rounded. Set the BUFFER_ROUND option.
+	 */
+	if(mod_power_of_two(wLength,MPS_8) && (i > 1)) {
+		set_reg_bits(
+					&(td_info->hc_gen_td[i-1].td_control),
+					BUFFER_ROUND);
+	}
+
+/******** Set Status packet **********************/
+
+	writereg32(
+			&(td_info->hc_gen_td[i].td_control),
+			DP_OUT
+			|DATA_TOGGLE(3)
+			|CC(NotAccessed)
+	);
+
+/************************************************/
+
+	/* Setup the buffer pointers and chain the TDs */
+	for(i = 1; i<max_packets; i++) {
+
+		writereg32(
+					&(td_info->hc_gen_td[i].current_buffer_pointer),
+					(uintptr_t)usb_buff_pool + idx
+				);
+
+		/* buffer_end is the last byte to send. Hence subtract by 1 */
+		writereg32(
+					&(td_info->hc_gen_td[i].buffer_end),
+					(uintptr_t)(usb_buff_pool + idx + MPS_8 - 1)
+				);
+
+		writereg32(&(td_info->hc_gen_td[i].next_td),
+				(uintptr_t)(&(td_info->hc_gen_td[i+1])));
+
+		idx = idx + MPS_8;
+	}
 }
 
 static int16_t

@@ -400,6 +400,8 @@ struct __attribute__((packed)) GEN_TRANSFER_DESCRIPTOR
 
 struct td_info {
 	struct GEN_TRANSFER_DESCRIPTOR *hc_gen_td;
+	struct GEN_TRANSFER_DESCRIPTOR *free_td_head;
+	struct GEN_TRANSFER_DESCRIPTOR *used_td_head;
 	uint32_t size;
 };
 
