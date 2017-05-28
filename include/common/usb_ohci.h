@@ -509,11 +509,5 @@ struct __attribute__((packed)) PACKET_STATUS_WORD
 #define FULL_SPEED_MAXIMUM_PACKET_SIZE 0x40U
 
 void init_ohci();
-void memcpy(
-			uint8_t *dest,
-			uint8_t *src,
-			unsigned int len
-			);
-
 
 #endif

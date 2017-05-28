@@ -2,6 +2,7 @@
 #include "uart_util.h"
 #include "usb.h"
 #include "usb_dbg_dump.h"
+#include "string.h"
 
 /* 
  * hcca_region should be 256 byte boundary attached. 
@@ -48,16 +49,6 @@ static void usb_short_delay()
 	}
 }
 */
-
-void memcpy(uint8_t *dest,
-				uint8_t *src,
-				unsigned int len
-				)
-{
-	while(len--) {
-		*dest++ = *src++;
-	}
-}
 
 
 static void init_ed(struct ed_info *edp_info,
@@ -221,14 +212,18 @@ static void set_ed_descriptor(
 
 static void
 	set_usb_desc_req_buffer(
-		uint8_t *usb_buff_pool,
+		uint8_t *usb_req_header,
 		enum Request request,
+		uint8_t requestType,
 		uint16_t wValue,
 		uint16_t wIndex,
 		uint16_t wLength
 	)
 {
 
+	writereg8(
+			(usb_req_header + USB_REQ_TYPE_OFFSET),
+			requestType);
 	writereg8(
 			(usb_req_header + USB_REQ_OFFSET),
 			request);
@@ -241,24 +236,6 @@ static void
 	writereg16(
 			(usb_req_header + USB_LENGTH_OFFSET),
 			wLength);
-
-	switch(request) {
-		case REQ_SET_ADDRESS:
-
-			writereg8(
-				(usb_req_header + USB_REQ_TYPE_OFFSET),
-				REQ_TYPE_SET_ADDRESS);
-			break;
-		case REQ_GET_DESCRIPTOR:
-
-			writereg8(
-				(usb_req_header + USB_REQ_TYPE_OFFSET),
-				REQ_TYPE_GET_DESCRIPTOR
-				);
-			break;
-		default:
-			break;
-	}
 }
 
 /*
@@ -275,6 +252,7 @@ static
 				uint8_t *usb_req_header,
 				uint8_t *usb_buff_pool,
 				enum Request request,
+				uint8_t requestType,
 				uint16_t wValue,
 				uint16_t wIndex,
 				uint16_t wLength
@@ -285,7 +263,15 @@ static
 	uint8_t data_toggle = 0;
 
 
-	writereg8(
+	set_usb_desc_req_buffer(
+					usb_req_header,
+					request,
+					requestType,
+					wValue,
+					wIndex,
+					wLength);
+
+/* 	writereg8(
 			(usb_req_header + USB_REQ_OFFSET),
 			request);
 	writereg16(
@@ -296,7 +282,7 @@ static
 			wIndex);
 	writereg16(
 			(usb_req_header + USB_LENGTH_OFFSET),
-			wLength);
+			wLength);*/
 
 
 /**** SETUP Request TD ****/
@@ -331,7 +317,6 @@ static
 
 	/* Write RequestType */
 	switch(request) {
-
 		case REQ_SET_ADDRESS:
 
 			writereg8(
@@ -399,10 +384,10 @@ static
 
 			max_packets = get_max_packets(wLength,MPS_8) + 1;
 
-			writereg8(
+/*			writereg8(
 				(usb_req_header + USB_REQ_TYPE_OFFSET),
 				REQ_TYPE_GET_DESCRIPTOR
-				);
+				);*/
 
 
 			/**** Data TD's ****/
@@ -508,6 +493,7 @@ static int16_t
 			usb_req_header,
 			usb_buff_pool,
 			REQ_GET_DESCRIPTOR,
+			REQ_TYPE_GET_DESCRIPTOR,
 			frmt_get_desc_wvalue(DESC_DEVICE,0),
 			0U,
 			sizeof(struct desc_dev)
