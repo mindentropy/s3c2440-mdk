@@ -108,6 +108,7 @@ static void init_td(struct td_info *td_info,
 //	print_hex_uart(UART0_BA,(uintptr_t)td_ll);
 //	print_hex_uart(UART0_BA,(uintptr_t)td_info->hc_gen_td);
 
+	td_info->free_td_head = td_info->hc_gen_td;
 
 	for(i = 0; ; i++,td_info->size++)
 	{
@@ -120,15 +121,62 @@ static void init_td(struct td_info *td_info,
 
 		td_info->hc_gen_td[i].td_control = 0;
 		td_info->hc_gen_td[i].current_buffer_pointer = 0;
-		td_info->hc_gen_td[i].next_td = 0;
+		td_info->hc_gen_td[i].next_td = (uintptr_t)((td_info->hc_gen_td) + (i + 1));
 		td_info->hc_gen_td[i].buffer_end = 0;
 
 		//print_hex_uart(UART0_BA,(uintptr_t)(&(td_info->hc_gen_td[i])));
 	}
 
+	/*
+	 * Set the final TD's next_td to 0. hc_gen_td[i-1] guarantees that the
+	 * TD is a full formed TD.
+	 */
+	td_info->hc_gen_td[i-1].next_td = 0;
+
 //	print_hex_uart(UART0_BA,(uintptr_t)((td_info->hc_gen_td)+i));
 //	print_hex_uart(UART0_BA,(uintptr_t)((td_info->hc_gen_td)+i-1));
 //	print_hex_uart(UART0_BA,(uintptr_t)(td_ll+TD_TOTAL_SIZE));
+}
+
+// Return pointer to the allocated transfer descriptor
+static struct GEN_TRANSFER_DESCRIPTOR *
+			get_free_tds(struct td_info *td_info,
+			uint32_t len)
+{
+	struct GEN_TRANSFER_DESCRIPTOR *td = td_info->free_td_head;
+	struct GEN_TRANSFER_DESCRIPTOR *alloc_td;
+
+	if(len > (td_info->free_td_size))
+		return 0;
+
+	//Decrease the size to signal allocation.
+	td_info->free_td_size -= len;
+
+	while(len--) {
+		td = (struct GEN_TRANSFER_DESCRIPTOR *)td->next_td;
+	}
+
+	alloc_td = td_info->free_td_head;
+	td_info->free_td_head = td;
+
+	return alloc_td;
+}
+
+static void reclaim_free_tds(
+		struct td_info *td_info,
+		struct GEN_TRANSFER_DESCRIPTOR *td
+		)
+{
+	//Go to the final TD.
+	while(td->next_td != 0) {
+		td = (struct GEN_TRANSFER_DESCRIPTOR *)td->next_td;
+	}
+
+	//Link the final TD to the free_td_head.
+	td->next_td = (uintptr_t)(td_info->free_td_head);
+
+	//Move the free_td_head to the current start of the td.
+	td_info->free_td_head = td;
 }
 
 static int16_t get_free_ed_index(
@@ -211,34 +259,6 @@ static void set_ed_descriptor(
 	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
 }
 
-/*static void
-	set_usb_desc_req_buffer(
-		uint8_t *usb_req_header,
-		enum Request request,
-		uint8_t requestType,
-		uint16_t wValue,
-		uint16_t wIndex,
-		uint16_t wLength
-	)
-{
-
-	writereg8(
-			(usb_req_header + USB_REQ_TYPE_OFFSET),
-			requestType);
-	writereg8(
-			(usb_req_header + USB_REQ_OFFSET),
-			request);
-	writereg16(
-			(usb_req_header + USB_VALUE_OFFSET),
-			wValue);
-	writereg16(
-			(usb_req_header + USB_INDEX_OFFSET),
-			wIndex);
-	writereg16(
-			(usb_req_header + USB_LENGTH_OFFSET),
-			wLength);
-}*/
-
 /*
  * Idea of the below function is take in different types of descriptors.
  * Based on the descriptors the TD chain will be setup for a request.
@@ -291,7 +311,7 @@ static
 	writereg32(&(td_info->hc_gen_td[0].next_td),
 			(uintptr_t)(&(td_info->hc_gen_td[0+1])));
 
-	max_packets = get_max_packets(wLength,MPS_8) + 1;
+	max_packets = get_max_packets(wLength,MPS_8) + 1; //+1 for status TD.
 
 
 	/**** Data TD's ****/
@@ -336,6 +356,7 @@ static
 			|CC(NotAccessed)
 	);
 
+	td_info->hc_gen_td[i].next_td = 0; //Set the status packet's next_td to 0.
 /************************************************/
 
 	/* Setup the buffer pointers and chain the TDs */
@@ -406,7 +427,12 @@ static int16_t
 			sizeof(struct desc_dev)
 		);
 
-	/* Setup the head and tail pointers of ED to point to the TD's. */
+	/*
+	 * Setup the head and tail pointers of ED to point to the TD's.
+	 * Make sure the final TD's next_td is pointing to 0 if the TailP
+	 * is also pointing to 0.
+	 */
+
 	writereg32(&(ed_info->hc_ed[0].HeadP),
 						(uintptr_t)(&(td_info->hc_gen_td[0])));
 

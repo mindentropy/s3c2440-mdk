@@ -3,9 +3,14 @@
 
 #include "common.h"
 
-void memcpy(uint8_t *dest,
-				uint8_t *src,
-				unsigned int len
+void * memcpy(void *dest,
+				void *src,
+				uint32_t len
 				);
+
+void * memset(void *buff,
+			uint8_t c,
+			uint32_t n
+			);
 
 #endif 

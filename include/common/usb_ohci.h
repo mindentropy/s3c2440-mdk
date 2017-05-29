@@ -401,8 +401,9 @@ struct __attribute__((packed)) GEN_TRANSFER_DESCRIPTOR
 struct td_info {
 	struct GEN_TRANSFER_DESCRIPTOR *hc_gen_td;
 	struct GEN_TRANSFER_DESCRIPTOR *free_td_head;
-	struct GEN_TRANSFER_DESCRIPTOR *used_td_head;
 	uint32_t size;
+	uint32_t free_td_size;
+	uint32_t used_td_size;
 };
 
 #define BUFFER_ROUNDING_MASK 	BIT18
