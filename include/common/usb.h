@@ -81,7 +81,7 @@ struct __attribute__((packed)) desc_dev
 
 #define DESC_DEV_bLength_OFFSET		(0U)
 
-#define get_max_packets(length,MPS) \
+#define get_max_data_packets(length,MPS) \
 	(mod_power_of_two(length,MPS) == 0) ? ((length) >> 3) : (((length) >> 3) + 1)
 
 

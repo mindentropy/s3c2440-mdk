@@ -313,25 +313,22 @@ static void set_ed_descriptor(
  * transfer.
  *
  */
-static
-	void
+static void
 	set_setup_descriptor(
-				struct td_info *td_info,
-				uint8_t *usb_req_header,
-				uint8_t *usb_buff_pool,
-				enum Request request,
-				uint16_t wLength
-		)
+		struct td_info *td_info,
+		uint8_t *usb_req_header,
+		uint8_t *usb_buff_pool,
+		enum Request request,
+		uint16_t wLength
+	)
 {
-	uint32_t i = 0, idx = 0;
-	uint8_t max_packets = 0;
+	uint32_t idx = 0;
 	uint8_t data_toggle = 0;
 
-	struct GEN_TRANSFER_DESCRIPTOR *td = 0;
-//	struct GEN_TRANSFER_DESCRIPTOR *trav_td = 0;
+	struct GEN_TRANSFER_DESCRIPTOR *td = 0,*prev_td = 0;
+	uint8_t max_data_packets = get_max_data_packets(wLength,MPS_8);
 
-	td = alloc_td(td_info,5);
-//	trav_td = td;
+	td = alloc_td(td_info,max_data_packets + 2); //+2 for REQUEST and STATUS packets.
 
 /**** SETUP Request TD ****/
 	writereg32(
@@ -350,8 +347,7 @@ static
 							  */
 		);
 
-	writereg32(
-			&(td->current_buffer_pointer),
+	writereg32(&(td->current_buffer_pointer),
 			(uintptr_t)usb_req_header
 			);
 
@@ -364,8 +360,7 @@ static
 	writereg32(&(td->next_td),
 			(uintptr_t)(td->next_td));
 
-	max_packets = get_max_packets(wLength,MPS_8) + 1; //+1 for status TD.
-	td = td->next_td;
+	td = (struct GEN_TRANSFER_DESCRIPTOR *) (td->next_td);
 
 	/**** Data TD's ****/
 
@@ -380,14 +375,29 @@ static
 
 	data_toggle = 3;
 
-	for(i = 1; i<max_packets; i++) {
+	while(max_data_packets--) {
 		writereg32(
 				&(td->td_control),
 				DP_IN
 				|DATA_TOGGLE(data_toggle)
 				|CC(NotAccessed)
 			);
+
+		writereg32(
+					&(td->current_buffer_pointer),
+					(uintptr_t)(usb_buff_pool + idx)
+				);
+
+		/* buffer_end is the last byte to send. Hence subtract by 1 */
+		writereg32(
+					&(td->buffer_end),
+					(uintptr_t)(usb_buff_pool + idx + MPS_8 - 1)
+				);
+
 		data_toggle = TOGGLE_DATA(data_toggle);
+
+		idx += MPS_8;
+		prev_td = td;
 		td = (struct GEN_TRANSFER_DESCRIPTOR *)(td->next_td);
 	}
 
@@ -395,42 +405,26 @@ static
 	 * If the final data packet is not modulo 0 of the MPS then buffer is not
 	 * rounded. Set the BUFFER_ROUND option.
 	 */
-	if(mod_power_of_two(wLength,MPS_8) && (i > 1)) {
+	//TODO: Verify if removal of i>1 has side effects.
+	//prev_td != 0 is to make sure that the conditional is entered only if there
+	//is atleast 1 data packet.
+	if(mod_power_of_two(wLength,MPS_8) && (prev_td != 0)/*&& (i > 1)*/) {
 		set_reg_bits(
-					&(td_info->hc_gen_td[i-1].td_control),
+					&(prev_td->td_control),
 					BUFFER_ROUND);
 	}
 
 /******** Set Status packet **********************/
 	writereg32(
-			&(td_info->hc_gen_td[i].td_control),
+			&(td->td_control),
 			DP_OUT
 			|DATA_TOGGLE(3)
 			|CC(NotAccessed)
 	);
 
-	td_info->hc_gen_td[i].next_td = 0; //Set the status packet's next_td to 0.
+	writereg32(&(td->next_td),0); //Set the status packet's next_td to 0.
 /************************************************/
 
-	/* Setup the buffer pointers and chain the TDs */
-	for(i = 1; i<max_packets; i++) {
-
-		writereg32(
-					&(td_info->hc_gen_td[i].current_buffer_pointer),
-					(uintptr_t)usb_buff_pool + idx
-				);
-
-		/* buffer_end is the last byte to send. Hence subtract by 1 */
-		writereg32(
-					&(td_info->hc_gen_td[i].buffer_end),
-					(uintptr_t)(usb_buff_pool + idx + MPS_8 - 1)
-				);
-
-		writereg32(&(td_info->hc_gen_td[i].next_td),
-				(uintptr_t)(&(td_info->hc_gen_td[i+1])));
-
-		idx = idx + MPS_8;
-	}
 }
 
 static int16_t
