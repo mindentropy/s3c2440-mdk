@@ -124,6 +124,7 @@ static void init_td(struct td_info *td_info,
 		td_info->hc_gen_td[i].next_td = (uintptr_t)((td_info->hc_gen_td) + (i + 1));
 		td_info->hc_gen_td[i].buffer_end = 0;
 
+		//print_hex_uart(UART0_BA,(uintptr_t)((td_info->hc_gen_td)+i));
 		//print_hex_uart(UART0_BA,(uintptr_t)(&(td_info->hc_gen_td[i])));
 	}
 
@@ -132,6 +133,8 @@ static void init_td(struct td_info *td_info,
 	 * TD is a full formed TD.
 	 */
 	td_info->hc_gen_td[i-1].next_td = 0;
+	td_info->free_td_size = td_info->size; //Initialize the free_td_size.
+
 
 //	print_hex_uart(UART0_BA,(uintptr_t)((td_info->hc_gen_td)+i));
 //	print_hex_uart(UART0_BA,(uintptr_t)((td_info->hc_gen_td)+i-1));
@@ -139,12 +142,29 @@ static void init_td(struct td_info *td_info,
 }
 
 // Return pointer to the allocated transfer descriptor
+/*
+ * Procedure:
+ * ---------
+ * 0) Set the free_td_head to a td.
+ * 1) Verify if the free TD length provided is greater than the available
+ *    free TDs present.
+ * 2) Decrease the free_td_size length.
+ * 3) Traverse from the head to the requested length.
+ * 4) After we traverse the requested length, save the free_td_head
+ *    to a temporary TD (here temp_td).
+ * 5) Point the free_td_head to the start of TD which was just traversed.
+ * 6) Return the free_td_head saved in the temporary TD which here is temp_td.
+ */
 static struct GEN_TRANSFER_DESCRIPTOR *
-			get_free_tds(struct td_info *td_info,
-			uint32_t len)
+			alloc_td
+			(
+				struct td_info *td_info,
+				uint32_t len
+			)
 {
 	struct GEN_TRANSFER_DESCRIPTOR *td = td_info->free_td_head;
-	struct GEN_TRANSFER_DESCRIPTOR *alloc_td;
+	struct GEN_TRANSFER_DESCRIPTOR *temp_td;
+
 
 	if(len > (td_info->free_td_size))
 		return 0;
@@ -153,30 +173,57 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	td_info->free_td_size -= len;
 
 	while(len--) {
-		td = (struct GEN_TRANSFER_DESCRIPTOR *)td->next_td;
+		temp_td = td;
+		td = (struct GEN_TRANSFER_DESCRIPTOR *)(td->next_td);
 	}
 
-	alloc_td = td_info->free_td_head;
+	temp_td->next_td = 0; //Terminate the final TD.
+
+	temp_td = td_info->free_td_head;
 	td_info->free_td_head = td;
 
-	return alloc_td;
+	return temp_td;
 }
 
-static void reclaim_free_tds(
+/*
+ * To reclaim unused TDs a TD list with termination is provided.
+ *
+ * Procedure:
+ * ---------
+ * 0) Save the TD to a temporary td.
+ * 1) Traverse the list until we find the terminator which can be the next_td pointing to 0
+ *    or some other reserved termination address. I have selected 0.
+ * 2) Point the last TD next_td to the free_td_head.
+ * 3) Point the free_td_head to the start of the TD sent.
+ *
+ */
+static void reclaim_unused_td(
 		struct td_info *td_info,
 		struct GEN_TRANSFER_DESCRIPTOR *td
 		)
 {
+	struct GEN_TRANSFER_DESCRIPTOR *tmp_td = td; //Save the TD.
+	uint32_t len = 0; //Used to track the size of reclamation.
+
+	if(td != 0) {
+		len++; //If the first TD is present then increment the length.
+	} else {
+		return;
+	}
+
 	//Go to the final TD.
 	while(td->next_td != 0) {
-		td = (struct GEN_TRANSFER_DESCRIPTOR *)td->next_td;
+		td = (struct GEN_TRANSFER_DESCRIPTOR *)(td->next_td);
+		len++;
 	}
 
 	//Link the final TD to the free_td_head.
 	td->next_td = (uintptr_t)(td_info->free_td_head);
 
 	//Move the free_td_head to the current start of the td.
-	td_info->free_td_head = td;
+	td_info->free_td_head = tmp_td;
+
+	td_info->free_td_size += len; //Increment the free_td_size
 }
 
 static int16_t get_free_ed_index(
@@ -280,10 +327,15 @@ static
 	uint8_t max_packets = 0;
 	uint8_t data_toggle = 0;
 
+	struct GEN_TRANSFER_DESCRIPTOR *td = 0;
+//	struct GEN_TRANSFER_DESCRIPTOR *trav_td = 0;
+
+	td = alloc_td(td_info,5);
+//	trav_td = td;
 
 /**** SETUP Request TD ****/
 	writereg32(
-			&(td_info->hc_gen_td[0].td_control),
+			&(td->td_control),
 			DP_SETUP
 			|NO_DELAY_INTERRUPT
 			|DATA_TOGGLE(2)/*
@@ -299,20 +351,21 @@ static
 		);
 
 	writereg32(
-			&(td_info->hc_gen_td[0].current_buffer_pointer),
+			&(td->current_buffer_pointer),
 			(uintptr_t)usb_req_header
 			);
 
 	writereg32(
-			&(td_info->hc_gen_td[0].buffer_end),
+			&(td->buffer_end),
 			(uintptr_t) (usb_req_header + MPS_8 - 1)
 			);
 
-	writereg32(&(td_info->hc_gen_td[0].next_td),
-			(uintptr_t)(&(td_info->hc_gen_td[0+1])));
+	//TODO: Can be skipped as we get the list chained.
+	writereg32(&(td->next_td),
+			(uintptr_t)(td->next_td));
 
 	max_packets = get_max_packets(wLength,MPS_8) + 1; //+1 for status TD.
-
+	td = td->next_td;
 
 	/**** Data TD's ****/
 
@@ -329,12 +382,13 @@ static
 
 	for(i = 1; i<max_packets; i++) {
 		writereg32(
-				&(td_info->hc_gen_td[i].td_control),
+				&(td->td_control),
 				DP_IN
 				|DATA_TOGGLE(data_toggle)
 				|CC(NotAccessed)
 			);
 		data_toggle = TOGGLE_DATA(data_toggle);
+		td = (struct GEN_TRANSFER_DESCRIPTOR *)(td->next_td);
 	}
 
 	/*
@@ -348,7 +402,6 @@ static
 	}
 
 /******** Set Status packet **********************/
-
 	writereg32(
 			&(td_info->hc_gen_td[i].td_control),
 			DP_OUT
