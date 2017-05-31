@@ -65,10 +65,8 @@ static void init_ed(struct ed_info *edp_info,
 							HC_ED_ALIGNMENT
 							);
 
-
 //	print_hex_uart(UART0_BA,(uintptr_t)ed_ll);
 //	print_hex_uart(UART0_BA,(uintptr_t)edp_info->hc_ed);
-
 
 	for(i = 0; ; i++,edp_info->size++) {
 		//If the index + 1 i.e. sizeof the structure crosses the pool size.
@@ -81,7 +79,6 @@ static void init_ed(struct ed_info *edp_info,
 		edp_info->hc_ed[i].HeadP = 0;
 		edp_info->hc_ed[i].NextED = 0;
 	}
-
 
 //	print_hex_uart(UART0_BA,(uintptr_t)(ed_ll+ED_TOTAL_SIZE));
 //	print_hex_uart(UART0_BA,(uintptr_t)(edp_info->hc_ed+i));
@@ -318,7 +315,6 @@ static void
 		struct td_info *td_info,
 		uint8_t *usb_req_header,
 		uint8_t *usb_buff_pool,
-		enum Request request,
 		uint16_t wLength
 	)
 {
@@ -361,6 +357,8 @@ static void
 			(uintptr_t)(td->next_td));
 
 	td = (struct GEN_TRANSFER_DESCRIPTOR *) (td->next_td);
+
+/**********************/
 
 	/**** Data TD's ****/
 
@@ -466,11 +464,7 @@ static int16_t
 	set_setup_descriptor(
 			td_info,
 			usb_req_header,
-			usb_buff_pool,/*
-			REQ_TYPE_GET_DESCRIPTOR,*/
-			REQ_GET_DESCRIPTOR,
-			/*frmt_get_desc_wvalue(DESC_DEVICE,0),
-			0U,*/
+			usb_buff_pool,
 			sizeof(struct desc_dev)
 		);
 
