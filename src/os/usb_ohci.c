@@ -101,7 +101,6 @@ static void init_td(struct td_info *td_info,
 								HC_GEN_TD_ALIGNMENT
 								);
 
-
 //	print_hex_uart(UART0_BA,(uintptr_t)td_ll);
 //	print_hex_uart(UART0_BA,(uintptr_t)td_info->hc_gen_td);
 
@@ -241,7 +240,7 @@ static int16_t get_free_ed_index(
 		}
 
 		if(idx == (ed_info->size)) {
-			/* We have reached the end of the ED and there is no more EDs.*/
+			/* We have reached the end of the ED and there are no more EDs.*/
 			return -1;
 		}
 
@@ -263,7 +262,7 @@ static void set_ed_descriptor(
 {
 
 	/* Set the function address and endpoint address */
-	writereg32(&(ed_info->hc_ed[0].endpoint_ctrl),
+	writereg32(&(ed_info->hc_ed[idx].endpoint_ctrl),
 				(fa<<FA_SHIFT)
 				|(en<<EN_SHIFT)
 				);
@@ -272,35 +271,35 @@ static void set_ed_descriptor(
 	 * and not ED.
 	 */
 	set_hc_ed_D(
-			&(ed_info->hc_ed[0].endpoint_ctrl),
+			&(ed_info->hc_ed[idx].endpoint_ctrl),
 			GET_DIR_FROM_TD
 		);
 
 	/* Set the speed */
 	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & LSDA) {
 		set_hc_ed_speed(
-				&(ed_info->hc_ed[0].endpoint_ctrl),
+				&(ed_info->hc_ed[idx].endpoint_ctrl),
 				SLOW_SPEED
 			);
 
 		set_hc_ed_mps(
-				&(ed_info->hc_ed[0].endpoint_ctrl),
+				&(ed_info->hc_ed[idx].endpoint_ctrl),
 				SLOW_SPEED_MAXIMUM_PACKET_SIZE
 			);
 	} else {
 		set_hc_ed_speed(
-				&(ed_info->hc_ed[0].endpoint_ctrl),
+				&(ed_info->hc_ed[idx].endpoint_ctrl),
 				FULL_SPEED
 			);
 
 		set_hc_ed_mps(
-				&(ed_info->hc_ed[0].endpoint_ctrl),
+				&(ed_info->hc_ed[idx].endpoint_ctrl),
 				FULL_SPEED_MAXIMUM_PACKET_SIZE
 			);
 	}
 
-	ed_info->hc_ed[0].HeadP = 0; //Init to 0.
-	ed_info->hc_ed[0].NextED = 0; //Zero since this is the only descriptor.
+	ed_info->hc_ed[idx].HeadP = 0; //Init to 0.
+	ed_info->hc_ed[idx].NextED = 0; //Zero since this is the only descriptor.
 }
 
 /*
@@ -310,7 +309,7 @@ static void set_ed_descriptor(
  * transfer.
  *
  */
-static void
+static struct GEN_TRANSFER_DESCRIPTOR *
 	set_setup_descriptor(
 		struct td_info *td_info,
 		uint8_t *usb_req_header,
@@ -321,10 +320,11 @@ static void
 	uint32_t idx = 0;
 	uint8_t data_toggle = 0;
 
-	struct GEN_TRANSFER_DESCRIPTOR *td = 0,*prev_td = 0;
+	struct GEN_TRANSFER_DESCRIPTOR *td = 0,*prev_td = 0,*tmp_td = 0;
 	uint8_t max_data_packets = get_max_data_packets(wLength,MPS_8);
 
 	td = alloc_td(td_info,max_data_packets + 2); //+2 for REQUEST and STATUS packets.
+	tmp_td = td;
 
 /**** SETUP Request TD ****/
 	writereg32(
@@ -423,6 +423,7 @@ static void
 	writereg32(&(td->next_td),0); //Set the status packet's next_td to 0.
 /************************************************/
 
+	return tmp_td;
 }
 
 static int16_t
@@ -434,23 +435,7 @@ static int16_t
 				)
 {
 	int16_t ed_idx = 0;
-
-	if((ed_idx = get_free_ed_index(ed_info)) == -1) {
-		return -1;
-	}
-
-	set_ed_descriptor(ed_info,0U,0U,ed_idx,port);
-
-	//Setup the td for the ed. I will setup a single td at index 0.
-
-	/*set_setup_descriptor(
-						td_info,
-						usb_buff_pool,
-						REQ_SET_ADDRESS,
-						USB_PORT1_ADDRESS,
-						0U,
-						0U
-						);*/
+	struct GEN_TRANSFER_DESCRIPTOR *start_td = 0;
 
 	set_usb_desc_req_buff(
 				usb_req_header,
@@ -461,7 +446,13 @@ static int16_t
 				sizeof(struct desc_dev)
 			);
 
-	set_setup_descriptor(
+	if((ed_idx = get_free_ed_index(ed_info)) == -1) {
+		return -1;
+	}
+
+	set_ed_descriptor(ed_info,0U,0U,ed_idx,port);
+
+	start_td = set_setup_descriptor(
 			td_info,
 			usb_req_header,
 			usb_buff_pool,
@@ -474,14 +465,14 @@ static int16_t
 	 * is also pointing to 0.
 	 */
 
-	writereg32(&(ed_info->hc_ed[0].HeadP),
-						(uintptr_t)(&(td_info->hc_gen_td[0])));
+	writereg32(&(ed_info->hc_ed[ed_idx].HeadP),
+				(uintptr_t)(start_td));
 
 	/* Set the TailP to 0. When HeadP == TailP the OHCI stops processing */
-	writereg32(&(ed_info->hc_ed[0].TailP),0);
+	writereg32(&(ed_info->hc_ed[ed_idx].TailP),0);
 	
 	//Dump the endpoint_ctrl for verification.
-	dump_ed_desc(&(ed_info->hc_ed[0]));
+	dump_ed_desc(&(ed_info->hc_ed[ed_idx]));
 
 	//Dump the tds.
 	dump_td(&(td_info->hc_gen_td[0]));
