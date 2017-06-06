@@ -50,7 +50,6 @@ static void usb_short_delay()
 }
 */
 
-
 static void init_ed(struct ed_info *edp_info,
 						uint8_t *ed_ll)
 {
@@ -581,20 +580,19 @@ static void reset_usb_port(enum Ports port)
 		hc_rh_clear_connect_status_change(USB_OHCI_BA,port);
 	}*/
 
-	/* Reset port */
+	//Reset port
+	//port enable bit will be set once the port is reset.
 	hc_rh_set_port_reset(USB_OHCI_BA,port);
 
-	/* port enable bit will be set once the port is reset */
-
-	/* Wait until the port reset status change bit is set to 1 */
+	//Wait until the port reset status change bit is set to 1
 	while(!(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & PRSC)) {
 		;
 	}
 
-	/* Clear the PRSC bit */
+	//Clear the PRSC bit
 	hc_rh_set_port_reset_status_change(USB_OHCI_BA, port);
 
-	/* Wait until the port reset signal bit state is set to 0 */
+	//Wait until the port reset signal bit state is set to 0
 	while(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & PRS) {
 		;
 	}
@@ -624,12 +622,12 @@ static void setup_ohci(void)
 {
 	uint16_t i = 0;
 	
-	/* Clear the hcca_region */
+	//Clear the hcca_region
 	for(i = 0; i<512; i++) {
 		hcca_region[i] = 0x0U;
 	}
 
-	/* Write the HCCA register. */
+	//Write the HCCA register.
 	writereg32(HC_HCCA_REG(USB_OHCI_BA),
 		nbyte_align(((uintptr_t) hcca_region),256));
 
@@ -642,7 +640,7 @@ static void setup_ohci(void)
 	writereg32(HC_LS_THRESHOLD_REG(USB_OHCI_BA),
 					0x628U);
 
-	/* Setup device descriptor buffer pool */
+	//Setup device descriptor buffer pool
 	get_dev_descriptor(&ed_info,&td_info,usb_buffer_pool,PORT1);
 	
 	/*** Write the ControlED to the HcControlHeadED register. ***/
@@ -655,7 +653,6 @@ static void setup_ohci(void)
 	 * the end of the control list.
 	 * TODO: Check if 0 is a valid value. In addition make sure
 	 * ControlListEnable (CLE) is cleared.
-	 *
 	 */
 	writereg32(HC_CONTROL_CURRENT_ED_REG(USB_OHCI_BA),0);
 
@@ -668,14 +665,12 @@ static void setup_ohci(void)
 	writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),
 					SO|WDH|SF|RD|UE|FNO|RHSC|OC|MIE);
 
-	/* Set control registers to enable control queue. */
-	set_reg_bits(
-				HC_CONTROL_REG(USB_OHCI_BA),
-				CLE
-				);
+	//Set control registers to enable control queue.
+	set_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),CLE);
 
-	/* Set to 90% of HcFmInterval. */
-	writereg32(HC_PERIODIC_START_REG(USB_OHCI_BA),((uint32_t)(0.9 * HcFmInterval)));
+	//Set to 90% of HcFmInterval.
+	writereg32(HC_PERIODIC_START_REG(USB_OHCI_BA),
+				((uint32_t)(0.9 * HcFmInterval)));
 
 	/*
 	 * Write the HcFmInterval register back after reset with the FSMPS value
@@ -686,6 +681,21 @@ static void setup_ohci(void)
 
 	/*uart_puts(UART0_BA,"HcFmInterval : ");
 	print_hex_uart(UART0_BA,HcFmInterval);*/
+}
+
+static struct GEN_TRANSFER_DESCRIPTOR *
+	rev_td_list(struct GEN_TRANSFER_DESCRIPTOR *td_head)
+{
+	struct GEN_TRANSFER_DESCRIPTOR *prev = 0, *tmp = 0;
+
+	while(td_head) {
+		tmp = (struct GEN_TRANSFER_DESCRIPTOR *) td_head->next_td;
+		td_head->next_td = (uintptr_t)prev;
+		prev = td_head;
+		td_head = tmp;
+	}
+
+	return prev;
 }
 
 void init_ohci()
@@ -702,21 +712,21 @@ void init_ohci()
 				);
 
 
-	/* Save the HcFmInterval register for later set up. */
+	//Save the HcFmInterval register for later set up.
 	HcFmInterval = readreg32(HC_FM_INTERVAL_REG(USB_OHCI_BA));
 
 
-	/* Reset the OHCI controller */
+	//Reset the OHCI controller
 	reset_ohci_controller();
 
-	/* Reset USB port */
+	//Reset USB port
 	reset_usb_port(PORT1);
 
 	//usb_delay();
 
 	setup_ohci();
 
-	/* Set to USB_OPERATIONAL to start sending SOF. */
+	//Set to USB_OPERATIONAL to start sending SOF.
 	set_regs_value(HC_CONTROL_REG(USB_OHCI_BA),
 					HCFS_MASK,
 					HCFS_USB_OPERATIONAL<<HCFS_SHIFT
@@ -724,15 +734,15 @@ void init_ohci()
 
 	dump_usb_controller_functional_state();
 
-	/* Verify is SF generation has started */
+	//Verify is SF generation has started
 	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & SF)) {
 		;
 	}
 
-	/* Set the control list filled. */
+	//Set the control list filled.
 	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
-	/* Poll for data */
+	//Poll for data
 	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & WDH)) {
 		;
 	}
@@ -744,7 +754,7 @@ void init_ohci()
 					(hccaregion_reg->HccaDoneHead));
 
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)
-				((hccaregion_reg->HccaDoneHead & 0xFFFFFFF0)));
+				((hccaregion_reg->HccaDoneHead) & 0xFFFFFFF0));
 
 	memcpy(desc_dev_buff, usb_buffer_pool, sizeof(struct desc_dev));
 
