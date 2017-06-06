@@ -253,16 +253,18 @@ static int16_t get_free_ed_index(
 
 
 static void set_ed_descriptor(
-		struct ed_info *ed_info,
+		struct HC_ENDPOINT_DESCRIPTOR *ed_desc,
 		uint8_t fa,
 		uint8_t en,
-		int16_t idx,
+		uintptr_t start_td,
+		uintptr_t end_td,
+		uintptr_t next_ed,
 		enum Ports port
 		)
 {
 
 	/* Set the function address and endpoint address */
-	writereg32(&(ed_info->hc_ed[idx].endpoint_ctrl),
+	writereg32(&(ed_desc->endpoint_ctrl),
 				(fa<<FA_SHIFT)
 				|(en<<EN_SHIFT)
 				);
@@ -271,35 +273,44 @@ static void set_ed_descriptor(
 	 * and not ED.
 	 */
 	set_hc_ed_D(
-			&(ed_info->hc_ed[idx].endpoint_ctrl),
+			&(ed_desc->endpoint_ctrl),
 			GET_DIR_FROM_TD
 		);
 
 	/* Set the speed */
 	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & LSDA) {
 		set_hc_ed_speed(
-				&(ed_info->hc_ed[idx].endpoint_ctrl),
+				&(ed_desc->endpoint_ctrl),
 				SLOW_SPEED
 			);
 
 		set_hc_ed_mps(
-				&(ed_info->hc_ed[idx].endpoint_ctrl),
+				&(ed_desc->endpoint_ctrl),
 				SLOW_SPEED_MAXIMUM_PACKET_SIZE
 			);
 	} else {
 		set_hc_ed_speed(
-				&(ed_info->hc_ed[idx].endpoint_ctrl),
+				&(ed_desc->endpoint_ctrl),
 				FULL_SPEED
 			);
 
 		set_hc_ed_mps(
-				&(ed_info->hc_ed[idx].endpoint_ctrl),
+				&(ed_desc->endpoint_ctrl),
 				FULL_SPEED_MAXIMUM_PACKET_SIZE
 			);
 	}
 
-	ed_info->hc_ed[idx].HeadP = 0; //Init to 0.
-	ed_info->hc_ed[idx].NextED = 0; //Zero since this is the only descriptor.
+	writereg32(&(ed_desc->NextED),next_ed); //Zero since this is the only descriptor.
+
+	/*
+	 * Setup the head and tail pointers of ED to point to the TD's.
+	 * Make sure the final TD's next_td is pointing to 0 if the TailP
+	 * is also pointing to 0.
+	 */
+	writereg32(&(ed_desc->HeadP),start_td);
+
+	/* Set the TailP to 0. When HeadP == TailP the OHCI stops processing */
+	writereg32(&(ed_desc->TailP),end_td);
 }
 
 /*
@@ -446,11 +457,6 @@ static int16_t
 				sizeof(struct desc_dev)
 			);
 
-	if((ed_idx = get_free_ed_index(ed_info)) == -1) {
-		return -1;
-	}
-
-	set_ed_descriptor(ed_info,0U,0U,ed_idx,port);
 
 	start_td = set_setup_descriptor(
 			td_info,
@@ -459,27 +465,24 @@ static int16_t
 			sizeof(struct desc_dev)
 		);
 
-	/*
-	 * Setup the head and tail pointers of ED to point to the TD's.
-	 * Make sure the final TD's next_td is pointing to 0 if the TailP
-	 * is also pointing to 0.
-	 */
 
-	writereg32(&(ed_info->hc_ed[ed_idx].HeadP),
-				(uintptr_t)(start_td));
+	if((ed_idx = get_free_ed_index(ed_info)) == -1) {
+		return -1;
+	}
 
-	/* Set the TailP to 0. When HeadP == TailP the OHCI stops processing */
-	writereg32(&(ed_info->hc_ed[ed_idx].TailP),0);
-	
+	set_ed_descriptor(ed_info->hc_ed+ed_idx,
+						0U, 0U,(uintptr_t)start_td,
+						0U, 0U, port
+					);
+
 	//Dump the endpoint_ctrl for verification.
 	dump_ed_desc(&(ed_info->hc_ed[ed_idx]));
 
 	//Dump the tds.
-	dump_td(&(td_info->hc_gen_td[0]));
-	dump_td(&(td_info->hc_gen_td[1]));
-	dump_td(&(td_info->hc_gen_td[2]));
-	dump_td(&(td_info->hc_gen_td[3]));
-	dump_td(&(td_info->hc_gen_td[4]));
+	while(start_td != 0) {
+		dump_td(start_td);
+		start_td = (struct GEN_TRANSFER_DESCRIPTOR *)(start_td->next_td);
+	}
 
 	return 0;
 }
