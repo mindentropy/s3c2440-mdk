@@ -138,7 +138,8 @@ void dump_td(
 	dump_error_str(((hc_gen_td->td_control) & (CC_MASK)) >> (CC_SHIFT));
 
 	if(hc_gen_td->current_buffer_pointer) {
-		dump_buff((uint8_t *)hc_gen_td->current_buffer_pointer, MPS_8);
+		dump_buff((uint8_t *)hc_gen_td->current_buffer_pointer,
+			( ((uintptr_t)(hc_gen_td->buffer_end)) - ((uintptr_t)(hc_gen_td->current_buffer_pointer)) + 1) );
 	}
 
 	uart_puts(UART0_BA,"\n");

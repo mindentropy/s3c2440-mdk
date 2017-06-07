@@ -329,6 +329,7 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 {
 	uint32_t idx = 0;
 	uint8_t data_toggle = 0;
+	uint16_t tmp_len = wLength;
 
 	struct GEN_TRANSFER_DESCRIPTOR *td = 0,*prev_td = 0,*tmp_td = 0;
 	uint8_t max_data_packets = get_max_data_packets(wLength,MPS_8);
@@ -397,26 +398,40 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 				);
 
 		/* buffer_end is the last byte to send. Hence subtract by 1 */
-		writereg32(
-					&(td->buffer_end),
-					(uintptr_t)(usb_buff_pool + idx + MPS_8 - 1)
-				);
+
+		if(tmp_len > MPS_8) {
+			writereg32(
+						&(td->buffer_end),
+						(uintptr_t)(usb_buff_pool + idx + MPS_8 - 1)
+					);
+		} else {
+			writereg32(
+						&(td->buffer_end),
+						(uintptr_t)(usb_buff_pool + idx + tmp_len - 1)
+					);
+		}
 
 		data_toggle = TOGGLE_DATA(data_toggle);
 
 		idx += MPS_8;
+		tmp_len -= MPS_8;
 		prev_td = td;
+
 		td = (struct GEN_TRANSFER_DESCRIPTOR *)(td->next_td);
 	}
 
 	/*
 	 * If the final data packet is not modulo 0 of the MPS then buffer is not
-	 * rounded. Set the BUFFER_ROUND option.
+	 * rounded. Also check if the buffer set is to be rounded or not.
+	 *
+	 * Set the BUFFER_ROUND option.
 	 */
 	//TODO: Verify if removal of i>1 has side effects.
 	//prev_td != 0 is to make sure that the conditional is entered only if there
 	//is atleast 1 data packet.
-	if(mod_power_of_two(wLength,MPS_8) && (prev_td != 0)/*&& (i > 1)*/) {
+	if(mod_power_of_two(wLength,MPS_8)
+			&& (prev_td != 0)
+			&& ((prev_td->buffer_end - prev_td->current_buffer_pointer + 1) == MPS_8)/*&& (i > 1)*/) {
 		set_reg_bits(
 					&(prev_td->td_control),
 					BUFFER_ROUND);
@@ -475,7 +490,7 @@ static int16_t
 					);
 
 	//Dump the endpoint_ctrl for verification.
-	dump_ed_desc(&(ed_info->hc_ed[ed_idx]));
+	//dump_ed_desc(&(ed_info->hc_ed[ed_idx]));
 
 	//Dump the tds.
 	while(start_td != 0) {
@@ -684,7 +699,7 @@ static void setup_ohci(void)
 }
 
 static struct GEN_TRANSFER_DESCRIPTOR *
-	rev_td_list(struct GEN_TRANSFER_DESCRIPTOR *td_head)
+	reverse_td_list(struct GEN_TRANSFER_DESCRIPTOR *td_head)
 {
 	struct GEN_TRANSFER_DESCRIPTOR *prev = 0, *tmp = 0;
 
@@ -696,6 +711,20 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	}
 
 	return prev;
+}
+
+static void process_complete_td(struct td_info *tdinfo,
+				struct GEN_TRANSFER_DESCRIPTOR *td_head)
+{
+	struct GEN_TRANSFER_DESCRIPTOR *rev_td_head;
+	rev_td_head = reverse_td_list(td_head);
+
+	reclaim_unused_td(tdinfo, rev_td_head);
+
+/*	while(rev_td_head != 0) {
+		dump_td(rev_td_head);
+		rev_td_head = (struct GEN_TRANSFER_DESCRIPTOR *)(rev_td_head->next_td);
+	}*/
 }
 
 void init_ohci()
@@ -753,12 +782,21 @@ void init_ohci()
 	print_hex_uart(UART0_BA,
 					(hccaregion_reg->HccaDoneHead));
 
+	uart_puts(UART0_BA,"Rev TD dump\n");
+
+/*	print_hex_uart(UART0_BA,
+					((hccaregion_reg->HccaDoneHead) & 0xFFFFFFF0));*/
+
+
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)
 				((hccaregion_reg->HccaDoneHead) & 0xFFFFFFF0));
 
 	memcpy(desc_dev_buff, usb_buffer_pool, sizeof(struct desc_dev));
 
 	dump_dev_desc((struct desc_dev *)desc_dev_buff);
+
+	process_complete_td(&td_info,(struct GEN_TRANSFER_DESCRIPTOR *)
+						((hccaregion_reg->HccaDoneHead) & 0xFFFFFFF0));
 
 	/*dump_buff(desc_dev_buff,18);
 	dump_buff(usb_buffer_pool+MPS_8, 18);*/
