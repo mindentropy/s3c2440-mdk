@@ -723,9 +723,9 @@ static void process_complete_td(struct td_info *tdinfo,
 
 	reclaim_unused_td(tdinfo, rev_td_head);
 
+#ifdef VERIFY_REV_TD
 	rev_td_head = tdinfo->free_td_head;
 
-#ifdef VERIFY_REV_TD
 	while(rev_td_head != 0) {
 		print_hex_uart(UART0_BA,(uintptr_t) rev_td_head);
 		rev_td_head = (struct GEN_TRANSFER_DESCRIPTOR *)rev_td_head->next_td;
