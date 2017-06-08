@@ -17,7 +17,7 @@ uint8_t ed_list[MAX_ED_DESCRIPTORS << ED_SIZE_SHIFT];
 uint8_t td_list[MAX_TD_DESCRIPTORS << TD_SIZE_SHIFT];
 uint8_t iso_td_list[MAX_ISO_TD_DESCRIPTORS << ISO_TD_SIZE_SHIFT];
 
-uint8_t usb_buffer_pool[512];
+//uint8_t usb_buffer_pool[512];
 
 struct ed_info ed_info;
 struct td_info td_info;
@@ -119,7 +119,9 @@ static void init_td(struct td_info *td_info,
 		td_info->hc_gen_td[i].next_td = (uintptr_t)((td_info->hc_gen_td) + (i + 1));
 		td_info->hc_gen_td[i].buffer_end = 0;
 
-		//print_hex_uart(UART0_BA,(uintptr_t)((td_info->hc_gen_td)+i));
+#ifdef DUMP_TD_INIT
+		print_hex_uart(UART0_BA,(uintptr_t)((td_info->hc_gen_td)+i));
+#endif
 		//print_hex_uart(UART0_BA,(uintptr_t)(&(td_info->hc_gen_td[i])));
 	}
 
@@ -656,7 +658,7 @@ static void setup_ohci(void)
 					0x628U);
 
 	//Setup device descriptor buffer pool
-	get_dev_descriptor(&ed_info,&td_info,usb_buffer_pool,PORT1);
+	get_dev_descriptor(&ed_info,&td_info,desc_dev_buff,PORT1);
 	
 	/*** Write the ControlED to the HcControlHeadED register. ***/
 	writereg32(
@@ -721,10 +723,15 @@ static void process_complete_td(struct td_info *tdinfo,
 
 	reclaim_unused_td(tdinfo, rev_td_head);
 
-/*	while(rev_td_head != 0) {
-		dump_td(rev_td_head);
-		rev_td_head = (struct GEN_TRANSFER_DESCRIPTOR *)(rev_td_head->next_td);
-	}*/
+	rev_td_head = tdinfo->free_td_head;
+
+#ifdef VERIFY_REV_TD
+	while(rev_td_head != 0) {
+		print_hex_uart(UART0_BA,(uintptr_t) rev_td_head);
+		rev_td_head = (struct GEN_TRANSFER_DESCRIPTOR *)rev_td_head->next_td;
+	}
+#endif
+
 }
 
 void init_ohci()
@@ -782,16 +789,13 @@ void init_ohci()
 	print_hex_uart(UART0_BA,
 					(hccaregion_reg->HccaDoneHead));
 
-	uart_puts(UART0_BA,"Rev TD dump\n");
-
 /*	print_hex_uart(UART0_BA,
 					((hccaregion_reg->HccaDoneHead) & 0xFFFFFFF0));*/
-
 
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)
 				((hccaregion_reg->HccaDoneHead) & 0xFFFFFFF0));
 
-	memcpy(desc_dev_buff, usb_buffer_pool, sizeof(struct desc_dev));
+	//memcpy(desc_dev_buff, usb_buffer_pool, sizeof(struct desc_dev));
 
 	dump_dev_desc((struct desc_dev *)desc_dev_buff);
 
