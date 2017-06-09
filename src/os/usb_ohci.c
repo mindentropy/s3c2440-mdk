@@ -79,6 +79,7 @@ static void init_ed(struct ed_info *edp_info,
 		edp_info->hc_ed[i].NextED = 0;
 	}
 
+
 //	print_hex_uart(UART0_BA,(uintptr_t)(ed_ll+ED_TOTAL_SIZE));
 //	print_hex_uart(UART0_BA,(uintptr_t)(edp_info->hc_ed+i));
 //	print_hex_uart(UART0_BA,(uintptr_t)(edp_info->hc_ed+(i-1)));
@@ -494,11 +495,18 @@ static int16_t
 	//Dump the endpoint_ctrl for verification.
 	//dump_ed_desc(&(ed_info->hc_ed[ed_idx]));
 
+
 	//Dump the tds.
 	while(start_td != 0) {
 		dump_td(start_td);
 		start_td = (struct GEN_TRANSFER_DESCRIPTOR *)(start_td->next_td);
 	}
+
+	/*
+	 * Set the control list filled. As per the spec it is set by HCD whenever
+	 * it adds a TD to an ED in the control list
+	 */
+	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
 	return 0;
 }
@@ -657,24 +665,6 @@ static void setup_ohci(void)
 	writereg32(HC_LS_THRESHOLD_REG(USB_OHCI_BA),
 					0x628U);
 
-	//Setup device descriptor buffer pool
-	get_dev_descriptor(&ed_info,&td_info,desc_dev_buff,PORT1);
-	
-	/*** Write the ControlED to the HcControlHeadED register. ***/
-	writereg32(
-				HC_CONTROL_HEAD_ED_REG(USB_OHCI_BA),
-				(uintptr_t)ed_info.hc_ed
-			);
-	/*
-	 * Init the HcControlCurrentED register to 0 to indicate
-	 * the end of the control list.
-	 * TODO: Check if 0 is a valid value. In addition make sure
-	 * ControlListEnable (CLE) is cleared.
-	 */
-	writereg32(HC_CONTROL_CURRENT_ED_REG(USB_OHCI_BA),0);
-
-	//TODO:Set the ControlBulkED to an ED.
-
 	/*
 	 * Enable all interrupts except Start of frame (SOF) 
 	 * in HcInterruptEnable register.
@@ -682,8 +672,14 @@ static void setup_ohci(void)
 	writereg32(HC_INTERRUPT_ENABLE_REG(USB_OHCI_BA),
 					SO|WDH|SF|RD|UE|FNO|RHSC|OC|MIE);
 
-	//Set control registers to enable control queue.
-	set_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),CLE);
+	init_ed(&ed_info,ed_list);
+	init_td(&td_info,td_list);
+
+	//Write the Control ED Head to the HcControlHeadED register.
+	writereg32(
+				HC_CONTROL_HEAD_ED_REG(USB_OHCI_BA),
+				(uintptr_t)ed_info.hc_ed
+			);
 
 	//Set to 90% of HcFmInterval.
 	writereg32(HC_PERIODIC_START_REG(USB_OHCI_BA),
@@ -698,6 +694,43 @@ static void setup_ohci(void)
 
 	/*uart_puts(UART0_BA,"HcFmInterval : ");
 	print_hex_uart(UART0_BA,HcFmInterval);*/
+
+
+	//Set HC to USB_OPERATIONAL to start sending SOF.
+	set_regs_value(HC_CONTROL_REG(USB_OHCI_BA),
+					HCFS_MASK,
+					HCFS_USB_OPERATIONAL<<HCFS_SHIFT
+					);
+
+	dump_usb_controller_functional_state();
+
+	//Verify is SF generation has started
+	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & SF)) {
+		;
+	}
+
+	/*
+	 * Init the HcControlCurrentED register to 0 to indicate
+	 * the end of the control list.
+	 *
+	 * CLE bit of the HcControl register should be cleared to modify
+	 * HcControlCurrentED register.
+	 *
+	 * Initially it should be set to 0 to indicate the end of the control list.
+	 */
+	clear_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),CLE);
+	writereg32(HC_CONTROL_CURRENT_ED_REG(USB_OHCI_BA),0);
+
+	//TODO:Set the ControlBulkED to an ED.
+
+	//Setup device descriptor buffer pool
+	get_dev_descriptor(&ed_info,&td_info,desc_dev_buff,PORT1);
+
+	/*
+	 * Set control registers to enable control queue.
+	 * Do not modify the lists when CLE is enabled as the HC is in control.
+	 */
+	set_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),CLE);
 }
 
 static struct GEN_TRANSFER_DESCRIPTOR *
@@ -736,21 +769,15 @@ static void process_complete_td(struct td_info *tdinfo,
 
 void init_ohci()
 {
-
 	init_usb();
-
-	init_ed(&ed_info,ed_list);
-	init_td(&td_info,td_list);
 
 	uart_puts(UART0_BA,"HcRevision :");
 	print_hex_uart(UART0_BA,
 				readreg32(HC_REVISION_REG(USB_OHCI_BA))
 				);
 
-
 	//Save the HcFmInterval register for later set up.
 	HcFmInterval = readreg32(HC_FM_INTERVAL_REG(USB_OHCI_BA));
-
 
 	//Reset the OHCI controller
 	reset_ohci_controller();
@@ -761,22 +788,6 @@ void init_ohci()
 	//usb_delay();
 
 	setup_ohci();
-
-	//Set to USB_OPERATIONAL to start sending SOF.
-	set_regs_value(HC_CONTROL_REG(USB_OHCI_BA),
-					HCFS_MASK,
-					HCFS_USB_OPERATIONAL<<HCFS_SHIFT
-					);
-
-	dump_usb_controller_functional_state();
-
-	//Verify is SF generation has started
-	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & SF)) {
-		;
-	}
-
-	//Set the control list filled.
-	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
 	//Poll for data
 	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & WDH)) {
