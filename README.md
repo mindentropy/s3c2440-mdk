@@ -1,4 +1,4 @@
-MDK OS and Microcontroller Development Kit
+MDK OS and Microcontroller Development Kit [![Build Status](https://travis-ci.org/mindentropy/s3c2440-mdk.svg?branch=usb_bringup)](https://travis-ci.org/mindentropy/s3c2440-mdk)
 ==========================================
 
 This project has two goals:
