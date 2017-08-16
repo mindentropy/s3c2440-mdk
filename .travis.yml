@@ -1,0 +1,8 @@
+language: c
+
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install -qq gcc-arm-none-eabi gdb-arm-none-eabi binutils-arm-none-eabi cscope
+
+script:
+    make
