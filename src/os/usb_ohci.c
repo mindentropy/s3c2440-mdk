@@ -508,6 +508,13 @@ static int16_t
 	 */
 	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
+	print_hex_uart(UART0_BA,readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)));
+	/*
+	 * Set control registers to enable control queue.
+	 * Do not modify the lists when CLE is enabled as the HC is in control.
+	 */
+	set_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),CLE);
+
 	return 0;
 }
 
@@ -723,14 +730,7 @@ static void setup_ohci(void)
 
 	//TODO:Set the ControlBulkED to an ED.
 
-	//Setup device descriptor buffer pool
-	get_dev_descriptor(&ed_info,&td_info,desc_dev_buff,PORT1);
 
-	/*
-	 * Set control registers to enable control queue.
-	 * Do not modify the lists when CLE is enabled as the HC is in control.
-	 */
-	set_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),CLE);
 }
 
 static struct GEN_TRANSFER_DESCRIPTOR *
@@ -788,6 +788,9 @@ void init_ohci()
 	//usb_delay();
 
 	setup_ohci();
+
+	//Setup device descriptor buffer pool
+	get_dev_descriptor(&ed_info,&td_info,desc_dev_buff,PORT1);
 
 	//Poll for data
 	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & WDH)) {
