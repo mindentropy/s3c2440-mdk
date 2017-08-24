@@ -55,6 +55,8 @@
 #define RWC 					BIT9
 #define RWE 					BIT10
 
+#define set_CLE(BA) \
+	set_reg_bits(HC_CONTROL_REG(BA),CLE)
 
 #define HC_COMMAND_STATUS_OFF 			0x08U
 #define HC_COMMAND_STATUS_REG(BA) \
@@ -64,7 +66,6 @@
 #define CLF BIT1
 #define BLF BIT2
 #define OCR BIT3
-
 #define SOC (BIT17|BIT16)
 
 #define HC_INTERRUPT_STATUS_OFF 		0x0CU
@@ -93,6 +94,12 @@
 #define HC_HCCA_OFF 					0x18U
 #define HC_HCCA_REG(BA) \
 	HW_REG(BA,HC_HCCA_OFF)
+
+#define is_WriteBackDoneHead_set(BA) \
+	(readreg32(HC_INTERRUPT_STATUS_REG(BA)) & (WDH))
+
+#define clear_WriteBackDoneHead(BA) \
+	clear_reg_bits(HC_INTERRUPT_STATUS_REG(BA),WDH)
 
 struct __attribute__((packed)) HCCARegion {
 	uint32_t HccaInterruptTable[32];
@@ -459,8 +466,46 @@ enum CONDITION_CODE
 	NotAccessed
 };
 
-
 #define NEXT_TD_MASK 			set_bit_range(31,4)
+
+#define set_td_status_packet(td) \
+	do { \
+		writereg32( \
+				&(td->td_control), \
+				DP_OUT \
+				|DATA_TOGGLE(3) \
+				|CC(NotAccessed) \
+		); \
+		/*Set the status packet's next_td to 0.*/ \
+		writereg32(&(td->next_td),0); \
+	} while(0)
+
+#define set_td_request_packet(td,req_header,MPS) \
+	do { \
+		writereg32( \
+			&(td->td_control), \
+			DP_SETUP \
+			|NO_DELAY_INTERRUPT \
+			|DATA_TOGGLE(2) /*
+							* See pg24(39) of spec.
+							* DATA0 data PID for setup packet,
+							* MSB of dataToggle = 1 for setup
+							* and LSB of dataToggle = 0 for setup.
+							*/ \
+			|CC(NotAccessed) /*
+			                  * See pg35(50) of spec.
+			                  *
+							  */ \
+		);  \
+		writereg32(&(td->current_buffer_pointer), \
+				(uintptr_t)req_header \
+				); \
+				\
+		writereg32(\
+				&(td->buffer_end),\
+				(uintptr_t) (usb_req_header + MPS_8 - 1) \
+				);\
+	} while(0)
 
 struct __attribute__((packed)) ISOCHRONOUS_TRANSFER_DESCRIPTOR
 {

@@ -340,31 +340,7 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	td = alloc_td(td_info,max_data_packets + 2); //+2 for REQUEST and STATUS packets.
 	tmp_td = td;
 
-/**** SETUP Request TD ****/
-	writereg32(
-			&(td->td_control),
-			DP_SETUP
-			|NO_DELAY_INTERRUPT
-			|DATA_TOGGLE(2)/*
-							* See pg24(39) of spec.
-							* DATA0 data PID for setup packet,
-							* MSB of dataToggle = 1 for setup
-							* and LSB of dataToggle = 0 for setup.
-							*/
-			|CC(NotAccessed) /*
-			                  * See pg35(50) of spec.
-			                  *
-							  */
-		);
-
-	writereg32(&(td->current_buffer_pointer),
-			(uintptr_t)usb_req_header
-			);
-
-	writereg32(
-			&(td->buffer_end),
-			(uintptr_t) (usb_req_header + MPS_8 - 1)
-			);
+	set_td_request_packet(td,usb_req_header,MPS_8);
 
 	//TODO: Can be skipped as we get the list chained.
 	writereg32(&(td->next_td),
@@ -441,14 +417,7 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	}
 
 /******** Set Status packet **********************/
-	writereg32(
-			&(td->td_control),
-			DP_OUT
-			|DATA_TOGGLE(3)
-			|CC(NotAccessed)
-	);
-
-	writereg32(&(td->next_td),0); //Set the status packet's next_td to 0.
+	set_td_status_packet(td);
 /************************************************/
 
 	return tmp_td;
@@ -474,14 +443,12 @@ static int16_t
 				sizeof(struct desc_dev)
 			);
 
-
 	start_td = set_setup_descriptor(
 			td_info,
 			usb_req_header,
 			usb_buff_pool,
 			sizeof(struct desc_dev)
 		);
-
 
 	if((ed_idx = get_free_ed_index(ed_info)) == -1) {
 		return -1;
@@ -495,12 +462,7 @@ static int16_t
 	//Dump the endpoint_ctrl for verification.
 	//dump_ed_desc(&(ed_info->hc_ed[ed_idx]));
 
-
-	//Dump the tds.
-	while(start_td != 0) {
-		dump_td(start_td);
-		start_td = (struct GEN_TRANSFER_DESCRIPTOR *)(start_td->next_td);
-	}
+	dump_td_list(start_td);
 
 	/*
 	 * Set the control list filled. As per the spec it is set by HCD whenever
@@ -508,12 +470,12 @@ static int16_t
 	 */
 	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
-	print_hex_uart(UART0_BA,readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)));
+	//print_hex_uart(UART0_BA,readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)));
 	/*
 	 * Set control registers to enable control queue.
 	 * Do not modify the lists when CLE is enabled as the HC is in control.
 	 */
-	set_reg_bits(HC_CONTROL_REG(USB_OHCI_BA),CLE);
+	set_CLE(USB_OHCI_BA);
 
 	return 0;
 }
@@ -767,8 +729,27 @@ static void process_complete_td(struct td_info *tdinfo,
 
 }
 
+static uint32_t getHccaDoneHead()
+{
+	uint32_t HccaDoneHead;
+
+	//Poll whether WriteBackDoneHead is set.
+	while(!is_WriteBackDoneHead_set(USB_OHCI_BA)) {
+		;
+	}
+
+	/* usb_delay(); */
+	HccaDoneHead = hccaregion_reg->HccaDoneHead;
+
+	//Reset the WriteBackDoneHead bit so that the HccaDoneHead can be written again.
+	clear_WriteBackDoneHead(USB_OHCI_BA);
+
+	return HccaDoneHead;
+}
+
 void init_ohci()
 {
+	uint32_t HccaDoneHead;
 	init_usb();
 
 	uart_puts(UART0_BA,"HcRevision :");
@@ -792,29 +773,22 @@ void init_ohci()
 	//Setup device descriptor buffer pool
 	get_dev_descriptor(&ed_info,&td_info,desc_dev_buff,PORT1);
 
-	//Poll for data
-	while(!(readreg32(HC_INTERRUPT_STATUS_REG(USB_OHCI_BA)) & WDH)) {
-		;
-	}
-
-	/* usb_delay(); */
-
+	HccaDoneHead = getHccaDoneHead();
 	uart_puts(UART0_BA,"HccaDoneHead: ");
-	print_hex_uart(UART0_BA,
-					(hccaregion_reg->HccaDoneHead));
+	print_hex_uart(UART0_BA,HccaDoneHead);
 
 /*	print_hex_uart(UART0_BA,
-					((hccaregion_reg->HccaDoneHead) & 0xFFFFFFF0));*/
+					((HccaDoneHead) & 0xFFFFFFF0));*/
 
 	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)
-				((hccaregion_reg->HccaDoneHead) & 0xFFFFFFF0));
+				((HccaDoneHead) & 0xFFFFFFF0));
 
 	//memcpy(desc_dev_buff, usb_buffer_pool, sizeof(struct desc_dev));
 
 	dump_dev_desc((struct desc_dev *)desc_dev_buff);
 
 	process_complete_td(&td_info,(struct GEN_TRANSFER_DESCRIPTOR *)
-						((hccaregion_reg->HccaDoneHead) & 0xFFFFFFF0));
+						((HccaDoneHead) & 0xFFFFFFF0));
 
 	/*dump_buff(desc_dev_buff,18);
 	dump_buff(usb_buffer_pool+MPS_8, 18);*/

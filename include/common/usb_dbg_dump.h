@@ -2,6 +2,9 @@
 
 #define USB_DBG_DUMP_H_
 
+void dump_td_list(
+			struct GEN_TRANSFER_DESCRIPTOR *start_td
+		);
 void dump_td(
 			struct GEN_TRANSFER_DESCRIPTOR *hc_gen_td
 		);

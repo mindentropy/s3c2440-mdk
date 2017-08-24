@@ -152,6 +152,15 @@ void dump_td(
 	}*/
 }
 
+void dump_td_list(struct GEN_TRANSFER_DESCRIPTOR *start_td)
+{
+	//Dump the tds.
+	while(start_td != 0) {
+		dump_td(start_td);
+		start_td = (struct GEN_TRANSFER_DESCRIPTOR *)(start_td->next_td);
+	}
+}
+
 void dump_ed_desc(struct HC_ENDPOINT_DESCRIPTOR *hc_ed)
 {
 	uart_puts(UART0_BA,"Endpt ctrl: ");
