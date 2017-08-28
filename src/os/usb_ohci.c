@@ -315,6 +315,39 @@ static void set_ed_descriptor(
 	writereg32(&(ed_desc->TailP),end_td);
 }
 
+static void send_td_request_pkt(
+	struct GEN_TRANSFER_DESCRIPTOR *td,
+	uint8_t *req_header,
+	uint8_t MPS
+	)
+{
+
+	writereg32(
+		&(td->td_control),
+		DP_SETUP
+		|NO_DELAY_INTERRUPT
+		|DATA_TOGGLE(2) /*
+						* See pg24(39) of spec.
+						* DATA0 data PID for setup packet,
+						* MSB of dataToggle = 1 for setup
+						* and LSB of dataToggle = 0 for setup.
+						*/
+		|CC(NotAccessed) /*
+		                  * See pg35(50) of spec.
+		                  *
+						  */
+		);
+
+		writereg32(&(td->current_buffer_pointer),
+				(uintptr_t)req_header
+				);
+
+		writereg32(
+				&(td->buffer_end),
+				(uintptr_t) (req_header + MPS - 1)
+				);
+}
+
 /*
  * Idea of the below function is take in different types of descriptors.
  * Based on the descriptors the TD chain will be setup for a request.
@@ -565,7 +598,6 @@ static void toggle_usb_global_power()
 
 static void reset_usb_port(enum Ports port)
 {
-
 
 /*	hc_rh_port_set_power(USB_OHCI_BA,port);
 	usb_short_delay();*/

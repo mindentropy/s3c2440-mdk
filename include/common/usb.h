@@ -135,7 +135,7 @@ enum DescriptorType {
 #define get_desc_type_from_wvalue(wvalue) \
 		(((wvalue) & (0xFF00U)) >> 8)
 
-#define set_usb_desc_req_buff(usb_req_header, \
+#define set_usb_desc_req_buff(usb_req_hdr_buff, \
 		requestType, \
 		request, \
 		wValue, \
@@ -143,19 +143,19 @@ enum DescriptorType {
 		wLength) \
 	do { \
 		writereg8( \
-				(usb_req_header + USB_REQ_TYPE_OFFSET), \
+				(usb_req_hdr_buff + USB_REQ_TYPE_OFFSET), \
 				requestType); \
 		writereg8( \
-				(usb_req_header + USB_REQ_OFFSET), \
+				(usb_req_hdr_buff + USB_REQ_OFFSET), \
 				request); \
 		writereg16( \
-				(usb_req_header + USB_VALUE_OFFSET), \
+				(usb_req_hdr_buff + USB_VALUE_OFFSET), \
 				wValue); \
 		writereg16( \
-				(usb_req_header + USB_INDEX_OFFSET), \
+				(usb_req_hdr_buff + USB_INDEX_OFFSET), \
 				wIndex); \
 		writereg16( \
-				(usb_req_header + USB_LENGTH_OFFSET), \
+				(usb_req_hdr_buff + USB_LENGTH_OFFSET), \
 				wLength); \
 	} while(0)
 
