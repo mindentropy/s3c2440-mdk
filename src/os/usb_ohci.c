@@ -338,14 +338,18 @@ static void send_td_request_pkt(
 						  */
 		);
 
-		writereg32(&(td->current_buffer_pointer),
-				(uintptr_t)req_header
-				);
+	writereg32(&(td->current_buffer_pointer),
+			(uintptr_t)req_header
+		);
 
-		writereg32(
-				&(td->buffer_end),
-				(uintptr_t) (req_header + MPS - 1)
-				);
+	writereg32(
+			&(td->buffer_end),
+			(uintptr_t) (req_header + MPS - 1)
+		);
+
+	//TODO: Can be skipped as we get the list chained.
+	writereg32(&(td->next_td),
+			(uintptr_t)(td->next_td));
 }
 
 /*
@@ -373,11 +377,7 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	td = alloc_td(td_info,max_data_packets + 2); //+2 for REQUEST and STATUS packets.
 	tmp_td = td;
 
-	set_td_request_packet(td,usb_req_header,MPS_8);
-
-	//TODO: Can be skipped as we get the list chained.
-	writereg32(&(td->next_td),
-			(uintptr_t)(td->next_td));
+	send_td_request_pkt(td,usb_req_header,MPS_8);
 
 	td = (struct GEN_TRANSFER_DESCRIPTOR *) (td->next_td);
 
