@@ -256,19 +256,14 @@ static int16_t get_free_ed_index(
 
 static void set_ed_descriptor(
 		struct HC_ENDPOINT_DESCRIPTOR *ed_desc,
-		uint8_t fa,
-		uint8_t en,
-		uintptr_t start_td,
-		uintptr_t end_td,
-		uintptr_t next_ed,
-		enum Ports port
+		struct ed_params *ed_params
 		)
 {
 
 	/* Set the function address and endpoint address */
 	writereg32(&(ed_desc->endpoint_ctrl),
-				(fa<<FA_SHIFT)
-				|(en<<EN_SHIFT)
+				((ed_params->fa)<<FA_SHIFT)
+				|((ed_params->en)<<EN_SHIFT)
 				);
 	/*
 	 * Set the direction. Currently take the direction from TD
@@ -280,7 +275,7 @@ static void set_ed_descriptor(
 		);
 
 	/* Set the speed */
-	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,port)) & LSDA) {
+	if(readreg32(HC_RH_PORT_STATUS_REG(USB_OHCI_BA,ed_params->port)) & LSDA) {
 		set_hc_ed_speed(
 				&(ed_desc->endpoint_ctrl),
 				SLOW_SPEED
@@ -302,25 +297,29 @@ static void set_ed_descriptor(
 			);
 	}
 
-	writereg32(&(ed_desc->NextED),next_ed); //Zero since this is the only descriptor.
+	writereg32(&(ed_desc->NextED),ed_params->next_ed); //Zero since this is the only descriptor.
 
 	/*
 	 * Setup the head and tail pointers of ED to point to the TD's.
 	 * Make sure the final TD's next_td is pointing to 0 if the TailP
 	 * is also pointing to 0.
 	 */
-	writereg32(&(ed_desc->HeadP),start_td);
+	writereg32(&(ed_desc->HeadP),ed_params->start_td);
 
 	/* Set the TailP to 0. When HeadP == TailP the OHCI stops processing */
-	writereg32(&(ed_desc->TailP),end_td);
+	writereg32(&(ed_desc->TailP),ed_params->end_td);
 }
 
-static void send_td_request_pkt(
+static int8_t send_td_request_pkt(
+	struct ed_info *ed_info,
 	struct GEN_TRANSFER_DESCRIPTOR *td,
 	uint8_t *req_header,
-	uint8_t MPS
+	uint8_t MPS,
+	enum Ports port
 	)
 {
+	int16_t ed_idx = 0;
+	struct ed_params ed_params;
 
 	writereg32(
 		&(td->td_control),
@@ -350,6 +349,39 @@ static void send_td_request_pkt(
 	//TODO: Can be skipped as we get the list chained.
 	writereg32(&(td->next_td),
 			(uintptr_t)(td->next_td));
+
+/***** Refactoring modification starts *****/
+
+	if((ed_idx = get_free_ed_index(ed_info)) == -1) {
+		return -1;
+	}
+
+	ed_params.fa = 0U;
+	ed_params.en = 0U;
+	ed_params.start_td = (uintptr_t)td;
+	ed_params.end_td = 0U;
+	ed_params.next_ed = 0U;
+	ed_params.port = port;
+
+	set_ed_descriptor(ed_info->hc_ed+ed_idx,
+					&ed_params
+					);
+
+	/*
+	 * Set the control list filled. As per the spec it is set by HCD whenever
+	 * it adds a TD to an ED in the control list
+	 */
+//	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
+
+	//print_hex_uart(UART0_BA,readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)));
+	/*
+	 * Set control registers to enable control queue.
+	 * Do not modify the lists when CLE is enabled as the HC is in control.
+	 */
+//	set_CLE(USB_OHCI_BA);
+
+/***** Refactoring modification ends *****/
+	return 0;
 }
 
 /*
@@ -361,10 +393,12 @@ static void send_td_request_pkt(
  */
 static struct GEN_TRANSFER_DESCRIPTOR *
 	set_setup_descriptor(
+		struct ed_info *ed_info,
 		struct td_info *td_info,
 		uint8_t *usb_req_header,
 		uint8_t *usb_buff_pool,
-		uint16_t wLength
+		uint16_t wLength,
+		enum Ports port
 	)
 {
 	uint32_t idx = 0;
@@ -377,7 +411,7 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	td = alloc_td(td_info,max_data_packets + 2); //+2 for REQUEST and STATUS packets.
 	tmp_td = td;
 
-	send_td_request_pkt(td,usb_req_header,MPS_8);
+	send_td_request_pkt(ed_info,td,usb_req_header,MPS_8,port);
 
 	td = (struct GEN_TRANSFER_DESCRIPTOR *) (td->next_td);
 
@@ -465,6 +499,7 @@ static int16_t
 				)
 {
 	int16_t ed_idx = 0;
+	struct ed_params ed_params;
 	struct GEN_TRANSFER_DESCRIPTOR *start_td = 0;
 
 	set_usb_desc_req_buff(
@@ -477,19 +512,29 @@ static int16_t
 			);
 
 	start_td = set_setup_descriptor(
+			ed_info,
 			td_info,
 			usb_req_header,
 			usb_buff_pool,
-			sizeof(struct desc_dev)
+			sizeof(struct desc_dev),
+			port
 		);
 
 	if((ed_idx = get_free_ed_index(ed_info)) == -1) {
 		return -1;
 	}
 
+	ed_params.fa = 0U;
+	ed_params.en = 0U;
+	ed_params.start_td = (uintptr_t)start_td;
+	ed_params.end_td = 0U;
+	ed_params.next_ed = 0U;
+	ed_params.port = port;
+
 	set_ed_descriptor(ed_info->hc_ed+ed_idx,
-						0U, 0U,(uintptr_t)start_td,
-						0U, 0U, port
+						&ed_params
+						/*0U, 0U,(uintptr_t)start_td,
+						0U, 0U, port*/
 					);
 
 	//Dump the endpoint_ctrl for verification.

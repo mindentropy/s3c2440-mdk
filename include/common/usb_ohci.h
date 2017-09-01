@@ -308,6 +308,15 @@ struct  __attribute__((packed)) HC_ENDPOINT_DESCRIPTOR
 	uint32_t NextED;
 };
 
+struct ed_params {
+	uint8_t fa;
+	uint8_t en;
+	uintptr_t start_td;
+	uintptr_t end_td;
+	uintptr_t next_ed;
+	enum Ports port;
+};
+
 struct ed_info {
 	struct HC_ENDPOINT_DESCRIPTOR *hc_ed;
 	uint32_t size;
