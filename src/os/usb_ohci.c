@@ -310,16 +310,38 @@ static void set_ed_descriptor(
 	writereg32(&(ed_desc->TailP),ed_params->end_td);
 }
 
+static uint32_t getHccaDoneHead()
+{
+	uint32_t HccaDoneHead;
+
+	//Poll whether WriteBackDoneHead is set.
+	while(!is_WriteBackDoneHead_set(USB_OHCI_BA)) {
+		;
+	}
+
+	/* usb_delay(); */
+	HccaDoneHead = hccaregion_reg->HccaDoneHead;
+
+	//Reset the WriteBackDoneHead bit so that the HccaDoneHead can be written again.
+	clear_WriteBackDoneHead(USB_OHCI_BA);
+
+	return HccaDoneHead;
+}
+
 static int8_t send_td_request_pkt(
-	struct ed_info *ed_info,
-	struct GEN_TRANSFER_DESCRIPTOR *td,
-	uint8_t *req_header,
-	uint8_t MPS,
-	enum Ports port
+		struct ed_info *ed_info,
+		struct td_info *td_info,
+		uint8_t *req_header,
+		uint8_t MPS,
+		enum Ports port
 	)
 {
 	int16_t ed_idx = 0;
 	struct ed_params ed_params;
+	uint32_t HccaDoneHead;
+	struct GEN_TRANSFER_DESCRIPTOR *td;
+
+	td = alloc_td(td_info,1);
 
 	writereg32(
 		&(td->td_control),
@@ -346,9 +368,10 @@ static int8_t send_td_request_pkt(
 			(uintptr_t) (req_header + MPS - 1)
 		);
 
-	//TODO: Can be skipped as we get the list chained.
+	//TODO: Verify if needed. Currently putting an end of the TD.
 	writereg32(&(td->next_td),
-			(uintptr_t)(td->next_td));
+			0);
+
 
 /***** Refactoring modification starts *****/
 
@@ -363,24 +386,36 @@ static int8_t send_td_request_pkt(
 	ed_params.next_ed = 0U;
 	ed_params.port = port;
 
-	set_ed_descriptor(ed_info->hc_ed+ed_idx,
-					&ed_params
-					);
+	set_ed_descriptor(
+				ed_info->hc_ed+ed_idx,
+				&ed_params
+			);
 
 	/*
 	 * Set the control list filled. As per the spec it is set by HCD whenever
 	 * it adds a TD to an ED in the control list
 	 */
-//	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
+	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
 
 	//print_hex_uart(UART0_BA,readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)));
 	/*
 	 * Set control registers to enable control queue.
 	 * Do not modify the lists when CLE is enabled as the HC is in control.
 	 */
-//	set_CLE(USB_OHCI_BA);
+	set_CLE(USB_OHCI_BA);
 
+	HccaDoneHead = getHccaDoneHead();
+
+	uart_puts(UART0_BA,"HccaDoneHead: ");
+	print_hex_uart(UART0_BA,HccaDoneHead);
+
+/*	print_hex_uart(UART0_BA,
+					((HccaDoneHead) & 0xFFFFFFF0));*/
+
+	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)
+				((HccaDoneHead) & 0xFFFFFFF0));
 /***** Refactoring modification ends *****/
+
 	return 0;
 }
 
@@ -408,12 +443,10 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	struct GEN_TRANSFER_DESCRIPTOR *td = 0,*prev_td = 0,*tmp_td = 0;
 	uint8_t max_data_packets = get_max_data_packets(wLength,MPS_8);
 
-	td = alloc_td(td_info,max_data_packets + 2); //+2 for REQUEST and STATUS packets.
+	td = alloc_td(td_info,max_data_packets + 1); //+2 for REQUEST and STATUS packets.
 	tmp_td = td;
 
-	send_td_request_pkt(ed_info,td,usb_req_header,MPS_8,port);
-
-	td = (struct GEN_TRANSFER_DESCRIPTOR *) (td->next_td);
+	send_td_request_pkt(ed_info,td_info,usb_req_header,MPS_8,port);
 
 /**********************/
 
@@ -806,23 +839,6 @@ static void process_complete_td(struct td_info *tdinfo,
 
 }
 
-static uint32_t getHccaDoneHead()
-{
-	uint32_t HccaDoneHead;
-
-	//Poll whether WriteBackDoneHead is set.
-	while(!is_WriteBackDoneHead_set(USB_OHCI_BA)) {
-		;
-	}
-
-	/* usb_delay(); */
-	HccaDoneHead = hccaregion_reg->HccaDoneHead;
-
-	//Reset the WriteBackDoneHead bit so that the HccaDoneHead can be written again.
-	clear_WriteBackDoneHead(USB_OHCI_BA);
-
-	return HccaDoneHead;
-}
 
 void init_ohci()
 {
