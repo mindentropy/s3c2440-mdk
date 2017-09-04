@@ -148,10 +148,11 @@ static void init_td(struct td_info *td_info,
  *    free TDs present.
  * 2) Decrease the free_td_size length.
  * 3) Traverse from the head to the requested length.
- * 4) After we traverse the requested length, save the free_td_head
+ * 4) Terminate the final TD with NULL.
+ * 5) After we traverse the requested length, save the free_td_head
  *    to a temporary TD (here temp_td).
- * 5) Point the free_td_head to the start of TD which was just traversed.
- * 6) Return the free_td_head saved in the temporary TD which here is temp_td.
+ * 6) Point the free_td_head to the start of TD which was just traversed.
+ * 7) Return the free_td_head saved in the temporary TD which here is temp_td.
  */
 static struct GEN_TRANSFER_DESCRIPTOR *
 			alloc_td
@@ -339,9 +340,9 @@ static int8_t send_td_request_pkt(
 	int16_t ed_idx = 0;
 	struct ed_params ed_params;
 	uint32_t HccaDoneHead;
-	struct GEN_TRANSFER_DESCRIPTOR *td;
+	struct GEN_TRANSFER_DESCRIPTOR *td = 0;
 
-	td = alloc_td(td_info,1);
+	td = alloc_td(td_info,1); //Allocate TD for request.
 
 	writereg32(
 		&(td->td_control),
@@ -368,10 +369,7 @@ static int8_t send_td_request_pkt(
 			(uintptr_t) (req_header + MPS - 1)
 		);
 
-	//TODO: Verify if needed. Currently putting an end of the TD.
-	writereg32(&(td->next_td),
-			0);
-
+	dump_td(td);
 
 /***** Refactoring modification starts *****/
 
@@ -390,6 +388,8 @@ static int8_t send_td_request_pkt(
 				ed_info->hc_ed+ed_idx,
 				&ed_params
 			);
+
+	dump_ed_desc(&(ed_info->hc_ed[ed_idx]));
 
 	/*
 	 * Set the control list filled. As per the spec it is set by HCD whenever
@@ -443,10 +443,10 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	struct GEN_TRANSFER_DESCRIPTOR *td = 0,*prev_td = 0,*tmp_td = 0;
 	uint8_t max_data_packets = get_max_data_packets(wLength,MPS_8);
 
-	td = alloc_td(td_info,max_data_packets + 1); //+2 for REQUEST and STATUS packets.
-	tmp_td = td;
-
 	send_td_request_pkt(ed_info,td_info,usb_req_header,MPS_8,port);
+
+	td = alloc_td(td_info,max_data_packets + 1); //+1 for STATUS packet.
+	tmp_td = td;
 
 /**********************/
 

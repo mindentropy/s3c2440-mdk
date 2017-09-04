@@ -10,7 +10,11 @@ void * memcpy(void *dest,
 
 void * memset(void *buff,
 			uint8_t c,
-			uint32_t n
+			uint32_t size
 			);
 
+void * memmove(void *dest,
+			void *src,
+			uint32_t size
+			);
 #endif 
