@@ -329,20 +329,12 @@ static uint32_t getHccaDoneHead()
 	return HccaDoneHead;
 }
 
-static int8_t send_td_request_pkt(
-		struct ed_info *ed_info,
-		struct td_info *td_info,
-		uint8_t *req_header,
-		uint8_t MPS,
-		enum Ports port
+static void send_td_request_pkt(
+	struct GEN_TRANSFER_DESCRIPTOR *td,
+	uint8_t *req_header,
+	uint8_t MPS
 	)
 {
-	int16_t ed_idx = 0;
-	struct ed_params ed_params;
-	uint32_t HccaDoneHead;
-	struct GEN_TRANSFER_DESCRIPTOR *td = 0;
-
-	td = alloc_td(td_info,1); //Allocate TD for request.
 
 	writereg32(
 		&(td->td_control),
@@ -360,63 +352,14 @@ static int8_t send_td_request_pkt(
 						  */
 		);
 
-	writereg32(&(td->current_buffer_pointer),
-			(uintptr_t)req_header
-		);
+		writereg32(&(td->current_buffer_pointer),
+				(uintptr_t)req_header
+				);
 
-	writereg32(
-			&(td->buffer_end),
-			(uintptr_t) (req_header + MPS - 1)
-		);
-
-	dump_td(td);
-
-/***** Refactoring modification starts *****/
-
-	if((ed_idx = get_free_ed_index(ed_info)) == -1) {
-		return -1;
-	}
-
-	ed_params.fa = 0U;
-	ed_params.en = 0U;
-	ed_params.start_td = (uintptr_t)td;
-	ed_params.end_td = 0U;
-	ed_params.next_ed = 0U;
-	ed_params.port = port;
-
-	set_ed_descriptor(
-				ed_info->hc_ed+ed_idx,
-				&ed_params
-			);
-
-	dump_ed_desc(&(ed_info->hc_ed[ed_idx]));
-
-	/*
-	 * Set the control list filled. As per the spec it is set by HCD whenever
-	 * it adds a TD to an ED in the control list
-	 */
-	writereg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA),CLF);
-
-	//print_hex_uart(UART0_BA,readreg32(HC_COMMAND_STATUS_REG(USB_OHCI_BA)));
-	/*
-	 * Set control registers to enable control queue.
-	 * Do not modify the lists when CLE is enabled as the HC is in control.
-	 */
-	set_CLE(USB_OHCI_BA);
-
-	HccaDoneHead = getHccaDoneHead();
-
-	uart_puts(UART0_BA,"HccaDoneHead: ");
-	print_hex_uart(UART0_BA,HccaDoneHead);
-
-/*	print_hex_uart(UART0_BA,
-					((HccaDoneHead) & 0xFFFFFFF0));*/
-
-	dump_td((struct GEN_TRANSFER_DESCRIPTOR *)
-				((HccaDoneHead) & 0xFFFFFFF0));
-/***** Refactoring modification ends *****/
-
-	return 0;
+		writereg32(
+				&(td->buffer_end),
+				(uintptr_t) (req_header + MPS - 1)
+				);
 }
 
 /*
@@ -443,11 +386,16 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	struct GEN_TRANSFER_DESCRIPTOR *td = 0,*prev_td = 0,*tmp_td = 0;
 	uint8_t max_data_packets = get_max_data_packets(wLength,MPS_8);
 
-	send_td_request_pkt(ed_info,td_info,usb_req_header,MPS_8,port);
-
-	td = alloc_td(td_info,max_data_packets + 1); //+1 for STATUS packet.
+	td = alloc_td(td_info,max_data_packets + 2); //+1 for STATUS packet.
 	tmp_td = td;
 
+	send_td_request_pkt(td,usb_req_header,MPS_8);
+
+	//TODO: Can be skipped as we get the list chained.
+	writereg32(&(td->next_td),
+			(uintptr_t)(td->next_td));
+
+	td = (struct GEN_TRANSFER_DESCRIPTOR *) (td->next_td);
 /**********************/
 
 	/**** Data TD's ****/
