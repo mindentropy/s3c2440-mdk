@@ -329,37 +329,28 @@ static uint32_t getHccaDoneHead()
 	return HccaDoneHead;
 }
 
-static void send_td_request_pkt(
+static void set_td_request_hdr(
 	struct GEN_TRANSFER_DESCRIPTOR *td,
 	uint8_t *req_header,
-	uint8_t MPS
+	uint32_t td_options,
+	uint8_t len /* This is the MPS */
 	)
 {
 
 	writereg32(
-		&(td->td_control),
-		DP_SETUP
-		|NO_DELAY_INTERRUPT
-		|DATA_TOGGLE(2) /*
-						* See pg24(39) of spec.
-						* DATA0 data PID for setup packet,
-						* MSB of dataToggle = 1 for setup
-						* and LSB of dataToggle = 0 for setup.
-						*/
-		|CC(NotAccessed) /*
-		                  * See pg35(50) of spec.
-		                  *
-						  */
+			&(td->td_control),
+			td_options
 		);
 
-		writereg32(&(td->current_buffer_pointer),
-				(uintptr_t)req_header
-				);
+	writereg32(
+			&(td->current_buffer_pointer),
+			(uintptr_t)req_header
+		);
 
-		writereg32(
-				&(td->buffer_end),
-				(uintptr_t) (req_header + MPS - 1)
-				);
+	writereg32(
+			&(td->buffer_end),
+			(uintptr_t) (req_header + len - 1)
+		);
 }
 
 /*
@@ -386,10 +377,10 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	struct GEN_TRANSFER_DESCRIPTOR *td = 0,*prev_td = 0,*tmp_td = 0;
 	uint8_t max_data_packets = get_max_data_packets(wLength,MPS_8);
 
-	td = alloc_td(td_info,max_data_packets + 2); //+1 for STATUS packet.
+	td = alloc_td(td_info,max_data_packets + 2); // +2 for Header and STATUS packet.
 	tmp_td = td;
 
-	send_td_request_pkt(td,usb_req_header,MPS_8);
+	set_td_request_hdr(td,usb_req_header,TD_SETUP_HDR,MPS_8);
 
 	//TODO: Can be skipped as we get the list chained.
 	writereg32(&(td->next_td),
@@ -412,6 +403,7 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	data_toggle = 3;
 
 	while(max_data_packets--) {
+
 		writereg32(
 				&(td->td_control),
 				DP_IN
@@ -458,15 +450,16 @@ static struct GEN_TRANSFER_DESCRIPTOR *
 	//is atleast 1 data packet.
 	if(mod_power_of_two(wLength,MPS_8)
 			&& (prev_td != 0)
-			&& ((prev_td->buffer_end - prev_td->current_buffer_pointer + 1) == MPS_8)/*&& (i > 1)*/) {
+			&& ((prev_td->buffer_end - prev_td->current_buffer_pointer + 1) == MPS_8)
+				/*&& (i > 1)*/) {
 		set_reg_bits(
 					&(prev_td->td_control),
 					BUFFER_ROUND);
 	}
 
-/******** Set Status packet **********************/
+/******** Set Status packet ********/
 	set_td_status_packet(td);
-/************************************************/
+/***********************************/
 
 	return tmp_td;
 }

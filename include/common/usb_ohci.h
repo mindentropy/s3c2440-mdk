@@ -426,6 +426,25 @@ struct td_info {
 #define BUFFER_ROUND 			BIT18
 #define BUFFER_ROUNDING_SHIFT 	18 
 
+#define TD_SETUP_HDR 			(DP_SETUP|\
+								NO_DELAY_INTERRUPT\
+								|DATA_TOGGLE(2)\
+						   /*\
+							* See pg24(39) of spec.\
+							* DATA0 data PID for setup packet,\
+							* MSB of dataToggle = 1 for setup\
+							* and LSB of dataToggle = 0 for setup.\
+							*/|CC(NotAccessed)\
+							/* \
+			                  * See pg35(50) of spec. \
+			                  * \
+							  */\
+							)
+
+#define TD_STATUS_HDR 		(DP_OUT \
+							|DATA_TOGGLE(3) \
+							|CC(NotAccessed))
+
 #define DP_SETUP_SHIFT 			19
 
 #define DP_SETUP 				(0)
