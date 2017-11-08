@@ -36,12 +36,12 @@ void * memmove(void *dest,
 	uint8_t *s = (uint8_t *)src;
 	uint32_t i = 0;
 
-	if(d > s) {
+	if(d < s) {
 		for(i = 0; i<size; i++) {
 			d[i] = s[i];
 		}
 	} else {
-		for(i = size; i>0; i++) {
+		for(i = size; i>0; i--) {
 			d[i-1] = s[i-1];
 		}
 	}
